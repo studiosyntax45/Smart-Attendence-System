@@ -1,0 +1,237 @@
+﻿
+import { useQuery } from "@tanstack/react-query";
+import { Link, useSearchParams } from "react-router-dom";
+import { BookMarked, Pencil, UserPlus } from "lucide-react";
+import { api } from "@/lib/api-client";
+import { useAuth } from "@/lib/auth";
+import { PageSkeleton } from "@/components/page-skeleton";
+import { SectionError } from "@/components/section-error";
+import { PageTitle } from "@/src/page-title";
+import { CourseForm } from "@/components/faculty/course-form";
+import {
+  EnrollmentManager,
+  type StudentOption,
+} from "@/components/faculty/enrollment-manager";
+import { GsapReveal } from "@/components/gsap-reveal";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+interface CourseRow {
+  code: string;
+  name: string;
+  credits: number;
+  semester: string;
+}
+
+export default function CoursesPage() {
+  const { profile } = useAuth();
+  const [searchParams] = useSearchParams();
+  const course = searchParams.get("course") ?? undefined;
+  const edit = searchParams.get("edit") ?? undefined;
+
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["faculty-courses", profile?.id],
+    enabled: !!profile,
+    queryFn: async () => {
+      const [
+        coursesRes,
+        studentsRes,
+        enrollmentsRes,
+      ] = await Promise.all([
+        api.get<{ courses: CourseRow[] }>("/courses"),
+        api.get<{ profiles: { id: string; fullName: string; rollNo: string | null }[] }>("/profiles?role=student"),
+        api.get<{ enrollments: { courseCode: string; studentId: string; active: boolean }[] }>("/enrollments"),
+      ]);
+
+      const studentRows: StudentOption[] = (studentsRes.profiles ?? []).map((s) => ({
+        id: s.id,
+        full_name: s.fullName,
+        roll_no: s.rollNo,
+      }));
+
+      return {
+        courses: coursesRes.courses ?? [],
+        students: studentRows,
+        enrollments: (enrollmentsRes.enrollments ?? []).map((e) => ({
+          course_code: e.courseCode,
+          student_id: e.studentId,
+          active: e.active,
+        })),
+      };
+    },
+  });
+
+  if (!profile || isLoading) return <PageSkeleton />;
+  if (isError || !data)
+    return (
+      <SectionError
+        error={new Error("Could not load courses.")}
+        reset={() => refetch()}
+      />
+    );
+
+  const { courses, students, enrollments } = data;
+
+  const activeByCourse = new Map<string, string[]>();
+  for (const e of enrollments) {
+    if (!e.active) continue;
+    const list = activeByCourse.get(e.course_code);
+    if (list) list.push(e.student_id);
+    else activeByCourse.set(e.course_code, [e.student_id]);
+  }
+
+  const selectedCode =
+    course && courses.some((c) => c.code === course)
+      ? course
+      : courses[0]?.code ?? null;
+  const selected = courses.find((c) => c.code === selectedCode) ?? null;
+  const editing = edit ? courses.find((c) => c.code === edit) ?? null : null;
+
+  return (
+    <GsapReveal className="space-y-6">
+      <PageTitle title="Courses" />
+      <div>
+        <h1 className="text-2xl font-bold">Courses &amp; Enrolment</h1>
+        <p className="text-sm text-muted-foreground">
+          Maintain the course catalogue and each course&apos;s student roster.
+        </p>
+      </div>
+
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookMarked className="size-4 text-muted-foreground" aria-hidden="true" />
+                Course catalogue
+              </CardTitle>
+              <CardDescription>
+                Tap a code to manage its roster; the pencil edits details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {courses.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">
+                  No courses yet Ã¢â‚¬â€ add the first one below.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
+                        <th scope="col" className="py-2 pr-4 font-medium">Course</th>
+                        <th scope="col" className="py-2 pr-4 font-medium">Sem</th>
+                        <th scope="col" className="py-2 pr-4 font-medium">Credits</th>
+                        <th scope="col" className="py-2 pr-4 font-medium">Enrolled</th>
+                        <th scope="col" className="py-2 font-medium">
+                          <span className="sr-only">Edit</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {courses.map((c) => (
+                        <tr
+                          key={c.code}
+                          className={cn(
+                            "border-b transition-colors last:border-0 hover:bg-muted/50",
+                            c.code === selectedCode && "bg-primary/5"
+                          )}
+                        >
+                          <td className="py-2.5 pr-4">
+                            <Link
+                              to={`/faculty/courses?course=${encodeURIComponent(c.code)}`}
+                              className="block"
+                            >
+                              <span className="font-medium">{c.name}</span>
+                              <span className="block font-mono text-xs text-muted-foreground">
+                                {c.code}
+                              </span>
+                            </Link>
+                          </td>
+                          <td className="py-2.5 pr-4 text-xs text-muted-foreground">
+                            {c.semester}
+                          </td>
+                          <td className="py-2.5 pr-4 font-mono text-xs tabular-nums">
+                            {Number(c.credits)}
+                          </td>
+                          <td className="py-2.5 pr-4 font-mono text-xs tabular-nums">
+                            {(activeByCourse.get(c.code) ?? []).length}
+                          </td>
+                          <td className="py-2.5 text-right">
+                            <Link
+                              to={`/faculty/courses?course=${encodeURIComponent(selectedCode ?? c.code)}&edit=${encodeURIComponent(c.code)}`}
+                              aria-label={`Edit ${c.name}`}
+                              className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            >
+                              <Pencil className="size-3.5" aria-hidden="true" />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{editing ? `Edit ${editing.code}` : "Add a course"}</CardTitle>
+              <CardDescription>
+                {editing
+                  ? "Update the name, credits or semester Ã¢â‚¬â€ the code stays."
+                  : "Backfilled placeholder courses can be fixed here too: enter the same code with the real details."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CourseForm editing={editing} />
+            </CardContent>
+          </Card>
+        </div>
+
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserPlus className="size-4 text-muted-foreground" aria-hidden="true" />
+              Roster
+              {selected && (
+                <Badge variant="secondary" className="font-mono">
+                  {selected.code}
+                </Badge>
+              )}
+            </CardTitle>
+            <CardDescription>
+              {selected
+                ? `Students enrolled in ${selected.name} (${selected.semester}). Unchecking deactivates Ã¢â‚¬â€ history is kept.`
+                : "Add a course first, then manage its roster here."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {selected ? (
+              <EnrollmentManager
+                key={selected.code}
+                courseCode={selected.code}
+                students={students}
+                enrolledIds={activeByCourse.get(selected.code) ?? []}
+              />
+            ) : (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                No course selected.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </GsapReveal>
+  );
+}

@@ -1,0 +1,145 @@
+﻿
+import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { AlertCircle, MapPin, ScanFace, TrendingUp, Users } from "lucide-react";
+import { useAuth, roleHome } from "@/lib/auth";
+import { PageSkeleton } from "@/components/page-skeleton";
+import { PageTitle } from "@/src/page-title";
+import { LoginForm } from "./login-form";
+import { loginErrorMessage } from "./login-errors";
+import { LoginWatermark } from "@/components/login-watermark";
+import { LoginPreviewCards } from "@/components/login-preview-cards";
+import { PesLogo } from "@/components/pes-logo";
+
+const FEATURES = [
+  { Icon: ScanFace, text: "Face-verified attendance â€” no proxies" },
+  { Icon: MapPin, text: "Geofenced to your classroom" },
+  { Icon: TrendingUp, text: "Attendance â†” performance insights" },
+];
+
+
+const DOTS_LIGHT = {
+  backgroundImage:
+    "radial-gradient(circle, hsl(var(--foreground) / 0.06) 1px, transparent 1px)",
+  backgroundSize: "22px 22px",
+} as const;
+const DOTS_DARKPANEL = {
+  backgroundImage:
+    "radial-gradient(circle, rgb(255 255 255 / 0.07) 1px, transparent 1px)",
+  backgroundSize: "22px 22px",
+} as const;
+
+export default function LoginPage() {
+  const { loading, user, profile } = useAuth();
+  const [searchParams] = useSearchParams();
+  if (loading) return <PageSkeleton />;
+  if (user && profile) return <Navigate to={roleHome(profile.role)} replace />;
+  const callbackError = loginErrorMessage(searchParams.get("error") ?? undefined);
+
+  return (
+    <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
+      <PageTitle title="Sign in" />
+      
+      <aside className="relative hidden flex-col overflow-hidden bg-[hsl(var(--pes-navy))] p-10 text-white lg:flex">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(52rem 36rem at 12% -10%, hsl(226 71% 46% / .55), transparent 60%), radial-gradient(40rem 30rem at 105% 110%, hsl(27 79% 54% / .18), transparent 60%)",
+          }}
+        />
+        <div aria-hidden="true" className="absolute inset-0" style={DOTS_DARKPANEL} />
+        <LoginWatermark variant="strong" />
+
+        <div className="relative z-10 flex items-center gap-3.5">
+          <span className="flex items-center rounded-lg bg-white/10 px-3 py-2 ring-1 ring-white/15">
+            <PesLogo variant="dark" priority className="h-9" />
+          </span>
+          <span aria-hidden="true" className="h-9 w-px bg-white/20" />
+          <p className="font-display text-xs font-semibold uppercase tracking-widest text-white/80">
+            Smart Attendance
+            <br />
+            System
+          </p>
+        </div>
+
+        <div className="relative z-10 flex flex-1 flex-col justify-center gap-10 py-10">
+          <LoginPreviewCards />
+
+          <div className="space-y-5">
+            <h2 className="font-display text-4xl font-bold leading-[1.15]">
+              Attendance you can{" "}
+              <span className="text-[hsl(var(--pes-orange))]">trust</span>.
+              <br />
+              Insights you can act on.
+            </h2>
+            <ul className="space-y-3">
+              {FEATURES.map(({ Icon, text }) => (
+                <li key={text} className="flex items-center gap-3 text-sm text-white/85">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-white/10 ring-1 ring-white/10">
+                    <Icon className="size-4 text-[hsl(var(--pes-orange))]" aria-hidden="true" />
+                  </span>
+                  {text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      
+      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-background p-6 sm:p-10">
+        <div aria-hidden="true" className="absolute inset-0" style={DOTS_LIGHT} />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(36rem 24rem at 88% -8%, hsl(var(--primary) / 0.08), transparent 62%)",
+          }}
+        />
+        <div className="lg:hidden">
+          <LoginWatermark variant="faint" />
+        </div>
+
+        <div className="relative z-10 mb-6 flex flex-col items-center gap-2 lg:hidden">
+          <PesLogo priority className="h-11" />
+          <p className="font-display text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Smart Attendance System
+          </p>
+        </div>
+
+        <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border bg-card shadow-pop">
+          <div
+            aria-hidden="true"
+            className="h-1 w-full bg-gradient-to-r from-[hsl(var(--pes-orange))] via-[hsl(var(--pes-amber-aa))] to-transparent"
+          />
+          <div className="space-y-6 p-6 sm:p-8">
+            {callbackError && (
+              <div
+                role="alert"
+                className="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+              >
+                <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                {callbackError}
+              </div>
+            )}
+            <LoginForm />
+
+            <Link
+              to="/parent-login"
+              className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Users className="size-4" aria-hidden="true" />
+              Sign in as a parent
+            </Link>
+          </div>
+        </div>
+
+        <p className="relative z-10 mt-6 text-center text-xs text-muted-foreground">
+          Team Preethika Â· Preethi Â· Nesara Â· Monisha â€” PES University
+        </p>
+      </div>
+    </main>
+  );
+}
