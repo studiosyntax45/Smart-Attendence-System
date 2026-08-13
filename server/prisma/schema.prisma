@@ -1,0 +1,370 @@
+// Prisma schema for PES Smart Attendance — MySQL (XAMPP).
+// Tables and column names mirror snake_case so existing seed data is mechanical.
+//
+// ── Mapping notes (Postgres → MySQL) ──────────────────────────────
+// • uuid          → CHAR(36) — Prisma's @default(uuid()) generates v4 client-side
+// • timestamptz   → DateTime(6) UTC — API boundary normalises to UTC
+// • jsonb         → Json         — read whole, no GIN indexing needed
+// • numeric(9,6)  → Decimal(9,6) — lat/lng
+// • numeric(5,2)  → Decimal(5,2) — percentages
+// • numeric(6,2)  → Decimal(6,2) — marks
+// • numeric(3,1)  → Decimal(3,1) — credits
+// • CHECK         → enforced at API layer (Zod) + DB CHECK where MySQL ≥ 8.0.16
+// • PostGIS geog  → DROP — Haversine at the API layer (lib/geo.ts)
+// • RLS           → DROP — reimplemented as Express middleware (middleware/authz.ts)
+//
+// ── Reference: every table here has a 1:1 RLS replacement ─────────
+//   profiles           → middleware/authz.ts:profileGuard
+//   geofences          → middleware/authz.ts:geofenceGuard
+//   sessions           → middleware/authz.ts:sessionGuard
+//   attendance         → middleware/authz.ts:attendanceGuard
+//   marks              → middleware/authz.ts:marksGuard
+//   courses            → middleware/authz.ts:courseGuard
+//   enrollments        → middleware/authz.ts:enrollmentGuard
+//   gps_settings       → middleware/authz.ts:gpsSettingsGuard
+//   student_details    → middleware/authz.ts:studentDetailsGuard
+//   classes            → middleware/authz.ts:classGuard
+//   class_students     → middleware/authz.ts:classStudentsGuard
+//   class_courses      → middleware/authz.ts:classCoursesGuard
+//   class_schedule     → middleware/authz.ts:scheduleGuard
+//   leave_requests     → middleware/authz.ts:leaveRequestsGuard
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────
+// MySQL ENUM types are fine — the values match the Postgres enums exactly
+// so seed data and existing string literals continue to work.
+
+enum UserRole {
+  student
+  faculty
+  admin
+}
+
+enum AttStatus {
+  present
+  late
+  absent
+  partial
+}
+
+enum LeaveStatus {
+  pending
+  approved
+  rejected
+}
+
+
+// ─── Tables ─────────────────────────────────────────────────────────
+
+/// profiles — one row per user. The auth identity (email + bcrypt hash)
+/// lives in the AuthUser table below; profiles holds the application data
+/// (role, name, roll, phone, face embeddings).
+///
+/// NOTE: model renamed from `User` → `AuthUser` to avoid clashing with
+/// the `Express.User` namespace declaration in middleware/auth.ts.
+model AuthUser {
+  id           String   @id @default(uuid()) @db.Char(36)
+  email        String   @unique
+  passwordHash String?  @map("password_hash") @db.VarChar(255)
+  /// Google subject identifier when the account was created via OAuth.
+  googleSub    String?  @unique @map("google_sub") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  profile      Profile?  @relation("UserProfile")
+
+  @@map("users")
+}
+
+/// profiles — application-level user data (role, identity fields).
+model Profile {
+  id                 String    @id @db.Char(36)
+  fullName           String    @default("New User") @map("full_name")
+  rollNo             String?   @unique @map("roll_no")
+  role               UserRole  @default(student)
+  parentPhone        String?   @map("parent_phone")
+  /// 128-d face-api browser descriptor (always set when enrolled).
+  faceEmbedding      Json?     @map("face_embedding")
+  /// Variable-length DeepFace server embedding (set only when FACE_SERVICE_URL configured).
+  faceEmbeddingServer Json?    @map("face_embedding_server")
+  /// Derived: whether face_embedding is non-null. Matches the migration 0005 generated col.
+  faceEnrolled       Boolean   @default(false) @map("face_enrolled")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // Relations
+  user               AuthUser?            @relation("UserProfile", fields: [id], references: [id], onDelete: Cascade)
+  sessionsOpened     Session[]            @relation("FacultySessions")
+  attendanceRows     Attendance[]
+  marks              Marks[]
+  studentDetails     StudentDetails?
+  enrollments        Enrollment[]
+  classStudents      ClassStudent[]
+  leaveRequests      LeaveRequest[]        @relation("StudentLeaveRequests")
+  leaveReviews       LeaveRequest[]        @relation("ReviewerLeaveRequests")
+  scheduleEntries    ClassSchedule[]       @relation("FacultySchedule")
+  marksUpdates       Marks[]               @relation("MarksUpdater")
+  gpsSettingsUpdates GpsSettings[]
+
+  @@map("profiles")
+  @@index([role])
+  @@index([faceEnrolled])
+}
+
+/// Classroom geofence (was public.geofences). PostGIS geog column is
+/// dropped — Haversine lives in services/geofence.ts.
+model Geofence {
+  id        String   @id @default(uuid()) @db.Char(36)
+  roomName  String   @map("room_name")
+  lat       Decimal  @db.Decimal(9, 6)
+  lng       Decimal  @db.Decimal(9, 6)
+  radiusM   Int      @default(50) @map("radius_m")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  sessions      Session[]
+  scheduleSlots ClassSchedule[]
+
+  @@map("geofences")
+}
+
+/// Class session opened by faculty; students mark attendance while open.
+model Session {
+  id         String    @id @default(uuid()) @db.Char(36)
+  course     String
+  facultyId  String?   @map("faculty_id") @db.Char(36)
+  geofenceId String    @map("geofence_id") @db.Char(36)
+  openedAt   DateTime  @default(now()) @map("opened_at") @db.Timestamp(6)
+  closedAt   DateTime? @map("closed_at") @db.Timestamp(6)
+
+  faculty        Profile?       @relation("FacultySessions", fields: [facultyId], references: [id], onDelete: SetNull)
+  geofence       Geofence        @relation(fields: [geofenceId], references: [id])
+  attendanceRows Attendance[]
+  leaveRequests  LeaveRequest[]
+
+  @@map("sessions")
+  @@index([openedAt(sort: Desc)])
+  @@index([course, closedAt])
+  @@index([closedAt])
+}
+
+/// One row per (session, student). exit_time + status updated on leave/close.
+model Attendance {
+  id             String     @id @default(uuid()) @db.Char(36)
+  sessionId      String     @map("session_id") @db.Char(36)
+  studentId      String     @map("student_id") @db.Char(36)
+  entryTime      DateTime   @default(now()) @map("entry_time") @db.Timestamp(6)
+  exitTime       DateTime?  @map("exit_time") @db.Timestamp(6)
+  status         AttStatus  @default(present)
+  faceConfidence Decimal?   @map("face_confidence") @db.Decimal(4, 3)
+  entryLat       Decimal?   @map("entry_lat") @db.Decimal(9, 6)
+  entryLng       Decimal?   @map("entry_lng") @db.Decimal(9, 6)
+  excused        Boolean    @default(false)
+
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student     Profile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@map("attendance")
+  @@index([studentId, entryTime(sort: Desc)])
+  @@index([sessionId])
+}
+
+/// Course catalogue — referenced by sessions.course, marks.course, etc.
+model Course {
+  code      String   @id @db.VarChar(40)
+  name      String
+  credits   Decimal  @default(0) @db.Decimal(3, 1)
+  semester  String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  enrollments Enrollment[]
+  marks       Marks[]
+  classCourses ClassCourse[]
+
+  @@map("courses")
+}
+
+/// (student, course) enrolment — drives attendance denominator.
+model Enrollment {
+  id         String   @id @default(uuid()) @db.Char(36)
+  studentId  String   @map("student_id") @db.Char(36)
+  courseCode String   @map("course_code") @db.VarChar(40)
+  enrolledAt DateTime @default(now()) @map("enrolled_at") @db.Timestamp(6)
+  active     Boolean  @default(true)
+
+  student Profile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [courseCode], references: [code], onDelete: Cascade)
+
+  @@unique([studentId, courseCode])
+  @@map("enrollments")
+  @@index([studentId])
+}
+
+/// Per-assessment mark row. Composite key (student, course, assessment).
+model Marks {
+  id         String   @id @default(uuid()) @db.Char(36)
+  studentId  String   @map("student_id") @db.Char(36)
+  course     String   @db.VarChar(40)
+  assessment String
+  score      Decimal  @db.Decimal(6, 2)
+  maxScore   Decimal  @default(100) @map("max_score") @db.Decimal(6, 2)
+  updatedBy  String?  @map("updated_by") @db.Char(36)
+  updatedAt  DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  student    Profile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  updater    Profile? @relation("MarksUpdater", fields: [updatedBy], references: [id])
+  courseRow  Course  @relation(fields: [course], references: [code])
+
+  @@unique([studentId, course, assessment])
+  @@map("marks")
+  @@index([studentId])
+}
+
+/// Single-row GPS policy table (id always = true).
+model GpsSettings {
+  id              Boolean   @id @default(true)
+  accuracyGraceM  Int       @default(25) @map("accuracy_grace_m")
+  lateAfterMin    Int       @default(10) @map("late_after_min")
+  highAccuracy    Boolean   @default(true) @map("high_accuracy")
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  updatedBy       String?   @map("updated_by") @db.Char(36)
+  updatedByUser   Profile?  @relation(fields: [updatedBy], references: [id])
+
+  @@map("gps_settings")
+}
+
+/// Rich student profile (PES portal fields). 1:1 with profiles where role=student.
+model StudentDetails {
+  studentId    String   @id @map("student_id") @db.Char(36)
+  pesuId       String?  @map("pesu_id")
+  branch       String?
+  section      String?
+  dob          DateTime? @db.Date
+  bloodGroup   String?  @map("blood_group")
+  sslcPct      Decimal? @map("sslc_pct") @db.Decimal(5, 2)
+  pucPct       Decimal? @map("puc_pct") @db.Decimal(5, 2)
+  fatherName   String?  @map("father_name")
+  fatherPhone  String?  @map("father_phone")
+  motherName   String?  @map("mother_name")
+  motherPhone  String?  @map("mother_phone")
+  address      String?
+  city         String?
+  state        String?
+  pincode      String?
+  aadhaarLast4 String?  @map("aadhaar_last4") @db.Char(4)
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  student Profile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("student_details")
+}
+
+/// Class section (e.g. "Sem-4 CSE-A"). Many students + many courses.
+model Class {
+  id           String   @id @default(uuid()) @db.Char(36)
+  name         String
+  branch       String
+  semester     String
+  section      String
+  academicYear String   @default("2024-2025") @map("academic_year")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  students      ClassStudent[]
+  courses       ClassCourse[]
+  scheduleSlots ClassSchedule[]
+
+  @@unique([branch, semester, section, academicYear])
+  @@map("classes")
+  @@index([branch, semester])
+}
+
+model ClassStudent {
+  id         String   @id @default(uuid()) @db.Char(36)
+  classId    String   @map("class_id") @db.Char(36)
+  studentId  String   @map("student_id") @db.Char(36)
+  enrolledAt DateTime @default(now()) @map("enrolled_at") @db.Timestamp(6)
+
+  class_  Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student Profile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@map("class_students")
+  @@index([classId])
+  @@index([studentId])
+}
+
+model ClassCourse {
+  id         String   @id @default(uuid()) @db.Char(36)
+  classId    String   @map("class_id") @db.Char(36)
+  courseCode String   @map("course_code") @db.VarChar(40)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  class_ Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseCode], references: [code], onDelete: Cascade)
+
+  @@unique([classId, courseCode])
+  @@map("class_courses")
+  @@index([classId])
+}
+
+/// Weekly recurring class slots.
+model ClassSchedule {
+  id         String   @id @default(uuid()) @db.Char(36)
+  course     String
+  facultyId  String   @map("faculty_id") @db.Char(36)
+  geofenceId String   @map("geofence_id") @db.Char(36)
+  classId    String?  @map("class_id") @db.Char(36)
+  dayOfWeek  Int      @map("day_of_week") @db.SmallInt
+  startTime  String   @map("start_time") @db.VarChar(8)  // HH:MM:SS
+  endTime    String   @map("end_time") @db.VarChar(8)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  faculty  Profile  @relation("FacultySchedule", fields: [facultyId], references: [id], onDelete: Cascade)
+  geofence Geofence @relation(fields: [geofenceId], references: [id])
+  class_   Class?   @relation(fields: [classId], references: [id], onDelete: SetNull)
+
+  @@map("class_schedule")
+  @@index([facultyId])
+  @@index([dayOfWeek])
+  @@index([classId])
+}
+
+/// Student appeal for an absent/late/partial session. On approval,
+/// attendance.excused is set true (without rewriting status/times).
+model LeaveRequest {
+  id         String      @id @default(uuid()) @db.Char(36)
+  studentId  String      @map("student_id") @db.Char(36)
+  sessionId  String      @map("session_id") @db.Char(36)
+  reason     String      @db.VarChar(500)
+  status     LeaveStatus @default(pending)
+  reviewedBy String?     @map("reviewed_by") @db.Char(36)
+  reviewedAt DateTime?   @map("reviewed_at") @db.Timestamp(6)
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+
+  student   Profile    @relation("StudentLeaveRequests", fields: [studentId], references: [id], onDelete: Cascade)
+  session   Session    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  reviewer  Profile?   @relation("ReviewerLeaveRequests", fields: [reviewedBy], references: [id])
+
+  @@unique([studentId, sessionId])
+  @@map("leave_requests")
+  @@index([status, createdAt(sort: Desc)])
+  @@index([sessionId])
+}
+
+/// Revoked refresh-token JTIs — persisted across server restarts so tokens
+/// revoked during logout remain invalid even after a crash/restart.
+/// Rows whose expiresAt < NOW() can be safely pruned by a cron job.
+model RevokedToken {
+  jti       String   @id @db.Char(36)
+  expiresAt DateTime @map("expires_at") @db.Timestamp(6)
+  revokedAt DateTime @default(now()) @map("revoked_at") @db.Timestamp(6)
+
+  @@map("revoked_tokens")
+  @@index([expiresAt])
+}
