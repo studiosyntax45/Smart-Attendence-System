@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" suppressHydrationWarning>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1E3A8A" />
+    <meta
+      name="description"
+      content="Smart Attendance Management System with Facial Recognition and Performance Analytics — PES University"
+    />
+    <title>PES Smart Attendance</title>
+    <link rel="icon" type="image/png" sizes="184x184" href="/pes-emblem.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <script>
+      try {
+        if (localStorage.getItem("pes-theme") === "dark")
+          document.documentElement.classList.add("dark");
+      } catch (e) {}
+    </script>
+  </head>
+  <body class="min-h-dvh">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
