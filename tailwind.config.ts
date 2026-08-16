@@ -6,12 +6,12 @@ const config: Config = {
   darkMode: "class",
   content: [
     "./index.html",
-    "./app*.{js,ts,jsx,tsx}",
-    "./components*.{js,ts,jsx,tsx}",
-    "./src*.{js,ts,jsx,tsx}",
-    "./hooks*.{js,ts,jsx,tsx}",
-    "./lib*.{js,ts,jsx,tsx}",
-    "./stores*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./hooks/**/*.{js,ts,jsx,tsx}",
+    "./lib/**/*.{js,ts,jsx,tsx}",
+    "./stores/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     container: {
@@ -50,7 +50,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        
+
         status: {
           present: "hsl(var(--status-present))",
           late: "hsl(var(--status-late))",

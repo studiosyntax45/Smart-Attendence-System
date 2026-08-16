@@ -96,7 +96,7 @@ attendanceRouter.post(
       row = await prisma.attendance.create({
         data: {
           sessionId: input.sessionId,
-          studentId: me.id,,
+          studentId: me.id,
           status,
           faceConfidence: input.faceConfidence,
           entryLat: input.lat,
