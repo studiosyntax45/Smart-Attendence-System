@@ -11,9 +11,9 @@ import { LoginPreviewCards } from "@/components/login-preview-cards";
 import { PesLogo } from "@/components/pes-logo";
 
 const FEATURES = [
-  { Icon: ScanFace, text: "Face-verified attendance â€” no proxies" },
+  { Icon: ScanFace, text: "Face-verified attendance — no proxies" },
   { Icon: MapPin, text: "Geofenced to your classroom" },
-  { Icon: TrendingUp, text: "Attendance â†” performance insights" },
+  { Icon: TrendingUp, text: "Attendance ↔ performance insights" },
 ];
 
 
@@ -137,7 +137,7 @@ export default function LoginPage() {
         </div>
 
         <p className="relative z-10 mt-6 text-center text-xs text-muted-foreground">
-          Team Preethika Â· Preethi Â· Nesara Â· Monisha â€” PES University
+          Team Preethika · Preethi · Nesara · Monisha — PES University
         </p>
       </div>
     </main>

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   validateScheduleInput,
   filterScheduleByDay,
+  mapScheduleEntry,
   normaliseTime,
   formatTimeRange,
   type ScheduleEntry,
@@ -67,7 +68,7 @@ test("validateScheduleInput: rejects start_time >= end_time", () => {
   );
 });
 
-test("validateScheduleInput: rejects day_of_week outside 0â€“6", () => {
+test("validateScheduleInput: rejects day_of_week outside 0–6", () => {
   assert.match(
     validateScheduleInput(input({ dayOfWeek: -1 })) ?? "",
     /Day of week/
@@ -107,6 +108,28 @@ test("filterScheduleByDay: keeps only the requested day, sorted by start", () =>
   assert.equal(filterScheduleByDay(rows, 5).length, 0);
 });
 
+test("mapScheduleEntry: converts the API's camelCase schedule fields for the UI", () => {
+  const mapped = mapScheduleEntry({
+    id: "slot-1",
+    course: "UQ24CA221B",
+    facultyId: "fac-1",
+    geofenceId: "geo-1",
+    classId: "class-1",
+    dayOfWeek: 1,
+    startTime: "09:00:00",
+    endTime: "10:00:00",
+    faculty: { id: "fac-1", fullName: "Demo Faculty" },
+    geofence: { roomName: "B-204" },
+    class_: { id: "class-1", name: "CSE-A", branch: "CSE", semester: "4", section: "A" },
+  });
+
+  assert.equal(mapped.day_of_week, 1);
+  assert.equal(mapped.start_time, "09:00:00");
+  assert.equal(mapped.class_id, "class-1");
+  assert.equal(mapped.profiles?.full_name, "Demo Faculty");
+  assert.equal(mapped.geofences?.room_name, "B-204");
+});
+
 test("formatTimeRange: strips seconds for display", () => {
-  assert.equal(formatTimeRange("09:00:00", "10:30:00"), "09:00 â€“ 10:30");
+  assert.equal(formatTimeRange("09:00:00", "10:30:00"), "09:00 – 10:30");
 });

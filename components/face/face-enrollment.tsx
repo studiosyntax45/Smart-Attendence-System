@@ -71,7 +71,7 @@ export function FaceEnrollment({
         <p className="font-display text-lg font-semibold">Face already enrolled</p>
         <p className="text-sm text-muted-foreground">
           Your face is registered and used to verify attendance. To replace it
-          Ã¢â‚¬â€ a poor original capture, or a change in appearance Ã¢â‚¬â€ ask an admin
+          — a poor original capture, or a change in appearance — ask an admin
           to reset your enrolment from the admin dashboard, then enrol again.
         </p>
         <p className="text-xs text-muted-foreground">
@@ -83,7 +83,7 @@ export function FaceEnrollment({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-md space-y-4">
       <BiometricScanner
         mode="enroll"
         captureImage={serverVerification}
@@ -110,7 +110,7 @@ export function FaceEnrollment({
         {pending ? (
           <>
             <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-            SavingÃ¢â‚¬Â¦
+            Saving…
           </>
         ) : (
           <>

@@ -42,7 +42,7 @@ export async function requireAuth(
   try {
     payload = verifyAccessToken(token);
   } catch {
-    return unauthorized(res, "Session expired ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â please sign in again.");
+    return unauthorized(res, "Session expired — please sign in again.");
   }
 
   const user = await getUserWithProfile(payload.sub);

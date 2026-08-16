@@ -105,7 +105,7 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
       
       {geofences.length === 0 ? (
         <p className="py-4 text-center text-sm text-muted-foreground">
-          No geofences yet Ã¢â‚¬â€ add your first classroom below.
+          No geofences yet — add your first classroom below.
         </p>
       ) : (
         <ul className="space-y-2">
@@ -118,7 +118,7 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{g.room_name}</p>
                 <p className="font-mono text-xs text-muted-foreground">
-                  {Number(g.lat).toFixed(5)}, {Number(g.lng).toFixed(5)} Ã‚Â· r{" "}
+                  {Number(g.lat).toFixed(5)}, {Number(g.lng).toFixed(5)} · r{" "}
                   {g.radius_m} m
                 </p>
               </div>
@@ -194,7 +194,7 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
             ) : (
               <Crosshair className="size-4" aria-hidden="true" />
             )}
-            {locating ? "LocatingÃ¢â‚¬Â¦" : "Use my current location"}
+            {locating ? "Locating…" : "Use my current location"}
           </Button>
           <Button
             type="button"
@@ -252,7 +252,7 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
           ) : (
             <Plus className="size-4" aria-hidden="true" />
           )}
-          {pending ? "SavingÃ¢â‚¬Â¦" : "Add geofence"}
+          {pending ? "Saving…" : "Add geofence"}
         </Button>
       </form>
     </div>

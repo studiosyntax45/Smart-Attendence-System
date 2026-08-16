@@ -19,7 +19,7 @@ export async function openSession(
 
   try {
     await api.post("/sessions", { course, geofenceId });
-    return { message: `Session "${course}" is open â€” students can mark now.` };
+    return { message: `Session "${course}" is open — students can mark now.` };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to open session." };
   }
@@ -29,7 +29,7 @@ export async function openSession(
 export async function closeSession(sessionId: string): Promise<SessionFormState> {
   try {
     await api.post(`/sessions/${sessionId}/close`);
-    return { message: "Session closed â€” open records stamped with exit time." };
+    return { message: "Session closed — open records stamped with exit time." };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to close session." };
   }

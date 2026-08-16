@@ -147,7 +147,7 @@ export default function StudentDashboard() {
           </h1>
           <p className="text-sm text-muted-foreground">
             {profile.rollNo && (
-              <span className="font-mono">{profile.rollNo} Ã‚Â· </span>
+              <span className="font-mono">{profile.rollNo} · </span>
             )}
             Last 30 days at a glance
           </p>
@@ -195,7 +195,7 @@ export default function StudentDashboard() {
           />
           <KpiCard
             label="Avg duration"
-            value={avgDuration !== null ? `${avgDuration} min` : "Ã¢â‚¬â€"}
+            value={avgDuration !== null ? `${avgDuration} min` : "—"}
             countTo={avgDuration ?? undefined}
             suffix=" min"
             sub="Per attended class"
@@ -223,7 +223,7 @@ export default function StudentDashboard() {
           <CardHeader>
             <CardTitle>Time in class</CardTitle>
             <CardDescription>
-              Minutes per attended session Ã¢â‚¬â€ last {chartData.length} sessions
+              Minutes per attended session — last {chartData.length} sessions
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -240,7 +240,7 @@ export default function StudentDashboard() {
               My marks
             </CardTitle>
             <CardDescription>
-              Recorded by your faculty Ã¢â‚¬â€ read-only.
+              Recorded by your faculty — read-only.
             </CardDescription>
           </div>
           {avgMarksPct !== null && (
@@ -253,7 +253,7 @@ export default function StudentDashboard() {
         <CardContent>
           {marks.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              No marks recorded yet Ã¢â‚¬â€ scores appear here once your faculty
+              No marks recorded yet — scores appear here once your faculty
               uploads them.
             </p>
           ) : (
@@ -294,7 +294,7 @@ export default function StudentDashboard() {
         <CardHeader>
           <CardTitle>Recent attendance</CardTitle>
           <CardDescription>
-            Entry, exit and duration per class Ã¢â‚¬â€ newest first.
+            Entry, exit and duration per class — newest first.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -322,7 +322,7 @@ export default function StudentDashboard() {
                       className="border-b transition-colors last:border-0 hover:bg-muted/50"
                     >
                       <td className="py-2.5 pr-4 font-medium">
-                        {r.sessions?.course ?? "Ã¢â‚¬â€"}
+                        {r.sessions?.course ?? "—"}
                       </td>
                       <td className="py-2.5 pr-4 font-mono text-xs">
                         {new Date(r.entry_time).toLocaleString([], {
@@ -338,10 +338,10 @@ export default function StudentDashboard() {
                               hour: "2-digit",
                               minute: "2-digit",
                             })
-                          : "Ã¢â‚¬â€"}
+                          : "—"}
                       </td>
                       <td className="py-2.5 pr-4">
-                        {r.duration_min !== null ? `${r.duration_min} min` : "Ã¢â‚¬â€"}
+                        {r.duration_min !== null ? `${r.duration_min} min` : "—"}
                       </td>
                       <td className="py-2.5">
                         <StatusPill

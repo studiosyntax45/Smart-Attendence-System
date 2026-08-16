@@ -9,7 +9,7 @@ import {
   APPEALABLE_STATUSES,
 } from "./leave-requests.ts";
 
-test("validateLeaveReason: accepts 5â€“500 char reasons", () => {
+test("validateLeaveReason: accepts 5–500 char reasons", () => {
   assert.equal(validateLeaveReason("Absent due to fever"), null);
   assert.equal(validateLeaveReason("a".repeat(REASON_MIN)), null);
   assert.equal(validateLeaveReason("a".repeat(REASON_MAX)), null);

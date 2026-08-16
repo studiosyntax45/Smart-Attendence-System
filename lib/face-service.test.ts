@@ -72,12 +72,12 @@ test("readFaceServiceConfig: parses url + optional token", () => {
   assert.equal(noToken?.token, null);
 });
 
-test("interpretResponse: 2xx with valid body â†’ ok", () => {
+test("interpretResponse: 2xx with valid body → ok", () => {
   const r = interpretResponse(200, { v: 1 }, (b): b is { v: number } => true);
   assert.deepEqual(r, { ok: true, data: { v: 1 } });
 });
 
-test("interpretResponse: 2xx with invalid body â†’ 502", () => {
+test("interpretResponse: 2xx with invalid body → 502", () => {
   const r = interpretResponse(200, { bad: true }, (b): b is never => false);
   assert.equal(r.ok, false);
   assert.equal((r as { status: number }).status, 502);
@@ -124,7 +124,7 @@ test("representFace: sends image, token header, and parses embedding", async () 
   });
 });
 
-test("representFace: unconfigured â†’ 501 result, no throw", async () => {
+test("representFace: unconfigured → 501 result, no throw", async () => {
   const res = await representFace("x", { config: null });
   assert.equal(res.ok, false);
   assert.equal((res as { status: number }).status, 501);
@@ -161,7 +161,7 @@ test("verifyFace: service 422 (no face) is surfaced, not thrown", async () => {
   assert.match((res as { reason: string }).reason, /no face/);
 });
 
-test("verifyFace: network failure â†’ 502 result", async () => {
+test("verifyFace: network failure → 502 result", async () => {
   const fetchImpl = (async () => {
     throw new Error("ECONNREFUSED");
   }) as Fetcher;
@@ -173,7 +173,7 @@ test("verifyFace: network failure â†’ 502 result", async () => {
   assert.equal((res as { status: number }).status, 502);
 });
 
-test("verifyFace: abort/timeout â†’ 504 result", async () => {
+test("verifyFace: abort/timeout → 504 result", async () => {
   const fetchImpl = (async (_url: unknown, init?: RequestInit) => {
     const err = new Error("aborted");
     err.name = "AbortError";

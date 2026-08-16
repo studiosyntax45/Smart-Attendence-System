@@ -314,7 +314,7 @@ function ScannerView({
         {status.phase === "loading" && (
           <Overlay>
             <LoaderCircle className="size-8 animate-spin" aria-hidden="true" />
-            <p className="text-sm">Loading face modelsÃ¢â‚¬Â¦</p>
+            <p className="text-sm">Loading face models…</p>
           </Overlay>
         )}
         {status.phase === "denied" && (
@@ -377,7 +377,7 @@ function StatusLine({
     case "loading":
     case "denied":
     case "no-models":
-      text = "Preparing cameraÃ¢â‚¬Â¦";
+      text = "Preparing camera…";
       break;
     case "searching":
       text = "Position your face inside the oval";
@@ -385,8 +385,8 @@ function StatusLine({
     case "blink":
       Icon = Eye;
       text = status.liveness
-        ? `Hold stillÃ¢â‚¬Â¦ quality ${pct}% (need ${Math.round(FACE_CONFIDENCE_MIN * 100)}%+)`
-        : "Waiting for a blinkÃ¢â‚¬Â¦";
+        ? `Hold still… quality ${pct}% (need ${Math.round(FACE_CONFIDENCE_MIN * 100)}%+)`
+        : "Waiting for a blink…";
       break;
     case "no-match":
       Icon = ShieldAlert;
@@ -394,15 +394,15 @@ function StatusLine({
       text =
         status.matched === false && status.distance !== null
           ? `Face doesn't match your enrolment (${Math.round(matchConfidence(status.distance) * 100)}% similar)`
-          : "No enrolled face to match Ã¢â‚¬â€ enrol first";
+          : "No enrolled face to match — enrol first";
       break;
     case "ready":
       Icon = ShieldCheck;
       tone = "text-status-present";
       text =
         mode === "verify"
-          ? `Identity verified (${Math.round(matchConfidence(status.distance ?? 0) * 100)}% match) Ã¢â‚¬â€ live`
-          : `Face captured Ã¢â‚¬â€ quality ${pct}%, live`;
+          ? `Identity verified (${Math.round(matchConfidence(status.distance ?? 0) * 100)}% match) — live`
+          : `Face captured — quality ${pct}%, live`;
       break;
   }
 

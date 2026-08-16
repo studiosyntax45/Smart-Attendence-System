@@ -32,7 +32,7 @@ export function CloseSessionButton({ sessionId }: { sessionId: string }) {
         ) : (
           <Square className="size-4" aria-hidden="true" />
         )}
-        {pending ? "ClosingÃ¢â‚¬Â¦" : "Close session"}
+        {pending ? "Closing…" : "Close session"}
       </Button>
       {error && (
         <p role="alert" className="text-sm text-destructive">

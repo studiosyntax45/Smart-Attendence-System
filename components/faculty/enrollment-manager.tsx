@@ -135,7 +135,7 @@ export function EnrollmentManager({
           ) : (
             <UserCheck className="size-4" aria-hidden="true" />
           )}
-          {pending ? "SavingÃ¢â‚¬Â¦" : "Save roster"}
+          {pending ? "Saving…" : "Save roster"}
         </Button>
       </div>
     </div>

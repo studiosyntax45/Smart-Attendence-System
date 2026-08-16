@@ -8,7 +8,7 @@ function run(ears: number[]) {
   return ears.reduce((s, ear) => updateBlinkState(s, ear), initBlinkState());
 }
 
-test("counts a single open â†’ closed â†’ open blink", () => {
+test("counts a single open → closed → open blink", () => {
   const s = run([0.3, 0.3, 0.1, 0.09, 0.3, 0.31]);
   assert.equal(s.count, 1);
   assert.equal(s.closed, false);

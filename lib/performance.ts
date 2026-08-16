@@ -54,14 +54,14 @@ const RUBRIC: Record<
   { headline: string; feedback: string; recommendedAction: string }
 > = {
   "good-good": {
-    headline: "Excellent â€” keep it up",
+    headline: "Excellent — keep it up",
     feedback:
       "Excellent performance. Maintain your attendance and continue your current study pattern.",
     recommendedAction:
       "Maintain your attendance and current study routine.",
   },
   "good-low": {
-    headline: "Strong attendance Â· academics need focus",
+    headline: "Strong attendance · academics need focus",
     feedback:
       "Your attendance is good, but your academic performance needs improvement. Focus on understanding concepts, practise previous question papers, and meet your faculty for additional guidance.",
     recommendedAction:
@@ -75,7 +75,7 @@ const RUBRIC: Record<
       "Improve attendance first, then revise daily and seek faculty help in weak subjects.",
   },
   "low-good": {
-    headline: "Good marks Â· attendance at risk",
+    headline: "Good marks · attendance at risk",
     feedback:
       "Although your marks are currently good, low attendance may impact your future performance and exam eligibility. Try to improve your attendance while maintaining your academic results.",
     recommendedAction:

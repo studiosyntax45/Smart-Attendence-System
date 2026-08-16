@@ -160,7 +160,7 @@ export default function PerformanceAnalytics() {
         />
         <KpiCard
           label="Correlation (r)"
-          value={r === null ? "Ã¢â‚¬â€" : r.toFixed(2)}
+          value={r === null ? "—" : r.toFixed(2)}
           sub={
             r === null
               ? "Needs 3+ students with marks"
@@ -183,7 +183,7 @@ export default function PerformanceAnalytics() {
           <CardContent className="p-10 text-center text-sm text-muted-foreground">
             No data to correlate yet. Record marks on the{" "}
             <span className="font-medium text-foreground">Marks</span> page and
-            run a few attendance sessions Ã¢â‚¬â€ dots appear here per student.
+            run a few attendance sessions — dots appear here per student.
           </CardContent>
         </Card>
       ) : (
@@ -193,7 +193,7 @@ export default function PerformanceAnalytics() {
               <CardTitle>Attendance vs average marks</CardTitle>
               <CardDescription>
                 Dashed line shows the least-squares trend
-                {r !== null && <> Ã‚Â· r = {r.toFixed(2)} ({describeR(r)})</>}
+                {r !== null && <> · r = {r.toFixed(2)} ({describeR(r)})</>}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -205,7 +205,7 @@ export default function PerformanceAnalytics() {
             <CardHeader>
               <CardTitle>Per-student breakdown</CardTitle>
               <CardDescription>
-                The table behind the chart Ã¢â‚¬â€ sorted by attendance.
+                The table behind the chart — sorted by attendance.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -229,7 +229,7 @@ export default function PerformanceAnalytics() {
                       >
                         <td className="py-2.5 pr-4 font-medium">{row.name}</td>
                         <td className="py-2.5 pr-4 font-mono text-xs">
-                          {row.roll ?? "Ã¢â‚¬â€"}
+                          {row.roll ?? "—"}
                         </td>
                         <td className="py-2.5 pr-4 font-mono text-xs">
                           {row.attendancePct}%
@@ -254,7 +254,7 @@ export default function PerformanceAnalytics() {
                               {row.prediction.riskLevel}
                             </Badge>
                           ) : (
-                            <span className="text-xs text-muted-foreground">Ã¢â‚¬â€</span>
+                            <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </td>
                       </tr>

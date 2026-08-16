@@ -56,7 +56,7 @@ export async function fileLeaveRequest(
   if (reasonError) return { error: reasonError };
   try {
     await api.post("/leave-requests", { sessionId, reason: reason.trim() });
-    return { message: "Appeal submitted â€” pending faculty review." };
+    return { message: "Appeal submitted — pending faculty review." };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to submit appeal." };
   }

@@ -28,7 +28,7 @@ export async function upsertMark(
 
   try {
     await api.post("/marks", { studentId, course, assessment, score, maxScore });
-    return { message: `Saved ${assessment} for the student â€” ${score}/${maxScore}.` };
+    return { message: `Saved ${assessment} for the student — ${score}/${maxScore}.` };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to save mark." };
   }

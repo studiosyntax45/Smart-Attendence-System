@@ -39,7 +39,7 @@ test("matchConfidence: clamps to 0..1", () => {
   assert.equal(matchConfidence(1.5), 0);
 });
 
-test("serializeDescriptor: Float32Array â†’ number[]", () => {
+test("serializeDescriptor: Float32Array → number[]", () => {
   const f = new Float32Array([0.5, -0.25, 1]);
   const s = serializeDescriptor(f);
   assert.ok(Array.isArray(s));

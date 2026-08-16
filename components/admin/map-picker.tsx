@@ -81,7 +81,7 @@ export function MapPicker({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         role="application"
-        aria-label="Map Ã¢â‚¬â€ drag to place the geofence centre"
+        aria-label="Map — drag to place the geofence centre"
       >
         
         {tiles.map((t) => (
@@ -143,7 +143,7 @@ export function MapPicker({
 
         
         <div className="absolute bottom-1 right-1 rounded bg-card/85 px-1.5 py-0.5 text-[10px] text-muted-foreground">
-          Ã‚Â©{" "}
+          ©{" "}
           <a
             href="https://www.openstreetmap.org/copyright"
             target="_blank"

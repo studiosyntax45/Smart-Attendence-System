@@ -123,7 +123,7 @@ export default function AdminAttendance() {
             />
             <KpiCard
               label="Institution average"
-              value={institutionAvg !== null ? `${institutionAvg}%` : "Ã¢â‚¬â€"}
+              value={institutionAvg !== null ? `${institutionAvg}%` : "—"}
               sub="Mean of course averages"
               icon={<Percent />}
               tone={
@@ -139,7 +139,7 @@ export default function AdminAttendance() {
               value={
                 worst && worst.avgOfficialPct !== null
                   ? `${worst.avgOfficialPct}%`
-                  : "Ã¢â‚¬â€"
+                  : "—"
               }
               sub={worst ? worst.course_name : "No data"}
               icon={<TrendingDown />}
@@ -164,7 +164,7 @@ export default function AdminAttendance() {
               <ExportMenu
                 filename="institution-attendance-rollup"
                 title="Institution Attendance Rollup"
-                subtitle={`${courseCount} courses${institutionAvg !== null ? ` Ã‚Â· avg ${institutionAvg}%` : ""}`}
+                subtitle={`${courseCount} courses${institutionAvg !== null ? ` · avg ${institutionAvg}%` : ""}`}
                 columns={exportColumns}
                 rows={exportRows}
               />

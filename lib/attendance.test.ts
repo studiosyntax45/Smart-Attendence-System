@@ -116,7 +116,7 @@ test("summarizeStudent: empty-denominator courses are ignored", () => {
   assert.equal(s.anyShortfall, false);
 });
 
-test("summarizeStudent: all no-data â†’ null overall, no worst course", () => {
+test("summarizeStudent: all no-data → null overall, no worst course", () => {
   const s = summarizeStudent([row({ conducted: 0 }), row({ course_code: "C2", conducted: 0 })]);
   assert.equal(s.coursesWithData, 0);
   assert.equal(s.overallOfficialPct, null);
@@ -161,7 +161,7 @@ test("rollupByCourse: no-data students don't skew the average", () => {
   assert.equal(a.avgOfficialPct, 80);
 });
 
-test("countEligibility: mix of present/late/absent/excused â€” excused excluded from both", () => {
+test("countEligibility: mix of present/late/absent/excused — excused excluded from both", () => {
   const outcomes: SessionOutcome[] = [
     { status: "present" },
     { status: "present" },
@@ -179,7 +179,7 @@ test("countEligibility: mix of present/late/absent/excused â€” excused excl
   assert.equal(c.weightedPct, 50);
 });
 
-test("countEligibility: all excused â†’ null % (no data), conducted 0", () => {
+test("countEligibility: all excused → null % (no data), conducted 0", () => {
   const c = countEligibility([
     { status: "absent", excused: true },
     { status: "late", excused: true },
@@ -201,7 +201,7 @@ test("countEligibility: excused does NOT count as attended (not gameable)", () =
   assert.equal(c.officialPct, 100);
 });
 
-test("classesNeededForEligibility: already at threshold â†’ 0", () => {
+test("classesNeededForEligibility: already at threshold → 0", () => {
   assert.equal(classesNeededForEligibility(15, 20), 0);
   assert.equal(classesNeededForEligibility(16, 20), 0);
 });

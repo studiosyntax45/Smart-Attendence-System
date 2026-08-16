@@ -43,17 +43,6 @@ marksRouter.post(
       throw badRequest(`Score must be between 0 and ${data.maxScore}.`);
     }
 
-    if (me.role === "faculty") {
-      const teaches = await prisma.classSchedule.findFirst({
-        where: { facultyId: me.id, course: data.course },
-      });
-      if (!teaches) {
-        throw forbidden(
-          `You are not assigned to teach '${data.course}'. Only the course's scheduled faculty can enter marks.`
-        );
-      }
-    }
-
     const row = await prisma.marks.upsert({
       where: {
         studentId_course_assessment: {

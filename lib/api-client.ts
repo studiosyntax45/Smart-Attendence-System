@@ -168,7 +168,7 @@ export async function refreshBootstrap(): Promise<SessionUser | null> {
 
 export async function me(): Promise<SessionUser | null> {
   try {
-    const res = await request<{ user: SessionUser }>("GET", "/auth/me", undefined, { skipAuth: true });
+    const res = await request<{ user: SessionUser }>("GET", "/auth/me");
     return res.user;
   } catch {
     return null;

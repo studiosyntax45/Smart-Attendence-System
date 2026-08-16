@@ -4,7 +4,7 @@
 export function PageSkeleton() {
   return (
     <div className="space-y-6" aria-busy="true" aria-live="polite">
-      <span className="sr-only">Loadingâ€¦</span>
+      <span className="sr-only">Loading…</span>
       <div className="space-y-2">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />

@@ -49,6 +49,6 @@ test("toPrintableHtml: escapes and includes title, subtitle, rows", () => {
 });
 
 test("slugifyFilename: safe download names", () => {
-  assert.equal(slugifyFilename("My Attendance â€” Sem 4"), "my-attendance-sem-4");
+  assert.equal(slugifyFilename("My Attendance — Sem 4"), "my-attendance-sem-4");
   assert.equal(slugifyFilename("!!!"), "export");
 });

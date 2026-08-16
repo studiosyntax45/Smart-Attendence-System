@@ -97,7 +97,7 @@ export function UsersTable({
                       )}
                     </span>
                   </td>
-                  <td className="py-2.5 pr-4 font-mono text-xs">{u.roll_no ?? "Ã¢â‚¬â€"}</td>
+                  <td className="py-2.5 pr-4 font-mono text-xs">{u.roll_no ?? "—"}</td>
                   <td className="py-2.5 pr-4">
                     <Badge variant={ROLE_BADGE[u.role]}>
                       {u.role === "admin" && (

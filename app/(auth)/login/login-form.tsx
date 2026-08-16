@@ -138,7 +138,7 @@ export function LoginForm() {
         </Button>
       </form>
       <p className="-mt-3 text-center text-xs text-muted-foreground">
-        Students only â€” use your <span className="font-medium">@pesu.pes.edu</span>{" "}
+        Students only — use your <span className="font-medium">@pesu.pes.edu</span>{" "}
         account.
       </p>
       {googleError && <ErrorAlert message={googleError} />}
@@ -174,7 +174,7 @@ export function LoginForm() {
             name="password"
             type="password"
             autoComplete="current-password"
-            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+            placeholder="••••••••"
             required
           />
         </div>

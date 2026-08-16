@@ -124,7 +124,7 @@ profileRouter.post(
     const { descriptor, image, serverVerification } = enrollFaceSchema.parse(req.body);
 
     if (!isValidDescriptorLocal(descriptor)) {
-      throw badRequest("Face data was malformed â€” please retry enrolment.");
+      throw badRequest("Face data was malformed — please retry enrolment.");
     }
 
     const existing = await prisma.profile.findUnique({
@@ -139,7 +139,7 @@ profileRouter.post(
 
     let serverEmbedding: number[] | null = null;
     if (serverVerification) {
-      if (!image) throw badRequest("Camera capture was missing â€” please retry enrolment.");
+      if (!image) throw badRequest("Camera capture was missing — please retry enrolment.");
       const { representFace } = await import("../services/face-service-client");
       const result = await representFace(image);
       if (!result.ok) throw badRequest(result.reason);

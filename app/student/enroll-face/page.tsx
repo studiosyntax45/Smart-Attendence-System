@@ -43,7 +43,7 @@ export default function EnrollFacePage() {
   const enrolled = data.enrolled;
 
   return (
-    <GsapReveal className="w-full space-y-4">
+    <GsapReveal className="mx-auto w-full max-w-2xl space-y-4">
       <PageTitle title="Enrol Face" />
       <div>
         <h1 className="text-2xl font-bold">Face Enrolment</h1>
@@ -60,8 +60,8 @@ export default function EnrollFacePage() {
           </CardTitle>
           <CardDescription>
             {serverVerification
-              ? "A blink confirms you're live. Your photo is sent once to verify identity server-side Ã¢â‚¬â€ only a numeric embedding is stored, never the image."
-              : "Your face never leaves your device as an image Ã¢â‚¬â€ only a numeric descriptor is stored, and a blink confirms you're live."}
+              ? "A blink confirms you're live. Your photo is sent once to verify identity server-side — only a numeric embedding is stored, never the image."
+              : "Your face never leaves your device as an image — only a numeric descriptor is stored, and a blink confirms you're live."}
           </CardDescription>
         </CardHeader>
         <CardContent>

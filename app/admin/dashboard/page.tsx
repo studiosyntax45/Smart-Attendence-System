@@ -137,7 +137,7 @@ export default function AdminDashboard() {
           Hello, {profile.fullName.split(" ")[0]}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Institution overview Ã‚Â· user &amp; geofence management
+          Institution overview · user &amp; geofence management
         </p>
       </div>
 
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle>This week&apos;s attendance</CardTitle>
             <CardDescription>
-              Marks per day by status Ã¢â‚¬â€ last 7 days, campus-wide
+              Marks per day by status — last 7 days, campus-wide
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
           <CardContent>
             {allUsers.length === 0 ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
-                No users yet Ã¢â‚¬â€ accounts appear here after sign-up.
+                No users yet — accounts appear here after sign-up.
               </p>
             ) : (
               <UsersTable users={allUsers} currentUserId={profile.id} />
@@ -212,7 +212,7 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle>Classroom geofences</CardTitle>
             <CardDescription>
-              Stand in the classroom and tap Ã¢â‚¬Å“Use my current locationÃ¢â‚¬Â for
+              Stand in the classroom and tap “Use my current location” for
               exact coordinates. Map-pin editing arrives in Phase 2.
             </CardDescription>
           </CardHeader>

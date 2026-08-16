@@ -596,7 +596,7 @@ export function ClassManager({
                           .filter((c) => !activeClass.assigned_courses?.includes(c.code))
                           .map((c) => (
                             <option key={c.code} value={c.code}>
-                              {c.code} Ã¢â‚¬â€ {c.name} ({c.semester})
+                              {c.code} — {c.name} ({c.semester})
                             </option>
                           ))}
                       </select>

@@ -185,7 +185,7 @@ export default function FacultyAttendance() {
             />
             <KpiCard
               label="Class average"
-              value={avgOfficial !== null ? `${avgOfficial}%` : "Ã¢â‚¬â€"}
+              value={avgOfficial !== null ? `${avgOfficial}%` : "—"}
               sub="Official attendance %"
               icon={<Percent />}
               tone={
@@ -220,8 +220,8 @@ export default function FacultyAttendance() {
                 <div className="flex flex-col items-end gap-2">
                   <ExportMenu
                     filename={`course-attendance-${selected ?? "course"}`}
-                    title={`Course Attendance Ã¢â‚¬â€ ${selectedCourse?.name ?? selected}`}
-                    subtitle={`${selected}${selectedCourse ? ` Ã‚Â· ${selectedCourse.semester}` : ""} Ã‚Â· ${rows.length} enrolled`}
+                    title={`Course Attendance — ${selectedCourse?.name ?? selected}`}
+                    subtitle={`${selected}${selectedCourse ? ` · ${selectedCourse.semester}` : ""} · ${rows.length} enrolled`}
                     columns={exportColumns}
                     rows={exportRows}
                   />
@@ -260,14 +260,14 @@ export default function FacultyAttendance() {
                             )}
                           >
                             <td className="py-2.5 pr-4 font-medium">
-                              {p?.full_name ?? "Ã¢â‚¬â€"}
+                              {p?.full_name ?? "—"}
                             </td>
                             <td className="py-2.5 pr-4 font-mono text-xs">
-                              {p?.roll_no ?? "Ã¢â‚¬â€"}
+                              {p?.roll_no ?? "—"}
                             </td>
                             <td className="py-2.5 pr-4 font-mono text-xs tabular-nums">
                               {r.conducted === 0
-                                ? "Ã¢â‚¬â€"
+                                ? "—"
                                 : `${attendedCount(r)}/${r.conducted}`}
                             </td>
                             <td className="py-2.5 pr-4 font-mono text-xs tabular-nums">

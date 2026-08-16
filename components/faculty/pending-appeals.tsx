@@ -91,9 +91,9 @@ export function PendingAppeals({ requests }: { requests: LeaveRequest[] }) {
                         ) : null}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {sess?.course ?? "Ã¢â‚¬â€"}
+                        {sess?.course ?? "—"}
                         {sess?.opened_at
-                          ? ` Ã‚Â· ${new Date(sess.opened_at).toLocaleDateString([], {
+                          ? ` · ${new Date(sess.opened_at).toLocaleDateString([], {
                               weekday: "short",
                               month: "short",
                               day: "numeric",

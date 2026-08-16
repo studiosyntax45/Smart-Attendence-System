@@ -52,7 +52,7 @@ export function useGeofence(
           setState({
             status: "denied",
             message:
-              "Location permission denied â€” allow location access to mark attendance.",
+              "Location permission denied — allow location access to mark attendance.",
           });
           return;
         }

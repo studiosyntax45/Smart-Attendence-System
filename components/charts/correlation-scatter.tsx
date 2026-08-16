@@ -86,7 +86,7 @@ export function CorrelationScatter({
                     )}
                   </p>
                   <p className="text-muted-foreground">
-                    Attendance <span className="font-mono text-card-foreground">{d.x}%</span> Ã‚Â·
+                    Attendance <span className="font-mono text-card-foreground">{d.x}%</span> ·
                     Marks <span className="font-mono text-card-foreground">{d.y}%</span>
                   </p>
                 </div>

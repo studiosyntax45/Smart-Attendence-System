@@ -121,6 +121,7 @@ authRouter.post(
     const refresh = req.cookies?.[REFRESH_COOKIE];
     if (!refresh) throw unauthorized("No refresh token.");
 
+    let payload: Awaited<ReturnType<typeof verifyRefreshToken>>;
     try {
       payload = await verifyRefreshToken(refresh);
     } catch {

@@ -28,7 +28,7 @@ export function GradeBadge({ grade }: { grade: LetterGrade | null }) {
     return (
       <Badge variant="outline">
         <CircleDashed className="size-3" aria-hidden="true" />
-        â€”
+        —
       </Badge>
     );
   }

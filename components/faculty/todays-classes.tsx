@@ -66,7 +66,7 @@ export function TodaysClasses({
       <CardHeader>
         <CardTitle>Today&apos;s Classes</CardTitle>
         <CardDescription>
-          From your weekly timetable Ã¢â‚¬â€ open a session in one tap.
+          From your weekly timetable — open a session in one tap.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -92,7 +92,7 @@ export function TodaysClasses({
                       {formatTimeRange(e.start_time, e.end_time)}
                       {room ? (
                         <span className="inline-flex items-center gap-1">
-                          {" Ã‚Â· "}
+                          {" · "}
                           <MapPin className="inline size-3" aria-hidden="true" />
                           {room}
                         </span>
@@ -124,7 +124,7 @@ export function TodaysClasses({
                       ) : (
                         <Play className="size-4" aria-hidden="true" />
                       )}
-                      {opening ? "OpeningÃ¢â‚¬Â¦" : "Open Session"}
+                      {opening ? "Opening…" : "Open Session"}
                     </Button>
                   )}
                 </li>

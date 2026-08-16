@@ -37,7 +37,7 @@ export function GeofenceIndicator({
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-status-late opacity-60" />
             <LoaderCircle className="relative size-4 animate-spin" />
           </span>
-          Locating youÃ¢â‚¬Â¦
+          Locating you…
         </div>
       );
     case "inside":
@@ -48,14 +48,14 @@ export function GeofenceIndicator({
             <span className="absolute inline-flex size-2.5 animate-ping rounded-full bg-status-present opacity-40 [animation-duration:2.5s]" />
             <MapPin className="relative size-4" />
           </span>
-          Inside Ã¢â‚¬Å“{roomName}Ã¢â‚¬Â Ã‚Â· {state.distance} m from center
+          Inside “{roomName}” · {state.distance} m from center
           {state.stale && (
             <span className="text-xs font-normal opacity-70">
-              (last known Ã¢â‚¬â€ GPS signal weak)
+              (last known — GPS signal weak)
             </span>
           )}
           <span className="ml-auto font-mono text-xs opacity-70">
-            Ã‚Â±{state.accuracy} m
+            ±{state.accuracy} m
           </span>
         </div>
       );
@@ -63,14 +63,14 @@ export function GeofenceIndicator({
       return (
         <div role="status" className={cn(base, "border-status-absent/40 bg-status-absent/10 text-status-absent")}>
           <MapPinOff className="size-4 shrink-0" aria-hidden="true" />
-          Outside geofence Ã¢â‚¬â€ {state.distance} m from Ã¢â‚¬Å“{roomName}Ã¢â‚¬Â
+          Outside geofence — {state.distance} m from “{roomName}”
           {state.stale && (
             <span className="text-xs font-normal opacity-70">
-              (last known Ã¢â‚¬â€ GPS signal weak)
+              (last known — GPS signal weak)
             </span>
           )}
           <span className="ml-auto font-mono text-xs opacity-70">
-            Ã‚Â±{state.accuracy} m
+            ±{state.accuracy} m
           </span>
         </div>
       );

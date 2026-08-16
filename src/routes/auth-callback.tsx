@@ -11,7 +11,7 @@ export default function AuthCallback() {
   const navigate = useNavigate();
   const [search] = useSearchParams();
   const { refresh } = useAuth();
-  const [message, setMessage] = useState("Completing sign-inâ€¦");
+  const [message, setMessage] = useState("Completing sign-in…");
   const ran = useRef(false);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function AuthCallback() {
         return bounce("not_student");
       }
 
-      setMessage("Signed in â€” redirectingâ€¦");
+      setMessage("Signed in — redirecting…");
       await refresh();
       navigate(search.get("next") ?? ROLE_HOME.student, { replace: true });
       void googleOAuthUrl;

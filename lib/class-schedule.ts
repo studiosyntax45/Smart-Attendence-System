@@ -35,6 +35,39 @@ export interface ScheduleEntry {
   faculty?: { id: string; fullName: string } | null;
 }
 
+export interface ApiScheduleEntry {
+  id: string;
+  course: string;
+  facultyId: string;
+  geofenceId: string;
+  classId: string | null;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  createdAt?: string;
+  geofence?: { roomName: string } | null;
+  faculty?: { id: string; fullName: string } | null;
+  class_?: { id: string; name: string; branch: string; semester: string; section: string } | null;
+}
+
+export function mapScheduleEntry(entry: ApiScheduleEntry): ScheduleEntry {
+  return {
+    id: entry.id,
+    course: entry.course,
+    faculty_id: entry.facultyId,
+    geofence_id: entry.geofenceId,
+    class_id: entry.classId,
+    day_of_week: entry.dayOfWeek,
+    start_time: entry.startTime,
+    end_time: entry.endTime,
+    created_at: entry.createdAt,
+    geofences: entry.geofence ? { room_name: entry.geofence.roomName } : null,
+    profiles: entry.faculty ? { full_name: entry.faculty.fullName } : null,
+    classes: entry.class_ ?? null,
+    faculty: entry.faculty ?? null,
+  };
+}
+
 export const DAY_NAMES = [
   "Sunday",
   "Monday",
@@ -85,7 +118,7 @@ export function filterScheduleByDay(entries: ScheduleEntry[], dayOfWeek: number)
 export function formatTimeRange(start: string, end: string): string {
   const s = start.slice(0, 5);
   const e = end.slice(0, 5);
-  return `${s} â€“ ${e}`;
+  return `${s} – ${e}`;
 }
 
 
@@ -96,10 +129,10 @@ export async function listScheduleForFaculty(
   if (!facultyId) return [];
   if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) return [];
   try {
-    const { schedule } = await api.get<{ schedule: ScheduleEntry[] }>(
+    const { schedule } = await api.get<{ schedule: ApiScheduleEntry[] }>(
       `/class-schedule?facultyId=${encodeURIComponent(facultyId)}&dayOfWeek=${dayOfWeek}`
     );
-    return schedule ?? [];
+    return (schedule ?? []).map(mapScheduleEntry);
   } catch (err) {
     console.warn("listScheduleForFaculty:", err);
     return [];
@@ -109,8 +142,8 @@ export async function listScheduleForFaculty(
 
 export async function listAllSchedule(): Promise<ScheduleEntry[]> {
   try {
-    const { schedule } = await api.get<{ schedule: ScheduleEntry[] }>("/class-schedule");
-    return schedule ?? [];
+    const { schedule } = await api.get<{ schedule: ApiScheduleEntry[] }>("/class-schedule");
+    return (schedule ?? []).map(mapScheduleEntry);
   } catch (err) {
     console.warn("listAllSchedule:", err);
     return [];

@@ -216,7 +216,7 @@ export function PerformanceInsight({
           </p>
           <CardTitle className="text-lg">Attendance meets performance</CardTitle>
           <CardDescription>
-            Where you stand across both â€” and the one thing to do next.
+            Where you stand across both — and the one thing to do next.
           </CardDescription>
         </div>
       </CardHeader>

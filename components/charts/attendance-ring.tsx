@@ -86,7 +86,7 @@ export function AttendanceRing({
       aria-label={
         pct === null
           ? "Attendance rate: no sessions recorded yet"
-          : `Attendance rate ${pct} percent Ã¢â‚¬â€ ${attended} of ${held} sessions. ${state.label}.`
+          : `Attendance rate ${pct} percent — ${attended} of ${held} sessions. ${state.label}.`
       }
     >
       <div className="relative" style={{ width: SIZE, height: SIZE }}>
@@ -114,7 +114,7 @@ export function AttendanceRing({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {pct === null ? (
-            <span className="font-display text-3xl font-bold text-muted-foreground">Ã¢â‚¬â€</span>
+            <span className="font-display text-3xl font-bold text-muted-foreground">—</span>
           ) : (
             <span className="font-display text-4xl font-bold tabular-nums">
               <span ref={numRef}>0</span>

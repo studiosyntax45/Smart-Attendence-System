@@ -52,7 +52,7 @@ export function LoginPreviewCards() {
         </span>
         <div>
           <p className="text-sm font-semibold text-white">Entry recorded</p>
-          <p className="text-xs text-white/65">Face + location verified Ã‚Â· 9:02 AM</p>
+          <p className="text-xs text-white/65">Face + location verified · 9:02 AM</p>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export function LoginPreviewCards() {
           <MapPin className="relative size-4 text-[hsl(142,71%,55%)]" />
         </span>
         <p className="text-sm font-medium text-white">
-          Inside Ã¢â‚¬Å“Room B-204Ã¢â‚¬Â <span className="text-white/60">Ã‚Â· 18 m</span>
+          Inside “Room B-204” <span className="text-white/60">· 18 m</span>
         </p>
       </div>
 

@@ -82,7 +82,7 @@ export default function MarksPage() {
       <div>
         <h1 className="text-2xl font-bold">Upload Marks</h1>
         <p className="text-sm text-muted-foreground">
-          Only faculty and admins can record scores Ã¢â‚¬â€ students see their own
+          Only faculty and admins can record scores — students see their own
           marks on their dashboard.
         </p>
       </div>
@@ -118,7 +118,7 @@ export default function MarksPage() {
           <CardContent>
             {!marks || marks.length === 0 ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
-                No marks recorded yet Ã¢â‚¬â€ they&apos;ll appear here as you save
+                No marks recorded yet — they&apos;ll appear here as you save
                 them.
               </p>
             ) : (
@@ -136,7 +136,7 @@ export default function MarksPage() {
                     {marks.map((m) => (
                       <tr key={m.id} className="border-b transition-colors last:border-0 hover:bg-muted/50">
                         <td className="py-2.5 pr-4 font-medium">
-                          {m.profiles?.full_name ?? "Ã¢â‚¬â€"}
+                          {m.profiles?.full_name ?? "—"}
                           {m.profiles?.roll_no && (
                             <span className="ml-1 font-mono text-xs text-muted-foreground">
                               {m.profiles.roll_no}

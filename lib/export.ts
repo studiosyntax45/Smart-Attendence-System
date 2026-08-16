@@ -93,7 +93,7 @@ export function toPrintableHtml({
     <thead><tr>${head}</tr></thead>
     <tbody>${body}</tbody>
   </table>
-  <p class="footer">PES Smart Attendance Â· ${rows.length} row${rows.length === 1 ? "" : "s"}</p>
+  <p class="footer">PES Smart Attendance · ${rows.length} row${rows.length === 1 ? "" : "s"}</p>
 </body>
 </html>`;
 }

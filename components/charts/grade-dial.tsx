@@ -110,7 +110,7 @@ export function GradeDial({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {value === null ? (
-            <span className="font-display text-3xl font-bold text-muted-foreground">Ã¢â‚¬â€</span>
+            <span className="font-display text-3xl font-bold text-muted-foreground">—</span>
           ) : (
             <span className="font-display text-4xl font-bold tabular-nums">
               <span ref={numRef}>0.00</span>

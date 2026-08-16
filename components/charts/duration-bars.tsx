@@ -49,7 +49,7 @@ export function DurationBars({ data }: { data: DurationDatum[] }) {
                 <div className="rounded-md border bg-card px-3 py-2 text-xs shadow-pop">
                   <p className="font-medium text-card-foreground">{d.course}</p>
                   <p className="text-muted-foreground">
-                    {d.label} Ã‚Â· <span className="font-mono font-medium text-card-foreground">{d.minutes} min</span>
+                    {d.label} · <span className="font-mono font-medium text-card-foreground">{d.minutes} min</span>
                   </p>
                 </div>
               );

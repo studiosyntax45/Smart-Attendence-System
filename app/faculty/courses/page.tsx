@@ -120,7 +120,7 @@ export default function CoursesPage() {
             <CardContent>
               {courses.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  No courses yet Ã¢â‚¬â€ add the first one below.
+                  No courses yet — add the first one below.
                 </p>
               ) : (
                 <div className="overflow-x-auto">
@@ -188,7 +188,7 @@ export default function CoursesPage() {
               <CardTitle>{editing ? `Edit ${editing.code}` : "Add a course"}</CardTitle>
               <CardDescription>
                 {editing
-                  ? "Update the name, credits or semester Ã¢â‚¬â€ the code stays."
+                  ? "Update the name, credits or semester — the code stays."
                   : "Backfilled placeholder courses can be fixed here too: enter the same code with the real details."}
               </CardDescription>
             </CardHeader>
@@ -212,7 +212,7 @@ export default function CoursesPage() {
             </CardTitle>
             <CardDescription>
               {selected
-                ? `Students enrolled in ${selected.name} (${selected.semester}). Unchecking deactivates Ã¢â‚¬â€ history is kept.`
+                ? `Students enrolled in ${selected.name} (${selected.semester}). Unchecking deactivates — history is kept.`
                 : "Add a course first, then manage its roster here."}
             </CardDescription>
           </CardHeader>

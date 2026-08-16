@@ -135,7 +135,7 @@ export default function ParentLoginPage() {
         </div>
 
         <p className="relative z-10 mt-6 text-center text-xs text-muted-foreground">
-          Team Preethika Ã‚Â· Preethi Ã‚Â· Nesara Ã‚Â· Monisha Ã¢â‚¬â€ PES University
+          Team Preethika · Preethi · Nesara · Monisha — PES University
         </p>
       </div>
     </main>

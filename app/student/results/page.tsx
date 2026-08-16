@@ -116,7 +116,7 @@ export default function StudentResults() {
           <h1 className="text-2xl font-bold">My Results</h1>
           <p className="text-sm text-muted-foreground">
             {profile.rollNo && (
-              <span className="font-mono">{profile.rollNo} Ã‚Â· </span>
+              <span className="font-mono">{profile.rollNo} · </span>
             )}
             ISA / ESA scores, grades and GPA
           </p>
@@ -151,7 +151,7 @@ export default function StudentResults() {
       {!selected ? (
         <Card>
           <CardContent className="py-16 text-center text-sm text-muted-foreground">
-            No results yet Ã¢â‚¬â€ scores appear here once your faculty records
+            No results yet — scores appear here once your faculty records
             ISA/ESA marks.
           </CardContent>
         </Card>
@@ -173,7 +173,7 @@ export default function StudentResults() {
                   {selected.semester}
                 </p>
                 <p className="text-muted-foreground">
-                  F grade in {failed.map((c) => c.name).join(", ")} Ã¢â‚¬â€ credits
+                  F grade in {failed.map((c) => c.name).join(", ")} — credits
                   not earned until cleared.
                 </p>
               </div>
@@ -184,7 +184,7 @@ export default function StudentResults() {
           <section className="grid gap-4 lg:grid-cols-5">
             <Card className="lg:col-span-2">
               <CardHeader className="pb-0">
-                <CardTitle>SGPA Ã¢â‚¬â€ {selected.semester}</CardTitle>
+                <CardTitle>SGPA — {selected.semester}</CardTitle>
                 <CardDescription>
                   Credit-weighted grade points, 10-point scale
                 </CardDescription>
@@ -200,7 +200,7 @@ export default function StudentResults() {
             <div className="grid gap-3 sm:grid-cols-3 lg:col-span-3">
               <KpiCard
                 label="CGPA"
-                value={cgpa !== null ? cgpa.toFixed(2) : "Ã¢â‚¬â€"}
+                value={cgpa !== null ? cgpa.toFixed(2) : "—"}
                 sub="All semesters"
                 icon={<Sigma />}
                 tone={
@@ -233,17 +233,17 @@ export default function StudentResults() {
                     className="size-4 text-muted-foreground"
                     aria-hidden="true"
                   />
-                  Course results Ã¢â‚¬â€ {selected.semester}
+                  Course results — {selected.semester}
                 </CardTitle>
                 <CardDescription>
-                  Grade bands: S Ã¢â€°Â¥ 90 Ã‚Â· A Ã¢â€°Â¥ 80 Ã‚Â· B Ã¢â€°Â¥ 70 Ã‚Â· C Ã¢â€°Â¥ 60 Ã‚Â· D Ã¢â€°Â¥ 50 Ã‚Â·
-                  E Ã¢â€°Â¥ 40 Ã‚Â· F below 40. F earns no credits.
+                  Grade bands: S ≥ 90 · A ≥ 80 · B ≥ 70 · C ≥ 60 · D ≥ 50 ·
+                  E ≥ 40 · F below 40. F earns no credits.
                 </CardDescription>
               </div>
               <ExportMenu
                 filename={`results-${profile.rollNo ?? "me"}-${selected.semester}`}
-                title={`Results Ã¢â‚¬â€ ${selected.semester}`}
-                subtitle={`${profile.fullName}${profile.rollNo ? ` Ã‚Â· ${profile.rollNo}` : ""} Ã‚Â· SGPA ${selected.sgpa ?? "Ã¢â‚¬â€"}`}
+                title={`Results — ${selected.semester}`}
+                subtitle={`${profile.fullName}${profile.rollNo ? ` · ${profile.rollNo}` : ""} · SGPA ${selected.sgpa ?? "—"}`}
                 columns={exportColumns}
                 rows={exportRows}
               />
@@ -297,13 +297,13 @@ export default function StudentResults() {
                                   </span>
                                 </>
                               ) : (
-                                "Ã¢â‚¬â€"
+                                "—"
                               )}
                             </td>
                           );
                         })}
                         <td className="py-3 pr-4 font-mono text-xs tabular-nums">
-                          {c.totalPct !== null ? `${c.totalPct}%` : "Ã¢â‚¬â€"}
+                          {c.totalPct !== null ? `${c.totalPct}%` : "—"}
                         </td>
                         <td className="py-3">
                           <GradeBadge grade={c.grade} />

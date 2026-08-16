@@ -8,7 +8,7 @@ import {
 } from "./performance.ts";
 import { ELIGIBILITY_THRESHOLD } from "./attendance.ts";
 
-test("analyze: high attendance + high marks â†’ excellent", () => {
+test("analyze: high attendance + high marks → excellent", () => {
   const a = analyzePerformance({ attendancePct: 96, marksPct: 91 });
   assert.ok(a);
   assert.equal(a.attendanceBand, "good");
@@ -17,7 +17,7 @@ test("analyze: high attendance + high marks â†’ excellent", () => {
   assert.match(a.feedback, /Excellent performance/i);
 });
 
-test("analyze: low attendance + low marks â†’ both need attention", () => {
+test("analyze: low attendance + low marks → both need attention", () => {
   const a = analyzePerformance({ attendancePct: 72, marksPct: 58 });
   assert.ok(a);
   assert.equal(a.attendanceBand, "low");
@@ -26,7 +26,7 @@ test("analyze: low attendance + low marks â†’ both need attention", () => {
   assert.match(a.feedback, /attendance is below the recommended level/i);
 });
 
-test("analyze: high attendance + low marks â†’ academics need focus", () => {
+test("analyze: high attendance + low marks → academics need focus", () => {
   const a = analyzePerformance({ attendancePct: 94, marksPct: 55 });
   assert.ok(a);
   assert.equal(a.attendanceBand, "good");
@@ -35,7 +35,7 @@ test("analyze: high attendance + low marks â†’ academics need focus", () =>
   assert.match(a.feedback, /attendance is good, but your academic performance/i);
 });
 
-test("analyze: low attendance + high marks â†’ attendance at risk", () => {
+test("analyze: low attendance + high marks → attendance at risk", () => {
   const a = analyzePerformance({ attendancePct: 68, marksPct: 87 });
   assert.ok(a);
   assert.equal(a.attendanceBand, "low");
@@ -62,7 +62,7 @@ test("analyze: band boundaries are inclusive at the threshold", () => {
   assert.equal(below.marksBand, "low");
 });
 
-test("analyze: null on either axis â†’ insufficient data", () => {
+test("analyze: null on either axis → insufficient data", () => {
   assert.equal(analyzePerformance({ attendancePct: null, marksPct: 80 }), null);
   assert.equal(analyzePerformance({ attendancePct: 80, marksPct: null }), null);
   assert.equal(analyzePerformance({ attendancePct: null, marksPct: null }), null);
@@ -76,7 +76,7 @@ test("analyze: out-of-range inputs are clamped, not trusted", () => {
   assert.equal(a.marksBand, "low");
 });
 
-test("predict: strong student â†’ low risk, high improvement, top grade", () => {
+test("predict: strong student → low risk, high improvement, top grade", () => {
   const p = predictPerformance({ attendancePct: 96, marksPct: 91 });
   assert.ok(p);
   assert.equal(p.riskLevel, "Low");
@@ -85,21 +85,21 @@ test("predict: strong student â†’ low risk, high improvement, top grade", (
   assert.equal(p.projectedPct, 92);
 });
 
-test("predict: engaged but weak marks â†’ medium/high risk, high improvement", () => {
+test("predict: engaged but weak marks → medium/high risk, high improvement", () => {
   const p = predictPerformance({ attendancePct: 94, marksPct: 55 });
   assert.ok(p);
   assert.equal(p.improvementProbability, "High");
   assert.notEqual(p.riskLevel, "Low");
 });
 
-test("predict: both low â†’ high risk, low improvement", () => {
+test("predict: both low → high risk, low improvement", () => {
   const p = predictPerformance({ attendancePct: 55, marksPct: 45 });
   assert.ok(p);
   assert.equal(p.riskLevel, "High");
   assert.equal(p.improvementProbability, "Low");
 });
 
-test("predict: capable but absent â†’ medium improvement (needs to show up)", () => {
+test("predict: capable but absent → medium improvement (needs to show up)", () => {
   const p = predictPerformance({ attendancePct: 68, marksPct: 87 });
   assert.ok(p);
   assert.equal(p.improvementProbability, "Medium");
@@ -114,7 +114,7 @@ test("predict: failing projection is always high risk", () => {
   assert.equal(fail.expectedGrade, "F");
 });
 
-test("predict: null on either axis â†’ no prediction", () => {
+test("predict: null on either axis → no prediction", () => {
   assert.equal(predictPerformance({ attendancePct: null, marksPct: 80 }), null);
   assert.equal(predictPerformance({ attendancePct: 80, marksPct: null }), null);
 });

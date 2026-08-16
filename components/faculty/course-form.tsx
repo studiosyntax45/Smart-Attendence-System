@@ -115,7 +115,7 @@ export function CourseForm({
         ) : (
           <Plus className="size-4" aria-hidden="true" />
         )}
-        {pending ? "SavingÃ¢â‚¬Â¦" : editing ? "Update course" : "Add course"}
+        {pending ? "Saving…" : editing ? "Update course" : "Add course"}
       </Button>
     </form>
   );

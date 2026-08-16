@@ -91,9 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [applyUser]);
 
   const refresh = useCallback(async () => {
-    if (user) setProfile(await fetchProfile(user.id));
-    setParentViewState(getParentView());
-  }, [user]);
+    await applyUser(await me());
+  }, [applyUser]);
 
   const signOut = useCallback(async () => {
     await logout();
@@ -140,8 +139,7 @@ export async function signInWithPassword(
   try {
     const res = await login(email.trim(), password);
     setParentView(false);
-    const m = await me();
-    return { role: (m?.role as Role) ?? "student" };
+    return { role: res.user.role };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Sign-in failed." };
   }

@@ -111,20 +111,20 @@ export default function MarkAttendancePage() {
           hour: "2-digit",
           minute: "2-digit",
         })}
-        {fence && <> Ã‚Â· Room Ã¢â‚¬Å“{fence.room_name}Ã¢â‚¬Â</>}
+        {fence && <> · Room “{fence.room_name}”</>}
       </p>
 
       {alreadyDone ? (
         <Card>
           <CardContent className="p-6 text-center text-sm text-muted-foreground">
-            Entry and exit are both recorded for this session Ã¢â‚¬â€ you&apos;re
+            Entry and exit are both recorded for this session — you&apos;re
             all set. See your dashboard for the details.
           </CardContent>
         </Card>
       ) : !fence ? (
         <Card>
           <CardContent className="p-6 text-center text-sm text-muted-foreground">
-            This session has no geofence configured Ã¢â‚¬â€ ask your administrator
+            This session has no geofence configured — ask your administrator
             to assign one.
           </CardContent>
         </Card>
@@ -137,7 +137,7 @@ export default function MarkAttendancePage() {
             </h2>
             <p className="text-sm text-muted-foreground">
               Attendance verifies your identity against an enrolled face. Set
-              it up once Ã¢â‚¬â€ it takes a few seconds.
+              it up once — it takes a few seconds.
             </p>
             <Link to="/student/enroll-face">
               <Button variant="accent">

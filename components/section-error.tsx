@@ -23,7 +23,7 @@ export function SectionError({
       <AlertTriangle className="size-10 text-status-late" aria-hidden="true" />
       <h1 className="text-xl font-semibold">This page didn&apos;t load</h1>
       <p className="text-sm text-muted-foreground">
-        Something went wrong fetching your data. This is usually temporary ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â
+        Something went wrong fetching your data. This is usually temporary —
         try again, or use the navigation above to go elsewhere.
       </p>
       {error.digest && (

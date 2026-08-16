@@ -79,7 +79,7 @@ export function MarkAttendanceClient({
               const res = await markExit(openAttendanceId);
               setResult(
                 res.ok
-                  ? { kind: "success", message: "Exit recorded Ã¢â‚¬â€ see your dashboard for the duration." }
+                  ? { kind: "success", message: "Exit recorded — see your dashboard for the duration." }
                   : { kind: "error", message: res.error ?? "Something went wrong." }
               );
             })
@@ -90,7 +90,7 @@ export function MarkAttendanceClient({
           ) : (
             <DoorOpen className="size-4" aria-hidden="true" />
           )}
-          {pending ? "Recording exitÃ¢â‚¬Â¦" : "Mark Exit"}
+          {pending ? "Recording exit…" : "Mark Exit"}
         </Button>
       </div>
     );
@@ -134,8 +134,8 @@ export function MarkAttendanceClient({
                   kind: "success",
                   message:
                     res.status === "late"
-                      ? `Entry recorded Ã¢â‚¬â€ marked Late (session opened over ${res.lateAfterMin ?? 10} min ago).`
-                      : "Entry recorded Ã¢â‚¬â€ you're marked Present.",
+                      ? `Entry recorded — marked Late (session opened over ${res.lateAfterMin ?? 10} min ago).`
+                      : "Entry recorded — you're marked Present.",
                 }
               : { kind: "error", message: res.error ?? "Something went wrong." }
           );
@@ -208,7 +208,7 @@ function EntryView({
         {pending ? (
           <>
             <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-            Verifying &amp; markingÃ¢â‚¬Â¦
+            Verifying &amp; marking…
           </>
         ) : (
           <>
@@ -221,10 +221,10 @@ function EntryView({
       {!ready && result.kind !== "success" && (
         <p className="text-center text-xs text-muted-foreground">
           {!faceReady && geo.status !== "inside"
-            ? "Waiting for face verification and locationÃ¢â‚¬Â¦"
+            ? "Waiting for face verification and location…"
             : !faceReady
-              ? "Complete the face + blink check aboveÃ¢â‚¬Â¦"
-              : "Waiting for you to be inside the geofenceÃ¢â‚¬Â¦"}
+              ? "Complete the face + blink check above…"
+              : "Waiting for you to be inside the geofence…"}
         </p>
       )}
     </div>

@@ -33,10 +33,10 @@ export async function markEntry(input: {
     return { ok: false, error: "Invalid location reading." };
   }
   if (input.faceConfidence < FACE_CONFIDENCE_MIN) {
-    return { ok: false, error: "Face confidence too low â€” try again in better lighting." };
+    return { ok: false, error: "Face confidence too low — try again in better lighting." };
   }
   if (!isValidDescriptor(input.descriptor)) {
-    return { ok: false, error: "Face capture was invalid â€” please retry." };
+    return { ok: false, error: "Face capture was invalid — please retry." };
   }
   const [session, gps, meProfile] = await Promise.all([
     api.get<{
@@ -63,12 +63,12 @@ export async function markEntry(input: {
   if (!meProfile?.profile?.faceEmbedding) {
     return {
       ok: false,
-      error: "No enrolled face found â€” enrol your face before marking attendance.",
+      error: "No enrolled face found — enrol your face before marking attendance.",
     };
   }
   const faceDistance = euclideanDistance(input.descriptor, meProfile.profile.faceEmbedding);
   if (!isFaceMatch(faceDistance)) {
-    return { ok: false, error: "Face does not match your enrolment â€” please try again." };
+    return { ok: false, error: "Face does not match your enrolment — please try again." };
   }
 
   const fence = session.session.geofence;

@@ -70,8 +70,8 @@ export function StatusStackedBars({ data }: { data: DayStatusDatum[] }) {
                   <div className="rounded-md border bg-card px-3 py-2 text-xs shadow-pop">
                     <p className="font-medium text-card-foreground">{label}</p>
                     <p className="text-muted-foreground">
-                      Present <span className="font-mono text-card-foreground">{d.present}</span> Ã‚Â·
-                      Late <span className="font-mono text-card-foreground">{d.late}</span> Ã‚Â·
+                      Present <span className="font-mono text-card-foreground">{d.present}</span> ·
+                      Late <span className="font-mono text-card-foreground">{d.late}</span> ·
                       Left early <span className="font-mono text-card-foreground">{d.partial}</span>
                     </p>
                   </div>

@@ -96,7 +96,7 @@ async function postJson<T>(
     return {
       ok: false,
       status: aborted ? 504 : 502,
-      reason: aborted ? "Face service timed out â€” please try again." : "Could not reach the face service.",
+      reason: aborted ? "Face service timed out — please try again." : "Could not reach the face service.",
     };
   } finally {
     clearTimeout(timer);

@@ -135,12 +135,12 @@ export default function ParentDashboard() {
         <div>
           <h1 className="text-2xl font-bold">{child.fullName}</h1>
           <p className="text-sm text-muted-foreground">
-            {child.rollNo && <span className="font-mono">{child.rollNo} Ã‚Â· </span>}
-            Attendance &amp; results Ã¢â‚¬â€ last 30 days
+            {child.rollNo && <span className="font-mono">{child.rollNo} · </span>}
+            Attendance &amp; results — last 30 days
           </p>
         </div>
         <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-          Parent view Ã‚Â· read-only
+          Parent view · read-only
         </span>
       </div>
 
@@ -174,7 +174,7 @@ export default function ParentDashboard() {
           />
           <KpiCard
             label="Avg duration"
-            value={avgDuration !== null ? `${avgDuration} min` : "Ã¢â‚¬â€"}
+            value={avgDuration !== null ? `${avgDuration} min` : "—"}
             countTo={avgDuration ?? undefined}
             suffix=" min"
             sub="Per attended class"
@@ -182,7 +182,7 @@ export default function ParentDashboard() {
           />
           <KpiCard
             label="Avg marks"
-            value={avgMarksPct !== null ? `${avgMarksPct}%` : "Ã¢â‚¬â€"}
+            value={avgMarksPct !== null ? `${avgMarksPct}%` : "—"}
             countTo={avgMarksPct ?? undefined}
             suffix="%"
             sub={marks.length > 0 ? `Across ${marks.length}` : "No marks yet"}
@@ -208,7 +208,7 @@ export default function ParentDashboard() {
             />
             Marks
           </CardTitle>
-          <CardDescription>Recorded by faculty Ã¢â‚¬â€ read-only.</CardDescription>
+          <CardDescription>Recorded by faculty — read-only.</CardDescription>
         </CardHeader>
         <CardContent>
           {marks.length === 0 ? (
@@ -257,7 +257,7 @@ export default function ParentDashboard() {
         <CardHeader>
           <CardTitle>Recent attendance</CardTitle>
           <CardDescription>
-            Entry, exit and duration per class Ã¢â‚¬â€ newest first.
+            Entry, exit and duration per class — newest first.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -284,7 +284,7 @@ export default function ParentDashboard() {
                       className="border-b transition-colors last:border-0 hover:bg-muted/50"
                     >
                       <td className="py-2.5 pr-4 font-medium">
-                        {r.sessions?.course ?? "Ã¢â‚¬â€"}
+                        {r.sessions?.course ?? "—"}
                       </td>
                       <td className="py-2.5 pr-4 font-mono text-xs">
                         {new Date(r.entry_time).toLocaleString([], {
@@ -300,10 +300,10 @@ export default function ParentDashboard() {
                               hour: "2-digit",
                               minute: "2-digit",
                             })
-                          : "Ã¢â‚¬â€"}
+                          : "—"}
                       </td>
                       <td className="py-2.5 pr-4">
-                        {r.duration_min !== null ? `${r.duration_min} min` : "Ã¢â‚¬â€"}
+                        {r.duration_min !== null ? `${r.duration_min} min` : "—"}
                       </td>
                       <td className="py-2.5">
                         <StatusPill

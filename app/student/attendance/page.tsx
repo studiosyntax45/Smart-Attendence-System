@@ -184,7 +184,7 @@ export default function StudentAttendance() {
           <h1 className="text-2xl font-bold">My Attendance</h1>
           <p className="text-sm text-muted-foreground">
             {profile.rollNo && (
-              <span className="font-mono">{profile.rollNo} Ã‚Â· </span>
+              <span className="font-mono">{profile.rollNo} · </span>
             )}
             Per-subject attendance and 75% eligibility
           </p>
@@ -269,7 +269,7 @@ export default function StudentAttendance() {
           <section className="grid gap-4 lg:grid-cols-5">
             <Card className="lg:col-span-2">
               <CardHeader className="pb-0">
-                <CardTitle>Overall Ã¢â‚¬â€ {selected}</CardTitle>
+                <CardTitle>Overall — {selected}</CardTitle>
                 <CardDescription>Attended of conducted, all subjects</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-center pb-6 pt-4">
@@ -330,7 +330,7 @@ export default function StudentAttendance() {
                 </p>
                 <p className="mt-1 font-display text-2xl font-semibold">
                   {totalConducted === 0
-                    ? "Ã¢â‚¬â€"
+                    ? "—"
                     : !Number.isFinite(overallNeeded)
                       ? "Unreachable"
                       : overallNeeded === 0
@@ -340,18 +340,18 @@ export default function StudentAttendance() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {totalAttended}/{totalConducted} counted
                   {summary.overallOfficialPct != null
-                    ? ` Ã‚Â· ${formatPct(summary.overallOfficialPct)}`
+                    ? ` · ${formatPct(summary.overallOfficialPct)}`
                     : ""}
                 </p>
               </div>
               <div className="rounded-md border bg-muted/30 p-4 text-sm">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Worst subject
-                  {worst ? ` Ã¢â‚¬â€ ${worst.course_code}` : ""}
+                  {worst ? ` — ${worst.course_code}` : ""}
                 </p>
                 <p className="mt-1 font-display text-2xl font-semibold">
                   {!worst || worst.conducted === 0
-                    ? "Ã¢â‚¬â€"
+                    ? "—"
                     : !Number.isFinite(worstNeeded)
                       ? "Unreachable"
                       : worstNeeded === 0
@@ -360,7 +360,7 @@ export default function StudentAttendance() {
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {worst
-                    ? `${attendedCount(worst)}/${worst.conducted} Ã‚Â· ${formatPct(worst.official_pct)}`
+                    ? `${attendedCount(worst)}/${worst.conducted} · ${formatPct(worst.official_pct)}`
                     : "No data yet"}
                 </p>
               </div>
@@ -375,7 +375,7 @@ export default function StudentAttendance() {
                     className="size-4 text-muted-foreground"
                     aria-hidden="true"
                   />
-                  Subjects Ã¢â‚¬â€ {selected}
+                  Subjects — {selected}
                 </CardTitle>
                 <CardDescription>
                   Official % gates the 75% requirement; weighted % counts
@@ -384,8 +384,8 @@ export default function StudentAttendance() {
               </div>
               <ExportMenu
                 filename={`attendance-${profile.rollNo ?? "me"}-${selected}`}
-                title={`Attendance Ã¢â‚¬â€ ${selected}`}
-                subtitle={`${profile.fullName}${profile.rollNo ? ` Ã‚Â· ${profile.rollNo}` : ""}`}
+                title={`Attendance — ${selected}`}
+                subtitle={`${profile.fullName}${profile.rollNo ? ` · ${profile.rollNo}` : ""}`}
                 columns={exportColumns}
                 rows={exportRows}
               />
@@ -420,7 +420,7 @@ export default function StudentAttendance() {
                         </td>
                         <td className="py-3 pr-4 font-mono text-xs tabular-nums">
                           {r.conducted === 0
-                            ? "Ã¢â‚¬â€"
+                            ? "—"
                             : `${attendedCount(r)}/${r.conducted}`}
                         </td>
                         <td className="py-3 pr-4">

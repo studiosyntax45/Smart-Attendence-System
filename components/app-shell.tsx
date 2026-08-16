@@ -102,7 +102,7 @@ export function AppShell({
         <div className="flex h-16 shrink-0 items-center justify-between px-5 border-b border-border">
           <Link
             to={`/${role}/dashboard`}
-            aria-label="PES Smart Attendance Ã¢â‚¬â€ home"
+            aria-label="PES Smart Attendance — home"
             className="flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <PesLogo className="h-8" />

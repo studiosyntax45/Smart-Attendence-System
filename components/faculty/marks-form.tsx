@@ -54,7 +54,7 @@ export function MarksForm({
           className="flex h-11 w-full cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <option value="" disabled>
-            Choose a studentÃ¢â‚¬Â¦
+            Choose a student…
           </option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>
@@ -128,7 +128,7 @@ export function MarksForm({
         ) : (
           <Save className="size-4" aria-hidden="true" />
         )}
-        {pending ? "SavingÃ¢â‚¬Â¦" : "Save mark"}
+        {pending ? "Saving…" : "Save mark"}
       </Button>
     </form>
   );

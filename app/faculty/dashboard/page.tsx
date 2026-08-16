@@ -172,7 +172,7 @@ export default function FacultyDashboard() {
         </h1>
         <p className="text-sm text-muted-foreground">
           {openSession
-            ? "A session is live Ã¢â‚¬â€ the roster below updates automatically."
+            ? "A session is live — the roster below updates automatically."
             : "No live session. Open one from today's timetable or ad-hoc below."}
         </p>
       </div>
@@ -187,7 +187,7 @@ export default function FacultyDashboard() {
               ? `Since ${new Date(openSession.opened_at).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
-                })}${fence ? ` Ã‚Â· ${fence.room_name}` : ""}`
+                })}${fence ? ` · ${fence.room_name}` : ""}`
               : "Open one below"
           }
           icon={<Radio />}
@@ -231,10 +231,10 @@ export default function FacultyDashboard() {
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-status-present opacity-70" />
                   <span className="relative inline-flex size-2.5 rounded-full bg-status-present" />
                 </span>
-                {openSession.course} Ã¢â‚¬â€ live roster
+                {openSession.course} — live roster
               </CardTitle>
               <CardDescription>
-                {fence ? `Room Ã¢â‚¬Å“${fence.room_name}Ã¢â‚¬Â Ã‚Â· ` : ""}
+                {fence ? `Room “${fence.room_name}” · ` : ""}
                 Updates live as students mark
               </CardDescription>
             </div>
@@ -243,7 +243,7 @@ export default function FacultyDashboard() {
           <CardContent>
             {roster.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No students have marked yet Ã¢â‚¬â€ the list fills in as entries
+                No students have marked yet — the list fills in as entries
                 arrive.
               </p>
             ) : (
@@ -265,10 +265,10 @@ export default function FacultyDashboard() {
                         className="border-b transition-colors last:border-0 hover:bg-muted/50"
                       >
                         <td className="py-2.5 pr-4 font-medium">
-                          {r.profiles?.full_name ?? "Ã¢â‚¬â€"}
+                          {r.profiles?.full_name ?? "—"}
                         </td>
                         <td className="py-2.5 pr-4 font-mono text-xs">
-                          {r.profiles?.roll_no ?? "Ã¢â‚¬â€"}
+                          {r.profiles?.roll_no ?? "—"}
                         </td>
                         <td className="py-2.5 pr-4 font-mono text-xs">
                           {new Date(r.entry_time).toLocaleTimeString([], {
@@ -279,7 +279,7 @@ export default function FacultyDashboard() {
                         <td className="py-2.5 pr-4 font-mono text-xs">
                           {r.face_confidence !== null
                             ? `${Math.round(Number(r.face_confidence) * 100)}%`
-                            : "Ã¢â‚¬â€"}
+                            : "—"}
                         </td>
                         <td className="py-2.5">
                           <StatusPill

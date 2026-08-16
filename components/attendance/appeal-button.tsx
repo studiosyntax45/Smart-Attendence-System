@@ -41,7 +41,7 @@ export function AppealControl({
   if (leaveStatus === "approved") {
     return (
       <Badge variant="outline" className="text-muted-foreground">
-        Approved Ã¢â‚¬â€ excused
+        Approved — excused
       </Badge>
     );
   }
@@ -99,7 +99,7 @@ export function AppealControl({
                   Appeal attendance
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Explain why this session should be excused (5Ã¢â‚¬â€œ500 characters).
+                  Explain why this session should be excused (5–500 characters).
                 </p>
               </div>
               <Button
@@ -124,7 +124,7 @@ export function AppealControl({
                   rows={4}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="e.g. Medical appointment with certificateÃ¢â‚¬Â¦"
+                  placeholder="e.g. Medical appointment with certificate…"
                   className="flex w-full rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 <p className="text-xs text-muted-foreground">
@@ -172,7 +172,7 @@ export function AppealControl({
                       aria-hidden="true"
                     />
                   ) : null}
-                  {pending ? "SubmittingÃ¢â‚¬Â¦" : "Submit appeal"}
+                  {pending ? "Submitting…" : "Submit appeal"}
                 </Button>
               </div>
             </form>

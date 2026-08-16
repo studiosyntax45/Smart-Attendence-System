@@ -88,7 +88,7 @@ export function ParentLoginForm() {
             name="password"
             type="password"
             autoComplete="current-password"
-            placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢"
+            placeholder="••••••••"
             required
           />
         </div>
@@ -112,7 +112,7 @@ export function ParentLoginForm() {
           {pending ? (
             <>
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              Signing inÃ¢â‚¬Â¦
+              Signing in…
             </>
           ) : (
             <>

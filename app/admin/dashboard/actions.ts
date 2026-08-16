@@ -25,7 +25,7 @@ export async function setUserRole(userId: string, role: Role): Promise<AdminActi
 export async function resetFaceEnrollment(userId: string): Promise<AdminActionState> {
   try {
     await api.post(`/profiles/${userId}/reset-face`);
-    return { message: "Face enrolment reset â€” the student can now re-enrol." };
+    return { message: "Face enrolment reset — the student can now re-enrol." };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to reset face." };
   }

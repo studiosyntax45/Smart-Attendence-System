@@ -287,7 +287,7 @@ export function ScheduleManager({
                       )}
                     </td>
                     <td className="py-3 pr-3">
-                      {fac?.full_name ?? "Ã¢â‚¬â€"}
+                      {fac?.full_name ?? "—"}
                     </td>
                     <td className="py-3 pr-3 font-medium">
                       {DAY_NAMES[e.day_of_week] ?? e.day_of_week}
@@ -296,7 +296,7 @@ export function ScheduleManager({
                       {formatTimeRange(e.start_time, e.end_time)}
                     </td>
                     <td className="py-3 pr-3">
-                      {room?.room_name ?? "Ã¢â‚¬â€"}
+                      {room?.room_name ?? "—"}
                     </td>
                     <td className="py-3 pr-3">
                       <div className="flex gap-1">
@@ -353,7 +353,7 @@ export function ScheduleManager({
         <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
           <p className="text-sm font-semibold flex items-center gap-2">
             <Sparkles className="size-4 text-primary" />
-            {editing ? `Edit Ã¢â‚¬Å“${editing.course}Ã¢â‚¬Â` : "Add a class or break slot"}
+            {editing ? `Edit “${editing.course}”` : "Add a class or break slot"}
           </p>
           {!editing && (
             <Button
@@ -401,14 +401,14 @@ export function ScheduleManager({
                 -- Choose Course or Break --
               </option>
               <optgroup label="Presets & Custom">
-                <option value="__BREAK__">Ã¢Ëœâ€¢ Break / Recess / Lunch</option>
-                <option value="__OTHER__">Ã¢Å“ÂÃ¯Â¸Â Other / Custom Course...</option>
+                <option value="__BREAK__">☕ Break / Recess / Lunch</option>
+                <option value="__OTHER__">✏️ Other / Custom Course...</option>
               </optgroup>
               {courses.length > 0 && (
                 <optgroup label="Available Institution Courses">
                   {courses.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.code} Ã¢â‚¬â€ {c.name}
+                      {c.code} — {c.name}
                     </option>
                   ))}
                 </optgroup>
@@ -451,7 +451,7 @@ export function ScheduleManager({
               className={selectClass}
             >
               <option value="" disabled>
-                Choose facultyÃ¢â‚¬Â¦
+                Choose faculty…
               </option>
               {faculty.map((f) => (
                 <option key={f.id} value={f.id}>
@@ -470,7 +470,7 @@ export function ScheduleManager({
               className={selectClass}
             >
               <option value="" disabled>
-                Choose roomÃ¢â‚¬Â¦
+                Choose room…
               </option>
               {geofences.map((g) => (
                 <option key={g.id} value={g.id}>
@@ -549,7 +549,7 @@ export function ScheduleManager({
               <Plus className="size-4" aria-hidden="true" />
             )}
             {pending
-              ? "SavingÃ¢â‚¬Â¦"
+              ? "Saving…"
               : editing
                 ? "Save changes"
                 : selectedCourseOption === "__BREAK__"

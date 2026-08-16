@@ -84,7 +84,7 @@ export function GpsSettingsForm({ settings }: { settings: GpsSettings }) {
           <span className="font-medium">High-accuracy location</span>
           <span className="block text-xs text-muted-foreground">
             Ask devices for GPS-grade positioning. More precise, slightly
-            slower and more battery Ã¢â‚¬â€ recommended on.
+            slower and more battery — recommended on.
           </span>
         </span>
       </label>
@@ -114,7 +114,7 @@ export function GpsSettingsForm({ settings }: { settings: GpsSettings }) {
         ) : (
           <Save className="size-4" aria-hidden="true" />
         )}
-        {pending ? "SavingÃ¢â‚¬Â¦" : "Save policy"}
+        {pending ? "Saving…" : "Save policy"}
       </Button>
     </form>
   );

@@ -46,7 +46,7 @@ interface StudentDetails {
 }
 
 
-const show = (v: string | null | undefined) => (v && v.trim() ? v : "Ã¢â‚¬â€");
+const show = (v: string | null | undefined) => (v && v.trim() ? v : "—");
 
 function initials(name: string): string {
   return name
@@ -87,7 +87,7 @@ function PctRow({ label, pct }: { label: string; pct: number | null }) {
           {label}
         </span>
         <span className="font-mono text-xs font-medium tabular-nums">
-          {pct !== null ? `${Number(pct)}%` : "Ã¢â‚¬â€"}
+          {pct !== null ? `${Number(pct)}%` : "—"}
         </span>
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted" aria-hidden="true">
@@ -175,7 +175,7 @@ export default function StudentProfile() {
               <span className="font-mono">{show(profile.rollNo)}</span>
               {d?.pesu_id && (
                 <>
-                  {" Ã‚Â· "}
+                  {" · "}
                   <span className="font-mono">{d.pesu_id}</span>
                 </>
               )}
@@ -202,7 +202,7 @@ export default function StudentProfile() {
       {!d && (
         <Card className="border-dashed">
           <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            Your detailed profile hasn&apos;t been filled in yet Ã¢â‚¬â€ the sections
+            Your detailed profile hasn&apos;t been filled in yet — the sections
             below populate once your details are added (via seed or admin).
           </CardContent>
         </Card>
@@ -219,7 +219,7 @@ export default function StudentProfile() {
           </CardHeader>
           <CardContent>
             <dl>
-              <Row label="Date of birth" value={dob ?? "Ã¢â‚¬â€"} />
+              <Row label="Date of birth" value={dob ?? "—"} />
               <Row label="Blood group" value={show(d?.blood_group)} />
               <Row label="Branch" value={show(d?.branch)} />
               <Row label="Section" value={show(d?.section)} />
@@ -290,7 +290,7 @@ export default function StudentProfile() {
             Identity documents
           </CardTitle>
           <CardDescription>
-            Only the last 4 digits of Aadhaar are ever stored Ã¢â‚¬â€ the full
+            Only the last 4 digits of Aadhaar are ever stored — the full
             number never enters this system.
           </CardDescription>
         </CardHeader>
@@ -298,7 +298,7 @@ export default function StudentProfile() {
           <dl>
             <Row
               label="Aadhaar"
-              value={d?.aadhaar_last4 ? `Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢-Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢-${d.aadhaar_last4}` : "Ã¢â‚¬â€"}
+              value={d?.aadhaar_last4 ? `••••-••••-${d.aadhaar_last4}` : "—"}
               mono
             />
           </dl>

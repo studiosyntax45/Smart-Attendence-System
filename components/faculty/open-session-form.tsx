@@ -62,7 +62,7 @@ export function OpenSessionForm({
           className={selectClass}
         >
           <option value="" disabled>
-            Choose a courseÃ¢â‚¬Â¦
+            Choose a course…
           </option>
           {courses.map((c) => (
             <option key={c.code} value={c.code}>
@@ -92,7 +92,7 @@ export function OpenSessionForm({
           className={selectClass}
         >
           <option value="" disabled>
-            Choose a roomÃ¢â‚¬Â¦
+            Choose a room…
           </option>
           {geofences.map((g) => (
             <option key={g.id} value={g.id}>
@@ -127,7 +127,7 @@ export function OpenSessionForm({
         ) : (
           <Play className="size-4" aria-hidden="true" />
         )}
-        {pending ? "OpeningÃ¢â‚¬Â¦" : "Open session"}
+        {pending ? "Opening…" : "Open session"}
       </Button>
     </form>
   );
