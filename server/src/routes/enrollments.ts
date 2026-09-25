@@ -14,11 +14,13 @@ enrollmentRouter.get(
   asyncHandler(async (req, res) => {
     const me = req.user!;
     const isStaff = me.role === "faculty" || me.role === "admin";
-    const studentId = typeof req.query.studentId === "string" ? req.query.studentId : me.id;
-    if (!isStaff && studentId !== me.id) throw forbidden();
+    const queryStudentId = typeof req.query.studentId === "string" ? req.query.studentId : undefined;
+    if (!isStaff && queryStudentId && queryStudentId !== me.id) throw forbidden();
+    // Staff see everyone unless a studentId is given; students only themselves.
+    const studentId = isStaff ? queryStudentId : me.id;
 
     const rows = await prisma.enrollment.findMany({
-      where: { studentId },
+      where: studentId ? { studentId } : {},
       include: { course: true },
       orderBy: { courseCode: "asc" },
     });

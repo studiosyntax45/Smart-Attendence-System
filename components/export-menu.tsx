@@ -1,6 +1,7 @@
 ﻿
 import { FileSpreadsheet, Printer } from "lucide-react";
 import {
+  downloadCsv,
   toCsv,
   toPrintableHtml,
   slugifyFilename,
@@ -24,20 +25,8 @@ export function ExportMenu({
   rows: ExportRow[];
 }) {
   const disabled = rows.length === 0;
-  const base = slugifyFilename(filename);
-
-  function downloadCsv() {
-    const csv = toCsv(columns, rows);
-    const blob = new Blob(["﻿", csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${base}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
+  // exportFilename() output is already safe; keep its case and underscores.
+  const base = /^[A-Za-z0-9_.-]+$/.test(filename) ? filename : slugifyFilename(filename);
 
   function printPdf() {
     const html = toPrintableHtml({ title, subtitle, columns, rows });
@@ -66,7 +55,7 @@ export function ExportMenu({
         type="button"
         variant="outline"
         size="sm"
-        onClick={downloadCsv}
+        onClick={() => downloadCsv(`${base}.csv`, toCsv(columns, rows))}
         disabled={disabled}
         title="Download as CSV"
       >

@@ -1,25 +1,19 @@
 ﻿
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import {
-  BookOpenCheck,
-  CalendarCheck2,
-  CalendarDays,
-  ListChecks,
-  ScanFace,
-  Timer,
-} from "lucide-react";
+import { BookOpenCheck, ScanFace } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { SectionError } from "@/components/section-error";
 import { PageTitle } from "@/src/page-title";
-import { KpiCard } from "@/components/kpi-card";
 import { StatusPill } from "@/components/status-pill";
 import { GsapReveal } from "@/components/gsap-reveal";
 import { AttendanceRing } from "@/components/charts/attendance-ring";
 import { DurationBars, type DurationDatum } from "@/components/charts/duration-bars";
 import { PerformanceInsight } from "@/components/performance-insight";
+import { StudentKpis, useStudentOverview } from "@/components/student-kpis";
+import { NotificationList } from "@/components/notification-list";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -42,6 +36,7 @@ interface AttendanceRow {
 
 export default function StudentDashboard() {
   const { profile } = useAuth();
+  const overview = useStudentOverview(profile?.id);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["student-dashboard", profile?.id],
@@ -85,6 +80,23 @@ export default function StudentDashboard() {
     },
   });
 
+  const { data: performanceData, isLoading: isPerformanceLoading } = useQuery({
+    queryKey: ["student-performance-insight", profile?.id],
+    enabled: !!profile,
+    queryFn: () =>
+      api.get<{
+        metrics: { attendancePct: number | null; marksPct: number | null };
+        feedback: {
+          source: "qwen" | "fallback";
+          priority: string;
+          summary: string;
+          strengths: string[];
+          concerns: string[];
+          actions: string[];
+        };
+      }>("/performance/me"),
+  });
+
   if (!profile || isLoading) return <PageSkeleton />;
   if (isError || !data)
     return (
@@ -95,20 +107,9 @@ export default function StudentDashboard() {
     );
 
   const records = data.rows;
-  const counted = records.filter((r) => !r.excused);
-  const effectiveHeld =
-    records.length > 0 ? counted.length : data.sessionsHeld;
-  const attended = counted.filter((r) => r.status !== "absent").length;
-  const pct =
-    effectiveHeld > 0 ? Math.round((attended / effectiveHeld) * 100) : null;
-
-  const durations = records
-    .map((r) => r.duration_min)
-    .filter((d): d is number => d !== null);
-  const avgDuration =
-    durations.length > 0
-      ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
-      : null;
+  const pct = overview.data?.overallPct == null ? null : Math.round(overview.data.overallPct);
+  const attended = overview.data?.attended ?? 0;
+  const effectiveHeld = overview.data?.conducted ?? 0;
 
   const todayStart = startOfToday();
   const todayRecord = records.find((r) => new Date(r.entry_time) >= todayStart);
@@ -149,7 +150,7 @@ export default function StudentDashboard() {
             {profile.rollNo && (
               <span className="font-mono">{profile.rollNo} · </span>
             )}
-            Last 30 days at a glance
+            Attendance, results and leave at a glance
           </p>
         </div>
         <Link to="/student/mark-attendance">
@@ -160,63 +161,34 @@ export default function StudentDashboard() {
         </Link>
       </div>
 
-      <section className="grid gap-4 lg:grid-cols-5">
-        <Card className="transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-pop lg:col-span-2">
+      <StudentKpis studentId={profile.id} />
+
+      <section className="grid items-start gap-4 lg:grid-cols-5">
+        <Card className="lg:col-span-2">
           <CardHeader className="pb-0">
             <CardTitle>Attendance rate</CardTitle>
-            <CardDescription>Rolling 30-day window</CardDescription>
+            <CardDescription>
+              All closed sessions in your courses
+              {todayRecord
+                ? ` · marked today at ${new Date(todayRecord.entry_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                : " · not marked today"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center pb-6 pt-4">
             <AttendanceRing pct={pct} attended={attended} held={effectiveHeld} />
           </CardContent>
         </Card>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:col-span-3">
-          <KpiCard
-            label="Today"
-            value={todayRecord ? "Marked" : "Not marked"}
-            sub={
-              todayRecord
-                ? `Entry ${new Date(todayRecord.entry_time).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}`
-                : "No entry yet"
-            }
-            icon={<CalendarCheck2 />}
-            tone={todayRecord ? "present" : "late"}
-          />
-          <KpiCard
-            label="Sessions held"
-            value={String(effectiveHeld)}
-            countTo={effectiveHeld}
-            sub="In the last 30 days (excused excluded)"
-            icon={<CalendarDays />}
-          />
-          <KpiCard
-            label="Avg duration"
-            value={avgDuration !== null ? `${avgDuration} min` : "—"}
-            countTo={avgDuration ?? undefined}
-            suffix=" min"
-            sub="Per attended class"
-            icon={<Timer />}
-          />
-          <KpiCard
-            label="Classes attended"
-            value={String(attended)}
-            countTo={attended}
-            sub={
-              effectiveHeld > 0
-                ? `Of ${effectiveHeld} held`
-                : "No sessions yet"
-            }
-            icon={<ListChecks />}
-            tone={pct === null ? "neutral" : pct >= 75 ? "present" : "absent"}
-          />
+        <div className="lg:col-span-3">
+          <NotificationList />
         </div>
       </section>
 
-      <PerformanceInsight attendancePct={pct} marksPct={avgMarksPct} />
+      <PerformanceInsight
+        attendancePct={performanceData?.metrics.attendancePct ?? pct}
+        marksPct={performanceData?.metrics.marksPct ?? avgMarksPct}
+        aiFeedback={performanceData?.feedback}
+        isAiLoading={isPerformanceLoading}
+      />
 
       {chartData.length >= 2 && (
         <Card>

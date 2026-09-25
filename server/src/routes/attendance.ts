@@ -4,6 +4,8 @@ import { z } from "zod";
 import { prisma } from "../config/db";
 import { asyncHandler, badRequest, conflict, forbidden, notFound } from "../middleware/error-handler";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { dayEnd, dayStart } from "../services/dates";
+import { courseScope } from "../services/scope";
 import { haversineWithin, effectiveGraceM } from "../services/geofence";
 import { euclideanDistance, isFaceMatch, isValidDescriptor } from "../services/face";
 import { getIO } from "../sockets/index";
@@ -23,15 +25,58 @@ attendanceRouter.get(
       throw forbidden();
     }
 
+    const str = (k: string) =>
+      typeof req.query[k] === "string" && req.query[k] !== "" ? (req.query[k] as string) : undefined;
+    const courseCode = str("courseCode");
+    const status = str("status");
+    const from = str("from");
+    const to = str("to");
+    const facultyId = str("facultyId");
+    const section = str("section");
+    const q = str("q");
+
+    // Filter on class date: rows written by leave/correction approval carry the approval time.
+    const scope = isStaff ? await courseScope(me) : null;
+    const sessionWhere = {
+      ...(courseCode ? { course: courseCode } : {}),
+      ...(scope ? { course: { in: courseCode ? scope.filter((c) => c === courseCode) : scope } } : {}),
+      ...(facultyId ? { facultyId } : {}),
+      ...(from || to
+        ? {
+            openedAt: {
+              ...(from ? { gte: dayStart(from) } : {}),
+              ...(to ? { lte: dayEnd(to) } : {}),
+            },
+          }
+        : {}),
+    };
     const rows = await prisma.attendance.findMany({
       where: {
         ...(sessionId ? { sessionId } : {}),
         ...(studentId ? { studentId } : {}),
+        ...(status === "excused" ? { excused: true } : status ? { status: status as never, excused: false } : {}),
+        ...(Object.keys(sessionWhere).length ? { session: sessionWhere } : {}),
+        ...(section || q
+          ? {
+              student: {
+                ...(section ? { studentDetails: { section } } : {}),
+                ...(q ? { OR: [{ fullName: { contains: q } }, { rollNo: { contains: q } }] } : {}),
+              },
+            }
+          : {}),
       },
-      orderBy: { entryTime: "desc" },
-      include: { student: { select: { id: true, fullName: true, rollNo: true } } },
+      orderBy: [{ session: { openedAt: "desc" } }, { entryTime: "desc" }],
+      take: Math.min(Number(str("limit") ?? 2000) || 2000, 5000),
+      include: {
+        student: {
+          select: { id: true, fullName: true, rollNo: true, studentDetails: { select: { section: true, branch: true } } },
+        },
+        session: { select: { course: true, openedAt: true, faculty: { select: { id: true, fullName: true } } } },
+      },
     });
-    res.json({ attendance: rows });
+    const durationMin = (r: (typeof rows)[number]) =>
+      r.exitTime && r.status !== "absent" ? Math.max(0, Math.round((r.exitTime.getTime() - r.entryTime.getTime()) / 60_000)) : null;
+    res.json({ attendance: rows.map((r) => ({ ...r, durationMin: durationMin(r) })) });
   })
 );
 const markEntrySchema = z.object({
@@ -52,7 +97,7 @@ attendanceRouter.post(
     const input = markEntrySchema.parse(req.body);
 
     if (!isValidDescriptor(input.descriptor)) {
-      throw badRequest("Face capture was invalid â€” please retry.");
+      throw badRequest("Face capture was invalid - please retry.");
     }
     const [session, gps, meProfile] = await Promise.all([
       prisma.session.findUnique({
@@ -68,18 +113,18 @@ attendanceRouter.post(
 
     if (!isValidDescriptor(meProfile?.faceEmbedding ?? null)) {
       throw badRequest(
-        "No enrolled face found â€” enrol your face before marking attendance."
+        "No enrolled face found - enrol your face before marking attendance."
       );
     }
     const faceDistance = euclideanDistance(input.descriptor, meProfile!.faceEmbedding as number[]);
     if (!isFaceMatch(faceDistance)) {
-      throw badRequest("Face does not match your enrolment â€” please try again.");
+      throw badRequest("Face does not match your enrolment - please try again.");
     }
     const graceM = effectiveGraceM(input.accuracy, gps?.accuracyGraceM ?? 25);
     const geo = haversineWithin(
       { lat: input.lat, lng: input.lng },
       { lat: Number(session.geofence.lat), lng: Number(session.geofence.lng) },
-      session.geofence.radiusM,
+      session.radiusM ?? session.geofence.radiusM,
       graceM
     );
     if (!geo.within) {

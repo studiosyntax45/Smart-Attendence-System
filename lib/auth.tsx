@@ -10,7 +10,6 @@ import { api, googleOAuthUrl, login, logout, me, refreshBootstrap, type SessionU
 import {
   ROLE_HOME,
   apiConfigured,
-  COLLEGE_EMAIL_DOMAIN,
   isCollegeEmail,
   type Role,
 } from "./utils";
@@ -154,7 +153,7 @@ export async function signInAsParent(
   if (!email || !password)
     return { error: "Enter your child's student email and password." };
   try {
-    const res = await login(email.trim(), password);
+    await login(email.trim(), password);
     const m = await me();
     if (m?.role !== "student") {
       await logout();

@@ -1,6 +1,6 @@
 ﻿
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LogOut,
   Menu,
@@ -18,7 +18,11 @@ import {
   Layers,
   Clock,
   MapPin,
-  ShieldAlert,
+  HeartPulse,
+  Upload,
+  FileClock,
+  History,
+  CalendarX2,
 } from "lucide-react";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { PesLogo } from "@/components/pes-logo";
@@ -33,6 +37,7 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/student/attendance", label: "My Attendance", icon: CalendarCheck },
     { href: "/student/results", label: "Results", icon: Award },
+    { href: "/student/leave", label: "Leave & Appeals", icon: CalendarX2 },
     { href: "/student/mark-attendance", label: "Mark Attendance", icon: CheckSquare },
     { href: "/student/enroll-face", label: "Enrol Face", icon: ScanFace },
     { href: "/student/profile", label: "Profile", icon: User },
@@ -42,6 +47,9 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/faculty/attendance", label: "Attendance", icon: CalendarCheck },
     { href: "/faculty/courses", label: "Courses", icon: BookOpen },
     { href: "/faculty/marks", label: "Marks", icon: GraduationCap },
+    { href: "/faculty/attendance-health", label: "Attendance Health", icon: HeartPulse },
+    { href: "/faculty/leave", label: "Leave & Appeals", icon: FileClock },
+    { href: "/faculty/imports", label: "Bulk Import", icon: Upload },
     { href: "/faculty/performance", label: "Performance", icon: BarChart3 },
   ],
   admin: [
@@ -51,8 +59,12 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/faculty/attendance", label: "By course", icon: Layers },
     { href: "/faculty/courses", label: "Courses", icon: BookOpen },
     { href: "/faculty/marks", label: "Marks", icon: GraduationCap },
+    { href: "/faculty/attendance-health", label: "Attendance Health", icon: HeartPulse },
+    { href: "/faculty/leave", label: "Leave & Appeals", icon: FileClock },
+    { href: "/faculty/imports", label: "Bulk Import", icon: Upload },
     { href: "/admin/schedule", label: "Timetable", icon: Clock },
     { href: "/admin/settings", label: "GPS Settings", icon: MapPin },
+    { href: "/admin/audit-logs", label: "Audit Logs", icon: History },
   ],
   parent: [
     { href: "/parent/dashboard", label: "Dashboard", icon: LayoutDashboard },

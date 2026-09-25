@@ -103,3 +103,6 @@ build/
 *.bak
 *.backup
 *~
+.claude/
+docs/
+docs/

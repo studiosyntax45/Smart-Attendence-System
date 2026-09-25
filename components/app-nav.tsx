@@ -24,7 +24,8 @@ export function AppNav({
         const active =
           pathname === item.href ||
           (item.href !== `/${item.href.split("/")[1]}/dashboard` &&
-            pathname.startsWith(`${item.href}`));
+            // Whole segments only, so /faculty/attendance doesn't match /faculty/attendance-health.
+            pathname.startsWith(`${item.href}/`));
 
         return (
           <Link

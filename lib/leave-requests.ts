@@ -17,6 +17,7 @@ export interface LeaveRequest {
   status: LeaveStatus;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  review_comment?: string | null;
   created_at: string;
   student?: { full_name: string; roll_no: string | null } | null;
   session?: { course: string; opened_at: string; faculty_id: string | null } | null;
@@ -63,13 +64,43 @@ export async function fileLeaveRequest(
 }
 
 
-export async function listPendingLeaveRequests(facultyId?: string): Promise<LeaveRequest[]> {
+interface ApiLeaveRequest {
+  id: string;
+  studentId: string;
+  sessionId: string;
+  reason: string;
+  status: LeaveStatus;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  reviewComment?: string | null;
+  createdAt: string;
+  student?: { fullName: string; rollNo: string | null } | null;
+  session?: { course: string; openedAt: string; facultyId: string | null } | null;
+}
+
+export function fromApiLeaveRequest(r: ApiLeaveRequest): LeaveRequest {
+  return {
+    id: r.id,
+    student_id: r.studentId,
+    session_id: r.sessionId,
+    reason: r.reason,
+    status: r.status,
+    reviewed_by: r.reviewedBy,
+    reviewed_at: r.reviewedAt,
+    review_comment: r.reviewComment ?? null,
+    created_at: r.createdAt,
+    student: r.student ? { full_name: r.student.fullName, roll_no: r.student.rollNo } : null,
+    session: r.session
+      ? { course: r.session.course, opened_at: r.session.openedAt, faculty_id: r.session.facultyId }
+      : null,
+  };
+}
+
+/** Pending appeals; the server limits faculty to sessions they opened. */
+export async function listPendingLeaveRequests(): Promise<LeaveRequest[]> {
   try {
-    const path = facultyId
-      ? `/leave-requests?mine=true&facultyId=${encodeURIComponent(facultyId)}`
-      : "/leave-requests?mine=true";
-    const { leaveRequests } = await api.get<{ leaveRequests: LeaveRequest[] }>(path);
-    return leaveRequests ?? [];
+    const { leaveRequests } = await api.get<{ leaveRequests: ApiLeaveRequest[] }>("/leave-requests");
+    return (leaveRequests ?? []).filter((r) => r.status === "pending").map(fromApiLeaveRequest);
   } catch (err) {
     if (err instanceof Error) throw new Error(err.message);
     throw new Error("Failed to list pending leave requests.");
@@ -79,14 +110,18 @@ export async function listPendingLeaveRequests(facultyId?: string): Promise<Leav
 
 export async function reviewLeaveRequest(
   id: string,
-  decision: "approved" | "rejected"
+  decision: "approved" | "rejected",
+  comment?: string
 ): Promise<LeaveActionState> {
   if (!id) return { error: "Missing leave request id." };
   if (decision !== "approved" && decision !== "rejected") {
     return { error: "Decision must be approved or rejected." };
   }
   try {
-    const { message } = await api.post<{ message: string }>(`/leave-requests/${id}/review`, { decision });
+    const { message } = await api.post<{ message: string }>(`/leave-requests/${id}/review`, {
+      decision,
+      ...(comment?.trim() ? { comment: comment.trim() } : {}),
+    });
     return { message };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to review appeal." };
@@ -96,8 +131,8 @@ export async function reviewLeaveRequest(
 
 export async function listMyLeaveRequests(): Promise<LeaveRequest[]> {
   try {
-    const { leaveRequests } = await api.get<{ leaveRequests: LeaveRequest[] }>("/leave-requests?mine=true");
-    return leaveRequests ?? [];
+    const { leaveRequests } = await api.get<{ leaveRequests: ApiLeaveRequest[] }>("/leave-requests?mine=true");
+    return (leaveRequests ?? []).map(fromApiLeaveRequest);
   } catch (err) {
     if (err instanceof Error) throw new Error(err.message);
     throw new Error("Failed to list your leave requests.");

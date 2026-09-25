@@ -1,7 +1,7 @@
 ﻿
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
-import { BookOpenCheck, AlertTriangle, Layers, Percent, Users } from "lucide-react";
+import { BookOpenCheck, AlertTriangle, Percent, Users } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import {
@@ -9,8 +9,6 @@ import {
   isEligible,
   formatPct,
   attendedCount,
-  classesNeededForEligibility,
-  ELIGIBILITY_THRESHOLD,
   type AttendanceSummaryRow,
 } from "@/lib/attendance";
 import { KpiCard } from "@/components/kpi-card";
@@ -18,6 +16,7 @@ import { EligibilityBadge } from "@/components/eligibility-badge";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { SectionError } from "@/components/section-error";
 import { PageTitle } from "@/src/page-title";
+import { AttendanceHistory } from "@/components/attendance-history";
 import { GsapReveal } from "@/components/gsap-reveal";
 import { ExportMenu } from "@/components/export-menu";
 import type { ExportColumn, ExportRow } from "@/lib/export";
@@ -45,7 +44,7 @@ export default function FacultyAttendance() {
     queryKey: ["faculty-attendance", profile?.id, course ?? null],
     enabled: !!profile,
     queryFn: async () => {
-      const coursesRes = await api.get<{ courses: CourseOption[] }>("/courses");
+      const coursesRes = await api.get<{ courses: CourseOption[] }>("/courses?mine=true");
       const courses = coursesRes.courses ?? [];
 
       const selected =
@@ -290,6 +289,7 @@ export default function FacultyAttendance() {
           </Card>
         </>
       )}
+      <AttendanceHistory />
     </GsapReveal>
   );
 }

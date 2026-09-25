@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../config/db";
 import { asyncHandler, badRequest, conflict, notFound } from "../middleware/error-handler";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { writeAudit } from "../services/audit";
 import { getIO } from "../sockets/index";
 
 export const sessionRouter = Router();
@@ -39,6 +40,7 @@ sessionRouter.get(
 const openSessionSchema = z.object({
   course: z.string().min(1).max(120),
   geofenceId: z.string().uuid(),
+  radiusM: z.number().int().min(5, "Radius must be at least 5 m.").max(2000, "Radius can be at most 2000 m.").optional(),
 });
 sessionRouter.post(
   "/",
@@ -61,11 +63,17 @@ sessionRouter.post(
         course: data.course,
         facultyId: me.id,
         geofenceId: data.geofenceId,
+        radiusM: data.radiusM ?? null,
       },
       include: { geofence: true, faculty: { select: { id: true, fullName: true } } },
     });
 
     getIO()?.to(`faculty:${me.id}`).emit("session:opened", { session });
+    await writeAudit({ id: me.id, role: me.role }, "open_session", "session", {
+      entityId: session.id,
+      summary: `Opened ${data.course} in ${session.geofence.roomName}${data.radiusM ? ` (radius ${data.radiusM} m)` : ""}.`,
+      after: { course: data.course, radiusM: data.radiusM ?? null },
+    });
     res.status(201).json({ session });
   })
 );
@@ -93,6 +101,12 @@ sessionRouter.post(
     ]);
 
     getIO()?.to(`session:${req.params.id}`).emit("session:closed", { sessionId: req.params.id, closedAt });
+    await writeAudit({ id: me.id, role: me.role }, "close_session", "session", {
+      entityId: req.params.id,
+      summary: `Closed ${existing.course} session.`,
+      before: { closedAt: null },
+      after: { closedAt: closedAt.toISOString() },
+    });
     res.json({ message: "Session closed.", closedAt });
   })
 );

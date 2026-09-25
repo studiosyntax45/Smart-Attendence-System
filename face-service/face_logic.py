@@ -42,7 +42,7 @@ def l2_normalize(v: Sequence[float]) -> list[float]:
 
 
 def cosine_distance(a: Sequence[float], b: Sequence[float]) -> float:
-    """1 âˆ’ cosine similarity. 0 = identical direction, 2 = opposite."""
+    """1 minus cosine similarity. 0 = identical direction, 2 = opposite."""
     av, bv = _as_floats(a), _as_floats(b)
     if len(av) != len(bv):
         raise ValueError(f"embedding length mismatch: {len(av)} vs {len(bv)}")

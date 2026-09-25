@@ -61,20 +61,3 @@ export function requireRole(...allowed: Role[]) {
     next();
   };
 }
-
-
-export async function tryAuth(
-  req: Request,
-  _res: Response,
-  next: NextFunction
-): Promise<void> {
-  const token = extractToken(req);
-  if (!token) return next();
-  try {
-    const payload = verifyAccessToken(token);
-    const user = await getUserWithProfile(payload.sub);
-    if (user) req.user = user;
-  } catch {
-  }
-  next();
-}

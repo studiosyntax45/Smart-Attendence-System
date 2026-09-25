@@ -19,8 +19,11 @@ export async function fetchAttendanceSummary(opts: {
   studentId?: string;
   studentIds?: string[];
   courseCode?: string;
+  courseCodes?: string[];
 } = {}): Promise<AttendanceSummaryRow[]> {
   const ids = opts.studentIds ?? (opts.studentId ? [opts.studentId] : undefined);
+  // An empty list would drop the IN filter entirely, so "no courses" must return nothing.
+  if (opts.courseCodes && opts.courseCodes.length === 0) return [];
 
   const rows = await prisma.$queryRaw<
     Array<{
@@ -78,6 +81,7 @@ export async function fetchAttendanceSummary(opts: {
     WHERE e.active = 1
       ${ids ? prismaSafeIn("e.student_id", ids) : prismaEmpty()}
       ${opts.courseCode ? prismaSafeEq("e.course_code", opts.courseCode) : prismaEmpty()}
+      ${opts.courseCodes ? prismaSafeIn("e.course_code", opts.courseCodes) : prismaEmpty()}
     GROUP BY e.student_id, e.course_code, c.name, c.credits, c.semester
     ORDER BY e.course_code
   `;

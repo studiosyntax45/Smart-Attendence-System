@@ -5,12 +5,12 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronDown,
-  Clock,
   Layers,
-  MapPin,
-  PlayCircle,
   Radio,
   Users,
+  FileClock,
+  GraduationCap,
+  Percent,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
@@ -34,7 +34,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn, startOfToday, firstRow, type AttendanceStatus } from "@/lib/utils";
+import { cn, startOfToday, type AttendanceStatus } from "@/lib/utils";
 
 interface RosterRow {
   id: string;
@@ -64,17 +64,39 @@ export default function FacultyDashboard() {
         coursesRes,
         schedule,
         pendingAppeals,
+        healthRes,
+        leaveAppsRes,
       ] = await Promise.all([
-        api.get<{ sessions: Array<{ id: string; course: string; openedAt: string; closedAt: string | null; geofence?: { roomName: string } }> }>("/sessions"),
+        api.get<{ sessions: Array<{ id: string; course: string; openedAt: string; closedAt: string | null; geofence?: { roomName: string }; faculty?: { id: string } | null }> }>("/sessions"),
         api.get<{ attendance: Array<{ id: string; sessionId: string; entryTime: string; exitTime: string | null; status: AttendanceStatus; faceConfidence: number | null; excused?: boolean; student?: { fullName: string; rollNo: string | null } }> }>("/attendance"),
         api.get<{ geofences: Array<{ id: string; roomName: string; radiusM: number }> }>("/geofences"),
         api.get<{ courses: Array<{ code: string; name: string }> }>("/courses"),
         listScheduleForFaculty(profile!.id, todayDayOfWeek),
-        listPendingLeaveRequests(profile!.id).catch(() => []),
+        listPendingLeaveRequests().catch(() => []),
+        api
+          .get<{ courseRows: Array<{ studentId: string; courseCode: string; attended: number; conducted: number }> }>("/attendance-health")
+          .catch(() => ({ courseRows: [] })),
+        api.get<{ leaveApplications: unknown[] }>("/leave-applications?status=pending").catch(() => ({ leaveApplications: [] })),
       ]);
 
       const allSessions = sessionsRes.sessions ?? [];
-      const openSessionRaw = allSessions.find((s) => !s.closedAt) ?? null;
+      // Own session only; closing someone else's is refused.
+      const openSessionRaw =
+        allSessions.find((s) => !s.closedAt && (profile!.role === "admin" || s.faculty?.id === profile!.id)) ?? null;
+
+      const myCourses = new Set([
+        ...allSessions.filter((s) => s.faculty?.id === profile!.id).map((s) => s.course),
+        ...schedule.map((c) => c.course),
+      ]);
+      const myRows = healthRes.courseRows.filter((r) => myCourses.has(r.courseCode));
+      const myConducted = myRows.reduce((n, r) => n + r.conducted, 0);
+      const myAttended = myRows.reduce((n, r) => n + r.attended, 0);
+      const kpis = {
+        myCourses: myCourses.size,
+        myStudents: new Set(myRows.map((r) => r.studentId)).size,
+        avgAttendance: myConducted === 0 ? null : Math.round((100 * myAttended) / myConducted),
+        pendingLeave: pendingAppeals.length + leaveAppsRes.leaveApplications.length,
+      };
       const openSession = openSessionRaw
         ? {
             id: openSessionRaw.id,
@@ -130,6 +152,7 @@ export default function FacultyDashboard() {
         schedule,
         pendingAppeals,
         liveCourses,
+        kpis,
       };
     },
   });
@@ -153,11 +176,13 @@ export default function FacultyDashboard() {
     schedule,
     pendingAppeals,
     liveCourses,
+    kpis,
   } = data;
 
   const today = todayRows;
   const presentToday = today.filter((r: { status: AttendanceStatus }) => r.status === "present").length;
   const lateToday = today.filter((r: { status: AttendanceStatus }) => r.status === "late").length;
+  const markedToday = today.filter((r: { status: AttendanceStatus }) => r.status !== "absent").length;
 
   const fence = openSession?.geofences ?? null;
 
@@ -178,7 +203,7 @@ export default function FacultyDashboard() {
       </div>
 
       
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="Live session"
           value={openSession ? openSession.course : "None"}
@@ -201,20 +226,52 @@ export default function FacultyDashboard() {
           icon={<Users />}
         />
         <KpiCard
-          label="Present today"
-          value={String(presentToday)}
-          countTo={presentToday}
-          sub={`Across ${sessionsToday ?? 0} session${(sessionsToday ?? 0) === 1 ? "" : "s"}`}
+          label="My courses"
+          value={String(kpis.myCourses)}
+          countTo={kpis.myCourses}
+          sub="Sessions or timetable slots"
+          icon={<Layers />}
+        />
+        <KpiCard
+          label="Students"
+          value={String(kpis.myStudents)}
+          countTo={kpis.myStudents}
+          sub="Enrolled in my courses"
+          icon={<GraduationCap />}
+        />
+        <KpiCard
+          label="Today's sessions"
+          value={String(sessionsToday ?? 0)}
+          countTo={sessionsToday ?? 0}
+          sub={`${schedule.length} on the timetable`}
+          icon={<CalendarDays />}
+        />
+        <KpiCard
+          label="Today's attendance"
+          value={String(markedToday)}
+          countTo={markedToday}
+          sub={`${presentToday} present · ${lateToday} late`}
           icon={<CheckCircle2 />}
           tone="present"
         />
         <KpiCard
-          label="Late today"
-          value={String(lateToday)}
-          countTo={lateToday}
-          sub="Entries after 10 min"
-          icon={<Clock />}
-          tone={lateToday > 0 ? "late" : "neutral"}
+          label="Pending leave"
+          value={String(kpis.pendingLeave)}
+          countTo={kpis.pendingLeave}
+          sub="Leave requests + appeals"
+          icon={<FileClock />}
+          tone={kpis.pendingLeave > 0 ? "late" : "neutral"}
+          href="/faculty/leave"
+        />
+        <KpiCard
+          label="Average attendance"
+          value={kpis.avgAttendance === null ? "—" : `${kpis.avgAttendance}%`}
+          countTo={kpis.avgAttendance ?? undefined}
+          suffix="%"
+          sub="My courses, closed sessions"
+          icon={<Percent />}
+          tone={kpis.avgAttendance === null ? "neutral" : kpis.avgAttendance >= 75 ? "present" : "late"}
+          href="/faculty/attendance-health"
         />
       </div>
 

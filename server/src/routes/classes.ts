@@ -2,7 +2,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db";
-import { asyncHandler, badRequest, forbidden, notFound } from "../middleware/error-handler";
+import { asyncHandler, badRequest, notFound } from "../middleware/error-handler";
 import { requireAuth, requireRole } from "../middleware/auth";
 
 export const classRouter = Router();
@@ -42,7 +42,7 @@ classRouter.get(
 
 const createClassSchema = z.object({
   name: z.string().min(2).max(100),
-  branch: z.string().min(1),
+  branch: z.string().trim().min(1, "Branch is required.").max(60),
   semester: z.string().min(1),
   section: z.string().min(1),
   academicYear: z.string().min(1),
@@ -79,7 +79,7 @@ classRouter.delete(
 
 const patchClassSchema = z.object({
   name:         z.string().min(2).max(100).optional(),
-  branch:       z.string().min(1).optional(),
+  branch:       z.string().trim().min(1).max(60).optional(),
   semester:     z.string().min(1).optional(),
   section:      z.string().min(1).optional(),
   academicYear: z.string().min(1).optional(),

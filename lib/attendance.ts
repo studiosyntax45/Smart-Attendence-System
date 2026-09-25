@@ -3,14 +3,9 @@ import { api } from "./api-client";
 
 
 export const ELIGIBILITY_THRESHOLD = 75;
+/** Below this is critical; between it and ELIGIBILITY_THRESHOLD is a warning. Matches the server. */
+export const WARNING_THRESHOLD = 65;
 
-
-export const STATUS_WEIGHTS = {
-  present: 1,
-  late: 0.5,
-  partial: 0.5,
-  absent: 0,
-} as const;
 
 
 export interface AttendanceSummaryRow {
@@ -38,63 +33,6 @@ export function attendedCount(r: AttendanceSummaryRow): number {
 export function isEligible(officialPct: number | null): boolean {
   if (officialPct === null || Number.isNaN(officialPct)) return false;
   return officialPct >= ELIGIBILITY_THRESHOLD;
-}
-
-export type SessionOutcomeStatus =
-  | "present"
-  | "late"
-  | "partial"
-  | "absent"
-  | "missing";
-
-
-export interface SessionOutcome {
-  status: SessionOutcomeStatus;
-  
-  excused?: boolean;
-}
-
-export interface EligibilityCounts {
-  
-  conducted: number;
-  
-  attended: number;
-  excused: number;
-  officialPct: number | null;
-  weightedPct: number | null;
-}
-
-
-export function countEligibility(outcomes: SessionOutcome[]): EligibilityCounts {
-  let conducted = 0;
-  let attended = 0;
-  let excused = 0;
-  let weightedSum = 0;
-
-  for (const o of outcomes) {
-    if (o.excused) {
-      excused += 1;
-      continue;
-    }
-    conducted += 1;
-    const status = o.status === "missing" ? "absent" : o.status;
-    const w = STATUS_WEIGHTS[status] ?? 0;
-    weightedSum += w;
-    if (status === "present" || status === "late" || status === "partial") {
-      attended += 1;
-    }
-  }
-
-  const officialPct =
-    conducted === 0
-      ? null
-      : Math.round((10000 * attended) / conducted) / 100;
-  const weightedPct =
-    conducted === 0
-      ? null
-      : Math.round((10000 * weightedSum) / conducted) / 100;
-
-  return { conducted, attended, excused, officialPct, weightedPct };
 }
 
 

@@ -3,7 +3,9 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, LoaderCircle, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DEFAULT_SESSION_RADIUS_M } from "@/lib/geofence";
 import {
   openSession,
   type SessionFormState,
@@ -35,6 +37,7 @@ export function OpenSessionForm({
   const qc = useQueryClient();
   const [state, setState] = useState<SessionFormState>(INITIAL);
   const [pending, setPending] = useState(false);
+  const [radiusM, setRadiusM] = useState(DEFAULT_SESSION_RADIUS_M);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -88,6 +91,10 @@ export function OpenSessionForm({
           name="geofenceId"
           required
           defaultValue=""
+          onChange={(e) => {
+            const room = geofences.find((g) => g.id === e.target.value);
+            if (room) setRadiusM(room.radius_m);
+          }}
           suppressHydrationWarning
           className={selectClass}
         >
@@ -100,6 +107,25 @@ export function OpenSessionForm({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="radiusM">GPS radius (metres)</Label>
+        <Input
+          id="radiusM"
+          name="radiusM"
+          type="number"
+          min={5}
+          max={2000}
+          step={5}
+          value={radiusM}
+          onChange={(e) => setRadiusM(Number(e.target.value))}
+          required
+        />
+        <p className="text-xs text-muted-foreground">
+          Pre-filled from the room ({DEFAULT_SESSION_RADIUS_M} m if the room has none). Raise it
+          for large halls or weak indoor GPS.
+        </p>
       </div>
 
       {state.error && (
