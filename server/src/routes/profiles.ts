@@ -4,10 +4,22 @@ import { z } from "zod";
 import { prisma } from "../config/db";
 import { asyncHandler, badRequest, forbidden, notFound } from "../middleware/error-handler";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { writeAudit } from "../services/audit";
+import { hashPassword } from "../services/auth";
 
 export const profileRouter = Router();
 
 profileRouter.use(requireAuth);
+// Must stay above "/:id", otherwise Express matches "me" as an id.
+profileRouter.get(
+  "/me",
+  asyncHandler(async (req, res) => {
+    const me = req.user!;
+    const profile = await prisma.profile.findUnique({ where: { id: me.id } });
+    if (!profile) throw notFound("Profile not found.");
+    res.json({ profile: serializeProfile(profile) });
+  })
+);
 profileRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
@@ -36,9 +48,10 @@ profileRouter.get(
         rollNo: true,
         role: true,
         faceEnrolled: true,
+        user: { select: { email: true } },
       },
     });
-    res.json({ profiles });
+    res.json({ profiles: profiles.map(({ user, ...p }) => ({ ...p, email: user?.email ?? null })) });
   })
 );
 
@@ -67,9 +80,22 @@ profileRouter.patch(
     if (data.parentPhone !== undefined) update.parentPhone = data.parentPhone;
     if (data.role !== undefined) update.role = data.role;
 
+    const before = await prisma.profile.findUnique({
+      where: { id: req.params.id },
+      select: { fullName: true, rollNo: true, role: true, parentPhone: true },
+    });
     const profile = await prisma.profile.update({
       where: { id: req.params.id },
       data: update,
+    });
+    await writeAudit({ id: me.id, role: me.role }, data.role && data.role !== before?.role ? "change_role" : "update_user", "user", {
+      entityId: req.params.id,
+      summary:
+        data.role && data.role !== before?.role
+          ? `Changed ${profile.fullName}'s role from ${before?.role} to ${data.role}.`
+          : `Updated ${profile.fullName}'s profile.`,
+      before,
+      after: update,
     });
     res.json({ profile: serializeProfile(profile) });
   })
@@ -82,6 +108,27 @@ profileRouter.delete(
     if (me.id === req.params.id) throw badRequest("You cannot delete your own account.");
     await prisma.authUser.delete({ where: { id: req.params.id } });
     res.status(204).end();
+  })
+);
+const resetPasswordSchema = z.object({
+  password: z.string().min(8, "New password must be at least 8 characters.").max(72),
+});
+profileRouter.post(
+  "/:id/reset-password",
+  asyncHandler(async (req, res) => {
+    const me = req.user!;
+    if (me.role !== "admin") throw forbidden("Only admins can reset passwords.");
+    const { password } = resetPasswordSchema.parse(req.body);
+    await prisma.authUser.update({
+      where: { id: req.params.id },
+      data: { passwordHash: await hashPassword(password) },
+    });
+    const target = await prisma.profile.findUnique({ where: { id: req.params.id }, select: { fullName: true } });
+    await writeAudit({ id: me.id, role: me.role }, "reset_password", "user", {
+      entityId: req.params.id,
+      summary: `Reset password for ${target?.fullName ?? "a user"}.`,
+    });
+    res.json({ message: "Password reset. Share the new password with the user." });
   })
 );
 profileRouter.post(
@@ -99,15 +146,6 @@ profileRouter.post(
       },
     });
     res.json({ message: "Face enrolment reset." });
-  })
-);
-profileRouter.get(
-  "/me",
-  asyncHandler(async (req, res) => {
-    const me = req.user!;
-    const profile = await prisma.profile.findUnique({ where: { id: me.id } });
-    if (!profile) throw notFound("Profile not found.");
-    res.json({ profile: serializeProfile(profile) });
   })
 );
 const enrollFaceSchema = z.object({
@@ -148,7 +186,8 @@ profileRouter.post(
 
     const { Prisma } = await import("@prisma/client");
     const updated = await prisma.profile.updateMany({
-      where: { id: me.id, faceEmbedding: { equals: Prisma.JsonNull } },
+      // faceEnrolled, not faceEmbedding: a never-set JSON column is SQL NULL, which JsonNull doesn't match.
+      where: { id: me.id, faceEnrolled: false },
       data: {
         faceEmbedding: descriptor,
         faceEmbeddingServer: serverEmbedding ?? Prisma.JsonNull,

@@ -18,10 +18,10 @@ await mkdir(outDir, { recursive: true });
 
 for (const file of FILES) {
   const url = `${BASE}/${file}`;
-  process.stdout.write(`â†“ ${file} ... `);
+  process.stdout.write(`Downloading ${file} ... `);
   const res = await fetch(url);
   if (!res.ok) {
-    console.error(`FAILED (${res.status}) â€” ${url}`);
+    console.error(`FAILED (${res.status}) - ${url}`);
     process.exitCode = 1;
     continue;
   }

@@ -176,10 +176,21 @@ function StatCell({
 export function PerformanceInsight({
   attendancePct,
   marksPct,
+  aiFeedback,
+  isAiLoading = false,
   className,
 }: {
   attendancePct: number | null;
   marksPct: number | null;
+  aiFeedback?: {
+    source: "qwen" | "fallback";
+    priority: string;
+    summary: string;
+    strengths: string[];
+    concerns: string[];
+    actions: string[];
+  };
+  isAiLoading?: boolean;
   className?: string;
 }) {
   const input = { attendancePct, marksPct };
@@ -255,6 +266,62 @@ export function PerformanceInsight({
                 </div>
                 <p className="text-sm text-muted-foreground">{analysis.feedback}</p>
               </div>
+            </div>
+
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                  <Sparkles className="size-3.5" aria-hidden="true" />
+                  Personalised AI guidance
+                </p>
+                {isAiLoading && (
+                  <CircleDashed className="size-4 animate-spin text-primary" aria-label="Generating AI guidance" />
+                )}
+              </div>
+              {isAiLoading ? (
+                <p className="mt-2 text-sm text-muted-foreground">Generating guidance from your latest attendance and marks…</p>
+              ) : aiFeedback ? (
+                <div className="mt-2 space-y-2 text-sm">
+                  <p className="rounded-lg bg-background/70 p-2.5 font-medium">
+                    <span className="text-primary">Priority: </span>
+                    {aiFeedback.priority}
+                  </p>
+                  <p>{aiFeedback.summary}</p>
+                  {(aiFeedback.strengths.length > 0 || aiFeedback.concerns.length > 0) && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {aiFeedback.strengths.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-status-present">Strengths</p>
+                          <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+                            {aiFeedback.strengths.map((strength) => <li key={strength}>{strength}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {aiFeedback.concerns.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-status-late">Focus areas</p>
+                          <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+                            {aiFeedback.concerns.map((concern) => <li key={concern}>{concern}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {aiFeedback.actions.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-primary">Recommended next steps</p>
+                      <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+                        {aiFeedback.actions.map((action) => <li key={action}>{action}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {aiFeedback.source === "qwen" ? "AI-generated guidance — verify with your faculty." : "Rule-based guidance shown because the local AI model is unavailable."}
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">Guidance will appear when your analysis is ready.</p>
+              )}
             </div>
 
             

@@ -1,6 +1,7 @@
 ﻿
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpenCheck, Layers } from "lucide-react";
+import { BookOpenCheck, FileSpreadsheet } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -8,9 +9,14 @@ import { SectionError } from "@/components/section-error";
 import { PageTitle } from "@/src/page-title";
 import { GsapReveal } from "@/components/gsap-reveal";
 import { MarksForm, type StudentOption } from "@/components/faculty/marks-form";
+import { BulkMarksUpload } from "@/components/faculty/bulk-marks-upload";
+import { ExportMenu } from "@/components/export-menu";
+import { exportFilename } from "@/lib/export";
 
 export interface MarkRow {
   id: string;
+  student_id: string;
+  updated_at: string;
   course: string;
   assessment: string;
   score: number;
@@ -27,6 +33,7 @@ import {
 
 export default function MarksPage() {
   const { profile } = useAuth();
+  const [exportCourse, setExportCourse] = useState("");
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["faculty-marks", profile?.id],
@@ -49,10 +56,11 @@ export default function MarksPage() {
         studentMap.set(s.id, { full_name: s.full_name, roll_no: s.roll_no });
       }
 
-      const courses = (coursesRes.courses ?? []).map((c) => c.code);
+      const courses = coursesRes.courses ?? [];
 
       const marks: MarkRow[] = (marksRes.marks ?? []).map((m) => ({
         id: m.id,
+        student_id: m.studentId,
         course: m.course,
         assessment: m.assessment,
         score: m.score,
@@ -61,7 +69,8 @@ export default function MarksPage() {
         profiles: studentMap.get(m.studentId) ?? null,
       }));
 
-      return { students, courses, marks };
+      marks.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+      return { students, courses, marks: marks.slice(0, 30), allMarks: marks };
     },
   });
 
@@ -74,7 +83,7 @@ export default function MarksPage() {
       />
     );
 
-  const { students, courses, marks } = data;
+  const { students, courses, marks, allMarks } = data;
 
   return (
     <GsapReveal className="space-y-6">
@@ -82,15 +91,45 @@ export default function MarksPage() {
       <div>
         <h1 className="text-2xl font-bold">Upload Marks</h1>
         <p className="text-sm text-muted-foreground">
-          Only faculty and admins can record scores — students see their own
-          marks on their dashboard.
+          Upload a whole class from a CSV file, or record a single score below.
+          Students see their own marks on their dashboard.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileSpreadsheet className="size-4 text-muted-foreground" aria-hidden="true" />
+            Bulk upload from CSV
+          </CardTitle>
+          <CardDescription>
+            Columns: USN, Student Name, Marks. Every row is saved against the course and
+            assessment you pick here. You see a preview before anything is saved.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {students.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              No students registered yet.
+            </p>
+          ) : (
+            <BulkMarksUpload
+              students={students}
+              courses={courses}
+              existingMarks={allMarks.map((m) => ({
+                studentId: m.student_id,
+                course: m.course,
+                assessment: m.assessment,
+              }))}
+            />
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Record a score</CardTitle>
+            <CardTitle>Record a single score</CardTitle>
             <CardDescription>
               Saving the same student + course + assessment again updates the
               existing score.
@@ -108,12 +147,49 @@ export default function MarksPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpenCheck className="size-4 text-muted-foreground" aria-hidden="true" />
-              Recently recorded
-            </CardTitle>
-            <CardDescription>Latest 30 entries, newest first.</CardDescription>
+          <CardHeader className="flex-row flex-wrap items-start justify-between gap-3 space-y-0">
+            <div className="space-y-1.5">
+              <CardTitle className="flex items-center gap-2">
+                <BookOpenCheck className="size-4 text-muted-foreground" aria-hidden="true" />
+                Recently recorded
+              </CardTitle>
+              <CardDescription>Latest 30 entries, newest first.</CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                aria-label="Course to export"
+                value={exportCourse}
+                onChange={(e) => setExportCourse(e.target.value)}
+                className="h-9 rounded-md border border-input bg-card px-2 text-sm"
+              >
+                <option value="">All courses</option>
+                {courses.map((c) => (
+                  <option key={c.code} value={c.code}>{c.code}</option>
+                ))}
+              </select>
+              <ExportMenu
+                filename={exportFilename("marks", [exportCourse])}
+                title={`Marks${exportCourse ? ` — ${exportCourse}` : ""}`}
+                columns={[
+                  { key: "usn", label: "USN" },
+                  { key: "name", label: "Student" },
+                  { key: "course", label: "Course" },
+                  { key: "assessment", label: "Assessment" },
+                  { key: "score", label: "Score" },
+                  { key: "max", label: "Out of" },
+                ]}
+                rows={allMarks
+                  .filter((m) => !exportCourse || m.course === exportCourse)
+                  .map((m) => ({
+                    usn: m.profiles?.roll_no ?? "",
+                    name: m.profiles?.full_name ?? "",
+                    course: m.course,
+                    assessment: m.assessment,
+                    score: Number(m.score),
+                    max: Number(m.max_score),
+                  }))}
+              />
+            </div>
           </CardHeader>
           <CardContent>
             {!marks || marks.length === 0 ? (

@@ -1,9 +1,7 @@
 "use client";
 
 import { api } from "@/lib/api-client";
-import { effectiveGraceM } from "@/lib/geofence";
-import { euclideanDistance, isFaceMatch, isValidDescriptor } from "@/lib/face";
-import { fetchGpsSettings } from "@/lib/gps-settings";
+import { isValidDescriptor } from "@/lib/face";
 import { FACE_CONFIDENCE_MIN } from "@/lib/utils";
 
 export interface MarkResult {
@@ -38,43 +36,22 @@ export async function markEntry(input: {
   if (!isValidDescriptor(input.descriptor)) {
     return { ok: false, error: "Face capture was invalid — please retry." };
   }
-  const [session, gps, meProfile] = await Promise.all([
-    api.get<{
-      session: {
-        id: string;
-        openedAt: string;
-        closedAt: string | null;
-        geofence: { lat: string; lng: string; radiusM: number };
-      };
-    }>(`/sessions/${input.sessionId}`).catch(() => null),
-    fetchGpsSettings(),
+  // Pre-checks only; the server decides face match and geofence.
+  const [session, meProfile] = await Promise.all([
     api
-      .get<{
-        profile: {
-          faceEmbedding: number[] | null;
-          faceEmbeddingServer: number[] | null;
-        };
-      }>("/profiles/me")
+      .get<{ session: { closedAt: string | null } }>(`/sessions/${input.sessionId}`)
       .catch(() => null),
+    api.get<{ profile: { hasFaceEmbedding: boolean } }>("/profiles/me").catch(() => null),
   ]);
 
   if (!session?.session) return { ok: false, error: "Session not found." };
   if (session.session.closedAt) return { ok: false, error: "This session has already been closed." };
-  if (!meProfile?.profile?.faceEmbedding) {
+  if (!meProfile?.profile?.hasFaceEmbedding) {
     return {
       ok: false,
       error: "No enrolled face found — enrol your face before marking attendance.",
     };
   }
-  const faceDistance = euclideanDistance(input.descriptor, meProfile.profile.faceEmbedding);
-  if (!isFaceMatch(faceDistance)) {
-    return { ok: false, error: "Face does not match your enrolment — please try again." };
-  }
-
-  const fence = session.session.geofence;
-  const graceM = effectiveGraceM(input.accuracy, gps.accuracyGraceM);
-  void graceM;
-  void fence;
 
   try {
     const { attendance, status, lateAfterMin } = await api.post<{

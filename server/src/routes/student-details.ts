@@ -2,7 +2,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db";
-import { asyncHandler, badRequest, forbidden, notFound } from "../middleware/error-handler";
+import { asyncHandler, forbidden } from "../middleware/error-handler";
 import { requireAuth } from "../middleware/auth";
 
 export const studentDetailsRouter = Router();

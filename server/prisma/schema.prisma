@@ -1,4 +1,4 @@
-// Prisma schema for PES Smart Attendance — MySQL (XAMPP).
+// Prisma schema for PES Smart Attendance — MySQL 8 (manage with MySQL Workbench / Prisma Studio).
 // Tables and column names mirror snake_case so existing seed data is mechanical.
 //
 // ── Mapping notes (Postgres → MySQL) ──────────────────────────────
@@ -61,6 +61,31 @@ enum LeaveStatus {
   rejected
 }
 
+enum LeaveType {
+  medical
+  personal
+  event
+  other
+}
+
+/// Date-range leave application (distinct from the per-session appeal above).
+enum LeaveAppStatus {
+  pending
+  approved
+  rejected
+  withdrawn
+}
+
+enum NotificationType {
+  attendance_alert
+  low_attendance
+  leave_approved
+  leave_rejected
+  appeal_approved
+  appeal_rejected
+  general
+}
+
 
 // ─── Tables ─────────────────────────────────────────────────────────
 
@@ -111,6 +136,10 @@ model Profile {
   scheduleEntries    ClassSchedule[]       @relation("FacultySchedule")
   marksUpdates       Marks[]               @relation("MarksUpdater")
   gpsSettingsUpdates GpsSettings[]
+  auditLogs          AuditLog[]            @relation("ActorAudit")
+  notifications      Notification[]        @relation("UserNotifications")
+  leaveApplications  LeaveApplication[]    @relation("StudentLeaveApps")
+  leaveAppReviews    LeaveApplication[]    @relation("ReviewerLeaveApps")
 
   @@map("profiles")
   @@index([role])
@@ -139,6 +168,8 @@ model Session {
   course     String
   facultyId  String?   @map("faculty_id") @db.Char(36)
   geofenceId String    @map("geofence_id") @db.Char(36)
+  /// Faculty override of the room's geofence radius for this session; null = use geofence.radiusM.
+  radiusM    Int?      @map("radius_m")
   openedAt   DateTime  @default(now()) @map("opened_at") @db.Timestamp(6)
   closedAt   DateTime? @map("closed_at") @db.Timestamp(6)
 
@@ -245,6 +276,10 @@ model StudentDetails {
   pesuId       String?  @map("pesu_id")
   branch       String?
   section      String?
+  /// Academic year 1-4 (nullable; set via student bulk import).
+  year         Int?     @db.SmallInt
+  /// Parent contact for demo notifications (no login — parents use the student's own account).
+  parentEmail  String?  @map("parent_email")
   dob          DateTime? @db.Date
   bloodGroup   String?  @map("blood_group")
   sslcPct      Decimal? @map("sslc_pct") @db.Decimal(5, 2)
@@ -345,6 +380,7 @@ model LeaveRequest {
   status     LeaveStatus @default(pending)
   reviewedBy String?     @map("reviewed_by") @db.Char(36)
   reviewedAt DateTime?   @map("reviewed_at") @db.Timestamp(6)
+  reviewComment String?  @map("review_comment") @db.VarChar(400)
   createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
 
   student   Profile    @relation("StudentLeaveRequests", fields: [studentId], references: [id], onDelete: Cascade)
@@ -367,4 +403,66 @@ model RevokedToken {
 
   @@map("revoked_tokens")
   @@index([expiresAt])
+}
+
+/// Append-only record of important actions, for the Admin → Audit Logs page.
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Char(36)
+  actorId    String?  @map("actor_id") @db.Char(36)
+  actorRole  String   @map("actor_role") @db.VarChar(20)
+  action     String   @db.VarChar(60)
+  entity     String   @db.VarChar(40)
+  entityId   String?  @map("entity_id") @db.VarChar(64)
+  summary    String   @db.VarChar(300)
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  actor Profile? @relation("ActorAudit", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+  @@index([createdAt(sort: Desc)])
+  @@index([actorId])
+  @@index([entity])
+  @@index([action])
+}
+
+/// Demo notification (no real SMS/email). Recipient is a student account;
+/// the parent view reads it through the same account.
+model Notification {
+  id         String           @id @default(uuid()) @db.Char(36)
+  userId     String           @map("user_id") @db.Char(36)
+  type       NotificationType @default(general)
+  title      String           @db.VarChar(120)
+  body       String           @db.VarChar(400)
+  read       Boolean          @default(false)
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user Profile @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+/// Date-range leave application (medical/personal/etc). Separate from the
+/// per-session appeal in LeaveRequest, which is what sets attendance.excused.
+model LeaveApplication {
+  id            String         @id @default(uuid()) @db.Char(36)
+  studentId     String         @map("student_id") @db.Char(36)
+  leaveType     LeaveType      @default(other) @map("leave_type")
+  fromDate      DateTime       @map("from_date") @db.Date
+  toDate        DateTime       @map("to_date") @db.Date
+  reason        String         @db.VarChar(500)
+  status        LeaveAppStatus @default(pending)
+  reviewedBy    String?        @map("reviewed_by") @db.Char(36)
+  reviewComment String?        @map("review_comment") @db.VarChar(400)
+  reviewedAt    DateTime?      @map("reviewed_at") @db.Timestamp(6)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamp(6)
+
+  student  Profile  @relation("StudentLeaveApps", fields: [studentId], references: [id], onDelete: Cascade)
+  reviewer Profile? @relation("ReviewerLeaveApps", fields: [reviewedBy], references: [id])
+
+  @@map("leave_applications")
+  @@index([studentId, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
 }

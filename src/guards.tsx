@@ -6,13 +6,15 @@ import type { Role } from "@/lib/utils";
 
 
 export function RequireRole({ allowed }: { allowed: Role[] }) {
-  const { loading, user, profile } = useAuth();
+  const { loading, user, profile, parentView } = useAuth();
   const location = useLocation();
 
   if (loading) return <PageSkeleton />;
   if (!user || !profile) {
     return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />;
   }
+  // Parent view signs in with the student's account; keep it on the read-only parent pages.
+  if (parentView) return <Navigate to="/parent/dashboard" replace />;
   if (!allowed.includes(profile.role)) {
     return <Navigate to={roleHome(profile.role)} replace />;
   }

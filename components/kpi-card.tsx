@@ -1,5 +1,6 @@
 ﻿
 import { useRef, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +20,7 @@ interface KpiCardProps {
   countTo?: number;
   
   suffix?: string;
+  href?: string;
 }
 
 const TONE_CLASS = {
@@ -37,6 +39,7 @@ export function KpiCard({
   tone = "neutral",
   countTo,
   suffix = "",
+  href,
 }: KpiCardProps) {
   const numberRef = useRef<HTMLParagraphElement>(null);
 
@@ -60,8 +63,8 @@ export function KpiCard({
     });
   }, [countTo, suffix]);
 
-  return (
-    <Card className="group transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-pop">
+  const card = (
+    <Card className="group h-full transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-pop">
       <CardContent className="flex items-center gap-3 p-4">
         <span
           className={cn(
@@ -73,20 +76,27 @@ export function KpiCard({
           {icon}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-xs font-medium uppercase leading-snug tracking-wide text-muted-foreground">
             {label}
           </p>
           
           <p
             ref={numberRef}
             aria-label={value}
-            className="font-display text-2xl font-semibold leading-tight"
+            className="font-display text-2xl font-semibold leading-tight tabular-nums"
           >
             {value}
           </p>
-          {sub && <p className="truncate text-xs text-muted-foreground">{sub}</p>}
+          {sub && <p className="line-clamp-2 text-xs text-muted-foreground" title={sub}>{sub}</p>}
         </div>
       </CardContent>
     </Card>
+  );
+  return href ? (
+    <Link to={href} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      {card}
+    </Link>
+  ) : (
+    card
   );
 }

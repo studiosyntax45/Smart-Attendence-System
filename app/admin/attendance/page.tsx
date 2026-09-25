@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { SectionError } from "@/components/section-error";
 import { PageTitle } from "@/src/page-title";
+import { AttendanceHistory } from "@/components/attendance-history";
 import {
   fetchAllAttendance,
   rollupByCourse,
@@ -238,6 +239,7 @@ export default function AdminAttendance() {
           </Card>
         </>
       )}
+      <AttendanceHistory showFacultyFilter />
     </GsapReveal>
   );
 }

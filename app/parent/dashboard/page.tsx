@@ -1,19 +1,17 @@
 ﻿
 import { useQuery } from "@tanstack/react-query";
-import {
-  BookOpenCheck,
-  CalendarDays,
-  ListChecks,
-  Timer,
-} from "lucide-react";
+import { BookOpenCheck } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
-import { KpiCard } from "@/components/kpi-card";
 import { StatusPill } from "@/components/status-pill";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { SectionError } from "@/components/section-error";
 import { PageTitle } from "@/src/page-title";
 import { GsapReveal } from "@/components/gsap-reveal";
+import { StudentKpis, useStudentOverview } from "@/components/student-kpis";
+import { NotificationList } from "@/components/notification-list";
+import { LeaveStatusPill } from "@/components/leave-status-pill";
+import { LEAVE_TYPES, leaveDays, listLeaveApplications } from "@/lib/leave-applications";
 import { AttendanceRing } from "@/components/charts/attendance-ring";
 import {
   Card,
@@ -45,6 +43,7 @@ interface MarkRow {
 export default function ParentDashboard() {
   const { profile } = useAuth();
   const child = profile;
+  const overview = useStudentOverview(child?.id);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["parent-dashboard", child?.id],
@@ -101,31 +100,9 @@ export default function ParentDashboard() {
 
   const records = data.records;
   const marks = data.marks;
-  const counted = records.filter((r) => !r.excused);
-  const effectiveHeld =
-    records.length > 0 ? counted.length : data.held;
-  const attended = counted.filter((r) => r.status !== "absent").length;
-  const pct =
-    effectiveHeld > 0 ? Math.round((attended / effectiveHeld) * 100) : null;
-  const held = effectiveHeld;
-
-  const durations = records
-    .map((r) => r.duration_min)
-    .filter((d): d is number => d !== null);
-  const avgDuration =
-    durations.length > 0
-      ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
-      : null;
-
-  const avgMarksPct =
-    marks.length > 0
-      ? Math.round(
-          marks.reduce(
-            (s, m) => s + (Number(m.score) / Number(m.max_score)) * 100,
-            0
-          ) / marks.length
-        )
-      : null;
+  const pct = overview.data?.overallPct == null ? null : Math.round(overview.data.overallPct);
+  const attended = overview.data?.attended ?? 0;
+  const held = overview.data?.conducted ?? 0;
 
   return (
     <GsapReveal className="space-y-6">
@@ -136,7 +113,7 @@ export default function ParentDashboard() {
           <h1 className="text-2xl font-bold">{child.fullName}</h1>
           <p className="text-sm text-muted-foreground">
             {child.rollNo && <span className="font-mono">{child.rollNo} · </span>}
-            Attendance &amp; results — last 30 days
+            Attendance, results, leave and alerts
           </p>
         </div>
         <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -145,56 +122,21 @@ export default function ParentDashboard() {
       </div>
 
       
-      <section className="grid gap-4 lg:grid-cols-5">
+      <StudentKpis studentId={child.id} variant="parent" />
+
+      <section className="grid items-start gap-4 lg:grid-cols-5">
         <Card className="lg:col-span-2">
           <CardHeader className="pb-0">
             <CardTitle>Attendance rate</CardTitle>
-            <CardDescription>Rolling 30-day window</CardDescription>
+            <CardDescription>All closed sessions in {child.fullName.split(" ")[0]}&apos;s courses</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center pb-6 pt-4">
             <AttendanceRing pct={pct} attended={attended} held={held} />
           </CardContent>
         </Card>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:col-span-3">
-          <KpiCard
-            label="Classes attended"
-            value={String(attended)}
-            countTo={attended}
-            sub={held > 0 ? `Of ${held} held` : "No sessions yet"}
-            icon={<ListChecks />}
-            tone={pct === null ? "neutral" : pct >= 75 ? "present" : "absent"}
-          />
-          <KpiCard
-            label="Sessions held"
-            value={String(held)}
-            countTo={held}
-            sub="In the last 30 days"
-            icon={<CalendarDays />}
-          />
-          <KpiCard
-            label="Avg duration"
-            value={avgDuration !== null ? `${avgDuration} min` : "—"}
-            countTo={avgDuration ?? undefined}
-            suffix=" min"
-            sub="Per attended class"
-            icon={<Timer />}
-          />
-          <KpiCard
-            label="Avg marks"
-            value={avgMarksPct !== null ? `${avgMarksPct}%` : "—"}
-            countTo={avgMarksPct ?? undefined}
-            suffix="%"
-            sub={marks.length > 0 ? `Across ${marks.length}` : "No marks yet"}
-            icon={<BookOpenCheck />}
-            tone={
-              avgMarksPct === null
-                ? "neutral"
-                : avgMarksPct >= 40
-                  ? "present"
-                  : "absent"
-            }
-          />
+        <div className="space-y-4 lg:col-span-3">
+          <NotificationList readOnly />
+          <ParentLeaveStatus />
         </div>
       </section>
 
@@ -320,5 +262,46 @@ export default function ParentDashboard() {
         </CardContent>
       </Card>
     </GsapReveal>
+  );
+}
+
+
+function ParentLeaveStatus() {
+  const { data, isLoading } = useQuery({ queryKey: ["student-leave-parent"], queryFn: () => listLeaveApplications() });
+  const rows = (data ?? []).slice(0, 5);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Leave status</CardTitle>
+        <CardDescription>Leave requests and their review outcome.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : rows.length === 0 ? (
+          <p className="py-4 text-center text-sm text-muted-foreground">No leave requests.</p>
+        ) : (
+          <ul className="divide-y">
+            {rows.map((l) => {
+              const days = leaveDays(l.fromDate, l.toDate);
+              return (
+                <li key={l.id} className="flex items-start justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
+                  <div className="min-w-0 text-sm">
+                    <p className="font-medium">
+                      {LEAVE_TYPES.find((t) => t.value === l.leaveType)?.label ?? l.leaveType}
+                      <span className="ml-1 font-normal text-muted-foreground tabular-nums">
+                        · {new Date(l.fromDate).toLocaleDateString([], { day: "numeric", month: "short" })} · {days} day{days === 1 ? "" : "s"}
+                      </span>
+                    </p>
+                    {l.reviewComment && <p className="text-xs text-muted-foreground">Comment: {l.reviewComment}</p>}
+                  </div>
+                  <LeaveStatusPill status={l.status} />
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }

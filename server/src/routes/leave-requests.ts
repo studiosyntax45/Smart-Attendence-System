@@ -4,6 +4,8 @@ import { z } from "zod";
 import { prisma } from "../config/db";
 import { asyncHandler, badRequest, conflict, forbidden, notFound } from "../middleware/error-handler";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { writeAudit } from "../services/audit";
+import { notify } from "../services/notify";
 
 export const leaveRouter = Router();
 
@@ -67,6 +69,10 @@ leaveRouter.post(
           status: "pending",
         },
       });
+      await writeAudit({ id: me.id, role: me.role }, "submit_appeal", "appeal", {
+        entityId: created.id,
+        summary: `Submitted an attendance appeal for ${session.course}.`,
+      });
       res.status(201).json({ leaveRequest: created });
     } catch (err) {
       const code = (err as { code?: string }).code;
@@ -78,6 +84,7 @@ leaveRouter.post(
 
 const reviewSchema = z.object({
   decision: z.enum(["approved", "rejected"]),
+  comment: z.string().trim().max(400).optional(),
 });
 
 leaveRouter.post(
@@ -85,11 +92,14 @@ leaveRouter.post(
   requireRole("faculty", "admin"),
   asyncHandler(async (req, res) => {
     const me = req.user!;
-    const { decision } = reviewSchema.parse(req.body);
+    const { decision, comment } = reviewSchema.parse(req.body);
 
     const existing = await prisma.leaveRequest.findUnique({
       where: { id: req.params.id },
-      include: { session: { select: { facultyId: true } } },
+      include: {
+        session: { select: { facultyId: true, course: true } },
+        student: { select: { fullName: true } },
+      },
     });
     if (!existing) throw notFound("That appeal no longer exists.");
     if (existing.status !== "pending") throw badRequest(`This appeal was already ${existing.status}.`);
@@ -101,7 +111,7 @@ leaveRouter.post(
 
     await prisma.leaveRequest.update({
       where: { id: req.params.id },
-      data: { status: decision, reviewedBy: me.id, reviewedAt },
+      data: { status: decision, reviewedBy: me.id, reviewedAt, reviewComment: comment || null },
     });
 
     if (decision === "approved") {
@@ -116,6 +126,18 @@ leaveRouter.post(
         });
       }
     }
+    await notify(
+      existing.studentId,
+      decision === "approved" ? "appeal_approved" : "appeal_rejected",
+      decision === "approved" ? "Appeal approved" : "Appeal rejected",
+      `${existing.student.fullName}'s appeal for ${existing.session.course} was ${decision}.${comment ? ` Comment: ${comment}` : ""}`
+    );
+    await writeAudit({ id: me.id, role: me.role }, `${decision === "approved" ? "approve" : "reject"}_appeal`, "appeal", {
+      entityId: existing.id,
+      summary: `${decision === "approved" ? "Approved" : "Rejected"} ${existing.student.fullName}'s appeal for ${existing.session.course}.`,
+      before: { status: "pending" },
+      after: { status: decision, comment: comment ?? null },
+    });
     res.json({ message: decision === "approved" ? "Appeal approved." : "Appeal rejected." });
   })
 );

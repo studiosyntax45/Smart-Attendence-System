@@ -108,13 +108,6 @@ export function validateScheduleInput(input: ScheduleEntryInput): string | null 
 }
 
 
-export function filterScheduleByDay(entries: ScheduleEntry[], dayOfWeek: number): ScheduleEntry[] {
-  return entries
-    .filter((e) => e.day_of_week === dayOfWeek)
-    .sort((a, b) => a.start_time.localeCompare(b.start_time));
-}
-
-
 export function formatTimeRange(start: string, end: string): string {
   const s = start.slice(0, 5);
   const e = end.slice(0, 5);

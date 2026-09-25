@@ -175,6 +175,7 @@ export function ScheduleManager({
   }
 
   async function remove(id: string) {
+    if (!confirm("Delete this timetable slot? Faculty will no longer see it under Today's Classes.")) return;
     setDelError(null);
     setDeletingId(id);
     const res = await deleteScheduleEntry(id);

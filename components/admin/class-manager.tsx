@@ -35,6 +35,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BranchSelect } from "@/components/branch-select";
 
 interface CourseOption {
   code: string;
@@ -131,7 +132,7 @@ export function ClassManager({
     }
   }
   async function handleDelete(classId: string, className: string) {
-    if (!confirm(`Are you sure you want to delete '${className}'?`)) return;
+    if (!confirm(`Delete '${className}'? Its roster and course links are removed too.`)) return;
     const res = await deleteClass(classId);
     if (res.error) {
       alert(res.error);
@@ -155,8 +156,9 @@ export function ClassManager({
       onRefresh();
     }
   }
-  async function handleRemoveStudent(studentId: string) {
+  async function handleRemoveStudent(studentId: string, studentName: string) {
     if (!activeClass) return;
+    if (!confirm(`Remove ${studentName} from '${activeClass.name}'?`)) return;
     const res = await removeStudentFromClass(activeClass.id, studentId);
     if (res.error) {
       alert(res.error);
@@ -182,6 +184,7 @@ export function ClassManager({
   }
   async function handleUnlinkCourse(courseCode: string) {
     if (!activeClass) return;
+    if (!confirm(`Unlink ${courseCode} from '${activeClass.name}'? Students keep their existing marks.`)) return;
     const res = await removeCourseFromClass(activeClass.id, courseCode);
     if (res.error) {
       alert(res.error);
@@ -220,11 +223,12 @@ export function ClassManager({
               className="pl-9"
             />
           </div>
-          <Input
-            placeholder="Branch filter (e.g. CSE)"
+          <BranchSelect
+            id="branch-filter"
             value={branchFilter}
-            onChange={(e) => setBranchFilter(e.target.value)}
-            className="w-40"
+            onChange={setBranchFilter}
+            allLabel="All branches"
+            className="w-56"
           />
           <Input
             placeholder="Semester (e.g. Sem-4)"
@@ -265,13 +269,7 @@ export function ClassManager({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5">
                 <div>
                   <Label htmlFor="c-branch">Branch</Label>
-                  <Input
-                    id="c-branch"
-                    placeholder="e.g. CSE"
-                    value={branch}
-                    onChange={(e) => setBranch(e.target.value)}
-                    required
-                  />
+                  <BranchSelect id="c-branch" value={branch} onChange={setBranch} required />
                 </div>
                 <div>
                   <Label htmlFor="c-sem">Semester</Label>
@@ -478,7 +476,7 @@ export function ClassManager({
                               size="sm"
                               variant="ghost"
                               className="h-7 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
-                              onClick={() => handleRemoveStudent(s.student_id)}
+                              onClick={() => handleRemoveStudent(s.student_id, s.full_name)}
                             >
                               Remove
                             </Button>
@@ -512,6 +510,29 @@ export function ClassManager({
                         className="pl-9 text-xs"
                       />
                     </div>
+                    {poolFiltered.length > 0 && (
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>
+                          {poolFiltered.length} shown — search &quot;PES1UG23&quot; to narrow to one batch
+                        </span>
+                        <span className="flex gap-2">
+                          <button
+                            type="button"
+                            className="font-medium text-primary hover:underline"
+                            onClick={() =>
+                              setSelectedStudentIds((prev) => [...new Set([...prev, ...poolFiltered.map((s) => s.id)])])
+                            }
+                          >
+                            Select all shown
+                          </button>
+                          {selectedStudentIds.length > 0 && (
+                            <button type="button" className="hover:underline" onClick={() => setSelectedStudentIds([])}>
+                              Clear
+                            </button>
+                          )}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="max-h-56 overflow-y-auto rounded-md border divide-y">
                       {poolFiltered.length === 0 ? (

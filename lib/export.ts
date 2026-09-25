@@ -26,12 +26,27 @@ function csvField(raw: string): string {
 }
 
 
+export function rowsToCsv(rows: string[][]): string {
+  return rows.map((r) => r.map(csvField).join(",")).join("\r\n");
+}
+
 export function toCsv(columns: ExportColumn[], rows: ExportRow[]): string {
-  const header = columns.map((c) => csvField(c.label)).join(",");
-  const body = rows.map((row) =>
-    columns.map((c) => csvField(cellText(row[c.key]))).join(",")
-  );
-  return [header, ...body].join("\r\n");
+  return rowsToCsv([
+    columns.map((c) => c.label),
+    ...rows.map((row) => columns.map((c) => cellText(row[c.key]))),
+  ]);
+}
+
+/** BOM first so Excel reads the file as UTF-8. */
+export function downloadCsv(filename: string, csv: string): void {
+  const url = URL.createObjectURL(new Blob(["﻿", csv], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 
@@ -107,4 +122,13 @@ export function slugifyFilename(raw: string): string {
       .replace(/^-+|-+$/g, "")
       .slice(0, 80) || "export"
   );
+}
+
+
+/** exportFilename("attendance", ["CS301", "A"]) -> "attendance_CS301_A_2026-09-24" */
+export function exportFilename(prefix: string, parts: Array<string | null | undefined>, date = new Date()): string {
+  const clean = (v: string) => v.trim().replace(/[^A-Za-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "");
+  const bits = [prefix, ...parts.filter((p): p is string => !!p && p.trim() !== "")].map(clean).filter(Boolean);
+  // en-CA formats as YYYY-MM-DD in the viewer's own time zone (IST for the college).
+  return [...bits, date.toLocaleDateString("en-CA")].join("_");
 }

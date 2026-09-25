@@ -35,6 +35,11 @@ export function EnrollmentManager({
   const [selected, setSelected] = useState<Set<string>>(new Set(enrolledIds));
   const [result, setResult] = useState<CourseActionState>({});
   const [pending, startTransition] = useTransition();
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const shown = q
+    ? students.filter((s) => s.full_name.toLowerCase().includes(q) || (s.roll_no ?? "").toLowerCase().includes(q))
+    : students;
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -51,8 +56,33 @@ export function EnrollmentManager({
 
   return (
     <div className="space-y-4">
-      <ul className="divide-y rounded-md border">
-        {students.map((s) => {
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Filter by name or USN, e.g. PES1UG23"
+          aria-label="Filter students"
+          className="h-9 w-full basis-full rounded-md border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setSelected((prev) => new Set([...prev, ...shown.map((s) => s.id)]))}
+          disabled={shown.length === 0}
+        >
+          Select all shown ({shown.length})
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => setSelected(new Set())} disabled={selected.size === 0}>
+          Clear
+        </Button>
+      </div>
+      <p className="-mt-2 text-xs text-muted-foreground tabular-nums">
+        {selected.size} of {students.length} selected. For a whole class from a spreadsheet, use Bulk Import → Enrollments.
+      </p>
+      <ul className="max-h-96 divide-y overflow-y-auto rounded-md border">
+        {shown.map((s) => {
           const checked = selected.has(s.id);
           return (
             <li key={s.id}>
@@ -86,6 +116,9 @@ export function EnrollmentManager({
             </li>
           );
         })}
+        {students.length > 0 && shown.length === 0 && (
+          <li className="px-3 py-6 text-center text-sm text-muted-foreground">No students match &quot;{query}&quot;.</li>
+        )}
         {students.length === 0 && (
           <li className="px-3 py-6 text-center text-sm text-muted-foreground">
             No student accounts yet.

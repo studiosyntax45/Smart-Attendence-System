@@ -2,7 +2,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db";
-import { asyncHandler, badRequest, forbidden } from "../middleware/error-handler";
+import { asyncHandler, badRequest } from "../middleware/error-handler";
 import { requireAuth, requireRole } from "../middleware/auth";
 
 export const geofenceRouter = Router();

@@ -24,7 +24,7 @@ export default function MarkAttendancePage() {
     enabled: !!profile,
     queryFn: async () => {
       const [sessionsRes, meRes, gps] = await Promise.all([
-        api.get<{ sessions: Array<{ id: string; course: string; openedAt: string; closedAt: string | null; geofence?: { roomName: string; lat: number; lng: number; radiusM: number } }> }>("/sessions"),
+        api.get<{ sessions: Array<{ id: string; course: string; openedAt: string; closedAt: string | null; radiusM?: number | null; geofence?: { roomName: string; lat: number; lng: number; radiusM: number } }> }>("/sessions"),
         api.get<{ profile: { faceEnrolled: boolean; faceEmbedding?: number[] | null } }>(`/profiles/${profile!.id}`),
         fetchGpsSettings(),
       ]);
@@ -41,7 +41,7 @@ export default function MarkAttendancePage() {
               room_name: openSession.geofence.roomName,
               lat: Number(openSession.geofence.lat),
               lng: Number(openSession.geofence.lng),
-              radius_m: openSession.geofence.radiusM,
+              radius_m: openSession.radiusM ?? openSession.geofence.radiusM,
             }
           : null,
       };

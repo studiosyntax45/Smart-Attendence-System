@@ -13,7 +13,6 @@ import {
   type LeaveRequest,
   type LeaveActionState,
 } from "@/lib/leave-requests";
-import { firstRow } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -29,11 +28,12 @@ export function PendingAppeals({ requests }: { requests: LeaveRequest[] }) {
   const qc = useQueryClient();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [state, setState] = useState<LeaveActionState>({});
+  const [comments, setComments] = useState<Record<string, string>>({});
 
   async function decide(id: string, decision: "approved" | "rejected") {
     setBusyId(id);
     setState({});
-    const result = await reviewLeaveRequest(id, decision);
+    const result = await reviewLeaveRequest(id, decision, comments[id]);
     setState(result);
     setBusyId(null);
     if (!result.error) {
@@ -41,6 +41,7 @@ export function PendingAppeals({ requests }: { requests: LeaveRequest[] }) {
       qc.invalidateQueries({ queryKey: ["student-attendance"] });
       qc.invalidateQueries({ queryKey: ["student-dashboard"] });
       qc.invalidateQueries({ queryKey: ["parent-dashboard"] });
+      qc.invalidateQueries({ queryKey: ["faculty-leave"] });
     }
   }
 
@@ -101,6 +102,15 @@ export function PendingAppeals({ requests }: { requests: LeaveRequest[] }) {
                           : null}
                       </p>
                       <p className="text-sm text-foreground/90">{r.reason}</p>
+                      <input
+                        type="text"
+                        aria-label={`Comment for ${student?.full_name ?? "student"}`}
+                        placeholder="Comment (optional, sent to the student)"
+                        maxLength={400}
+                        value={comments[r.id] ?? ""}
+                        onChange={(e) => setComments({ ...comments, [r.id]: e.target.value })}
+                        className="mt-1 h-8 w-full max-w-sm rounded-md border border-input bg-card px-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      />
                     </div>
                     <div className="flex shrink-0 gap-2">
                       <Button

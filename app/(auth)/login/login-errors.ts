@@ -6,7 +6,8 @@ export type LoginErrorCode =
   | "not_student"
   | "oauth"
   | "config"
-  | "cancelled";
+  | "cancelled"
+  | "google_unavailable";
 
 const MESSAGES: Record<LoginErrorCode, string> = {
   domain: `Please sign in with your college Google account (@${COLLEGE_EMAIL_DOMAIN}).`,
@@ -15,6 +16,8 @@ const MESSAGES: Record<LoginErrorCode, string> = {
   oauth: "Google sign-in could not be completed. Please try again.",
   config: "Backend API is not configured.",
   cancelled: "Sign-in was cancelled before it completed.",
+  google_unavailable:
+    "Google sign-in isn't set up on this server. Students can sign in below with their college email and password (default Pes@12345).",
 };
 
 

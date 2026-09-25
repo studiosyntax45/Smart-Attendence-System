@@ -21,7 +21,7 @@ export function MarksForm({
   courses,
 }: {
   students: StudentOption[];
-  courses: string[];
+  courses: Array<{ code: string; name: string }>;
 }) {
   const qc = useQueryClient();
   const [state, setState] = useState<MarkFormState>(INITIAL);
@@ -68,18 +68,23 @@ export function MarksForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label htmlFor="course">Course</Label>
-          <Input
+          <select
             id="course"
             name="course"
-            list="course-suggestions"
-            placeholder="Data Structures"
             required
-          />
-          <datalist id="course-suggestions">
+            defaultValue=""
+            suppressHydrationWarning
+            className="flex h-11 w-full cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="" disabled>
+              Choose a course…
+            </option>
             {courses.map((c) => (
-              <option key={c} value={c} />
+              <option key={c.code} value={c.code}>
+                {c.name} ({c.code})
+              </option>
             ))}
-          </datalist>
+          </select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="assessment">Assessment</Label>

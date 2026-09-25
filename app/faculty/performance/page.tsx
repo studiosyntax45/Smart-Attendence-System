@@ -1,6 +1,6 @@
 ﻿
 import { useQuery } from "@tanstack/react-query";
-import { TrendingUp, AlertTriangle, Layers, Percent, Users, Sigma } from "lucide-react";
+import { TrendingUp, AlertTriangle, Users, Sigma } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -14,7 +14,6 @@ import {
 } from "@/components/charts/correlation-scatter";
 import { describeR, linearRegression, pearsonR } from "@/lib/stats";
 import { analyzePerformance, predictPerformance } from "@/lib/performance";
-import { PerformanceInsight } from "@/components/performance-insight";
 import {
   Card,
   CardContent,

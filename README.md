@@ -6,7 +6,7 @@ A Smart Attendance. It combines faculty-managed attendance sessions, GPS geofenc
 
 - **Node.js 20+** ([Download](https://nodejs.org/))
 - **Python 3.11+** ([Download](https://www.python.org/downloads/))
-- **XAMPP** with MySQL ([Download](https://www.apachefriends.org/))
+- **MySQL 8** with **MySQL Workbench** ([Download](https://dev.mysql.com/downloads/workbench/)) — the schema is browsed with Prisma Studio
 
 ## Local Setup
 
@@ -37,8 +37,8 @@ node -e "console.log('JWT_REFRESH_SECRET=' + require('crypto').randomBytes(48).t
 3. Open `.env` and update these required values:
 
 ```env
-# Database (XAMPP MySQL - default credentials)
-DATABASE_URL="mysql://root:@localhost:3306/smart_attendance"
+# Database (local MySQL 8 — use the root password you set during MySQL install)
+DATABASE_URL="mysql://root:YOUR_MYSQL_PASSWORD@localhost:3306/smart_attendance"
 
 # JWT Secrets (paste the generated values from step 2)
 JWT_ACCESS_SECRET=your-generated-access-secret-here
@@ -73,16 +73,25 @@ VITE_FACE_VERIFICATION=true
 
 ### Step 3: Setup Database
 
-1. Start XAMPP and launch MySQL service
-2. Open phpMyAdmin (http://localhost/phpmyadmin)
-3. Create a new database named `smart_attendance`
-4. Run Prisma migrations and seed demo data:
+1. Start the MySQL 8 service (Windows: Services, or MySQL Notifier)
+2. Open MySQL Workbench, connect to `localhost:3306` as `root`
+3. Create the database: `CREATE DATABASE smart_attendance;`
+4. Push the Prisma schema and seed demo data:
 
 ```powershell
 npm --prefix server run prisma:generate
 npm --prefix server run prisma:push
 npm --prefix server run seed
 ```
+
+5. Browse and edit rows with Prisma Studio (http://localhost:5555):
+
+```powershell
+npm --prefix server run prisma:studio
+```
+
+> MySQL Workbench is for SQL, users and backups; Prisma Studio is the quicker way
+> to look at application rows during a demo.
 
 ### Step 4: Setup Face Recognition Service
 
@@ -133,7 +142,7 @@ Once all services are running:
 - **Backend API**: http://localhost:4000
 - **Face Service**: http://localhost:8000
 
-> **Important**: Ensure XAMPP MySQL is running before starting the backend service.
+> **Important**: Ensure the MySQL service is running before starting the backend service.
 
 ### Default Demo Users
 
@@ -141,10 +150,14 @@ After running the seed script, you can log in with these accounts:
 
 | Role    | Email/Username       | Password   |
 |---------|---------------------|------------|
-| Admin   | admin@pesu.pes.edu  | admin123   |
-| Faculty | faculty@pesu.pes.edu| faculty123 |
-| Student | student@pesu.pes.edu| student123 |
-| Parent  | parent@pesu.pes.edu | parent123  |
+| Admin   | admin@pesu.pes.edu  | Pes@12345   |
+| Faculty | faculty@pesu.pes.edu| Pes@12345 |
+| Student | student@pesu.pes.edu| Pes@12345 |
+
+The seed also creates a CSE Sem-5 cohort of 24 students (`PES1UG23CS001`–`024`, e.g.
+`nandini.murthy@pesu.pes.edu`), two more faculty, four courses with attendance, marks,
+leave, appeals, notifications and audit history. Every seeded account uses the password
+`Pes@12345`. Re-running the seed is safe.
 
 ## Development Commands
 
@@ -167,15 +180,20 @@ npm --prefix server run build
 ```
 
 ### Testing
+The test files are kept out of the demo build, in a git stash on this branch:
+
 ```powershell
-# Frontend tests
-npm run test
+git stash list    # "test files (removed from working tree for the demo build)"
+git checkout 759a952 -- "lib/*.test.ts" server/src/test face-service/tests    # older tests only
+git stash pop     # new and updated tests on top
+```
 
-# Backend tests
-npm --prefix server run test
+These checks stay in the project:
 
-# Face service tests
-face-service\.venv\Scripts\python -m unittest discover -s face-service\tests
+```powershell
+npm run typecheck
+npm --prefix server run typecheck
+npm run check:encoding
 ```
 
 ### Database Management
@@ -199,8 +217,8 @@ npm --prefix server run seed
 ## Troubleshooting
 
 ### MySQL Connection Issues
-- Ensure XAMPP MySQL service is running
-- Verify database `smart_attendance` exists in phpMyAdmin
+- Ensure the MySQL 8 service is running
+- Verify database `smart_attendance` exists (MySQL Workbench → Schemas)
 - Check `DATABASE_URL` in `.env` matches your MySQL credentials
 
 ### Face Service Errors
@@ -238,7 +256,7 @@ smart-attendance/
 ## For Viva/Demo Presentation
 
 1. **Before the demo**:
-   - Start XAMPP and ensure MySQL is running
+   - Start the MySQL service and confirm the connection in MySQL Workbench
    - Verify `.env` is configured correctly
    - Start all three services (face service, backend, frontend)
 
@@ -254,3 +272,6 @@ smart-attendance/
    - Attendance analytics and reporting
    - Marks management by faculty
    - Parent dashboard (read-only access)
+   - Attendance health bands, demo low-attendance alerts, audit logs
+   - Leave requests and appeals with faculty review
+   - Bulk CSV import with preview (students, courses, enrollments, attendance, marks)

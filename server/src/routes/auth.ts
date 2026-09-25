@@ -1,5 +1,5 @@
 
-import { Router, type Request, type Response } from "express";
+import { Router, type Response } from "express";
 import { z } from "zod";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -8,7 +8,6 @@ import { prisma } from "../config/db";
 import {
   hashPassword,
   isCollegeEmail,
-  pruneExpiredRevokedTokens,
   revokeRefreshToken,
   signAccessToken,
   signRefreshToken,
@@ -16,7 +15,7 @@ import {
   verifyRefreshToken,
   type Role,
 } from "../services/auth";
-import { asyncHandler, badRequest, conflict, HttpError, unauthorized } from "../middleware/error-handler";
+import { asyncHandler, conflict, unauthorized } from "../middleware/error-handler";
 
 export const authRouter = Router();
 
@@ -157,7 +156,13 @@ authRouter.get(
       throw unauthorized();
     }
     const { verifyAccessToken, getUserWithProfile } = await import("../services/auth");
-    const payload = verifyAccessToken(auth.slice(7));
+    let payload: ReturnType<typeof verifyAccessToken>;
+    try {
+      payload = verifyAccessToken(auth.slice(7));
+    } catch {
+      // 401, not 500: the client refreshes the access token only on a 401.
+      throw unauthorized("Session expired — please sign in again.");
+    }
     const user = await getUserWithProfile(payload.sub);
     if (!user) throw unauthorized();
     res.json({ user });
@@ -173,7 +178,7 @@ if (config.google.clientId && config.google.clientSecret) {
         callbackURL: config.google.callbackUrl,
         passReqToCallback: true,
       },
-      async (req, accessToken, refreshToken, profile, done) => {
+      async (_req, _accessToken, _refreshToken, profile, done) => {
         try {
           const email = profile.emails?.[0]?.value?.toLowerCase();
           if (!email || !isCollegeEmail(email)) {
@@ -244,6 +249,10 @@ if (config.google.clientId && config.google.clientSecret) {
       )(req, res, next);
     }
   );
+} else {
+  authRouter.get("/google", (_req, res) => {
+    res.redirect(`${config.webOrigin}/login?error=google_unavailable`);
+  });
 }
 
 export { REFRESH_COOKIE };

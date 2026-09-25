@@ -32,6 +32,20 @@ export async function resetFaceEnrollment(userId: string): Promise<AdminActionSt
 }
 
 
+export async function resetUserPassword(
+  userId: string,
+  password: string
+): Promise<AdminActionState> {
+  if (password.length < 8) return { error: "New password must be at least 8 characters." };
+  try {
+    await api.post(`/profiles/${userId}/reset-password`, { password });
+    return { message: "Password reset." };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to reset password." };
+  }
+}
+
+
 export async function createGeofence(
   _prev: AdminActionState,
   formData: FormData

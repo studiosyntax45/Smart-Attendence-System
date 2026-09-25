@@ -30,10 +30,6 @@ export interface VerifyData {
   dims?: number;
 }
 
-export function faceServiceConfigured(): boolean {
-  return !!config.faceService.url;
-}
-
 export function readFaceServiceConfig(): FaceServiceConfig | null {
   const baseUrl = config.faceService.url;
   if (!baseUrl) return null;

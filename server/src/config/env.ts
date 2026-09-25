@@ -51,6 +51,12 @@ export const config = {
     token: optional("FACE_SERVICE_TOKEN"),
   },
 
+  ollama: {
+    enabled: process.env.OLLAMA_ENABLED !== "false",
+    url: (process.env.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434").replace(/\/+$/, ""),
+    model: process.env.OLLAMA_MODEL ?? "qwen2.5:7b-instruct",
+    timeoutMs: Number(process.env.OLLAMA_TIMEOUT_MS ?? 8_000),
+  },
+
 } as const;
 
-export type AppConfig = typeof config;

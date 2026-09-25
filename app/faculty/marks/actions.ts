@@ -33,3 +33,31 @@ export async function upsertMark(
     return { error: err instanceof Error ? err.message : "Failed to save mark." };
   }
 }
+
+
+export interface BulkMarksResult {
+  error?: string;
+  saved?: number;
+  skipped?: Array<{ usn: string; reason: string }>;
+}
+
+
+export async function bulkUploadMarks(input: {
+  course: string;
+  assessment: string;
+  maxScore: number;
+  rows: Array<{ usn: string; score: number }>;
+}): Promise<BulkMarksResult> {
+  if (!input.course) return { error: "Choose a course." };
+  if (!input.assessment.trim()) return { error: "Enter an assessment name (e.g. ISA-1)." };
+  if (input.rows.length === 0) return { error: "No valid rows to upload." };
+  try {
+    const res = await api.post<{ saved: number; skipped: Array<{ usn: string; reason: string }> }>(
+      "/marks/bulk",
+      { ...input, assessment: input.assessment.trim() }
+    );
+    return { saved: res.saved, skipped: res.skipped };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Bulk upload failed." };
+  }
+}

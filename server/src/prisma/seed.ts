@@ -1,6 +1,7 @@
 
 import { prisma } from "../config/db";
 import { hashPassword } from "../services/auth";
+import { alignSession, classDay, istMorning, seedCohort } from "./seed-cohort";
 
 const PASSWORD = "Pes@12345";
 
@@ -20,6 +21,8 @@ const USERS: DemoUser[] = [
   { email: "admin@pesu.pesu.pes.edu", fullName: "Demo Admin 2", role: "admin", rollNo: null },
 ];
 
+const DEMO_ROLLS = USERS.map((u) => u.rollNo).filter((r): r is string => r !== null);
+
 async function ensureUsers() {
   const passwordHash = await hashPassword(PASSWORD);
   for (const u of USERS) {
@@ -36,7 +39,7 @@ async function ensureUsers() {
       update: { fullName: u.fullName, role: u.role, rollNo: u.rollNo },
       create: { id: user.id, fullName: u.fullName, role: u.role, rollNo: u.rollNo },
     });
-    console.log(`  user ${u.email} (${u.role}) â€” password ${PASSWORD}`);
+    console.log(`  user ${u.email} (${u.role}) - password ${PASSWORD}`);
   }
 }
 
@@ -89,10 +92,11 @@ async function ensureCourses() {
 }
 
 async function ensureEnrollmentsAndSessions(fenceId: string) {
-  const students = await prisma.profile.findMany({ where: { role: "student" } });
+  // Original demo accounts only; seed-cohort.ts covers the Sem-5 cohort.
+  const students = await prisma.profile.findMany({ where: { role: "student", rollNo: { in: DEMO_ROLLS } } });
   const faculty = await prisma.profile.findFirst({ where: { role: "faculty" } });
   if (!faculty) {
-    console.warn("  no faculty user â€” skipping sessions + attendance");
+    console.warn("  no faculty user - skipping sessions + attendance");
     return;
   }
 
@@ -105,8 +109,9 @@ async function ensureEnrollmentsAndSessions(fenceId: string) {
       });
     }
     for (let n = 1; n <= c.conducted; n++) {
-      const openedAt = new Date(Date.now() - (c.conducted - n) * 2 * 86_400_000 - 20 * 86_400_000);
+      const openedAt = new Date(classDay(istMorning(), (c.conducted - n) * 2 + 20).getTime() + 60 * 60_000);
       const closedAt = new Date(openedAt.getTime() + 50 * 60_000);
+      await alignSession(`${c.code}-${n}`.padEnd(36, "0").slice(0, 36), openedAt, 50);
       await prisma.session.upsert({
         where: { id: `${c.code}-${n}`.padEnd(36, "0").slice(0, 36) },
         update: {},
@@ -120,7 +125,7 @@ async function ensureEnrollmentsAndSessions(fenceId: string) {
         },
       });
     }
-    students.forEach(async (s, idx) => {
+    for (const [idx, s] of students.entries()) {
       const attendedAdj = Math.max(c.late + c.partial, c.attended - idx * 3);
       for (let n = 1; n <= c.conducted; n++) {
         if (n > attendedAdj) continue;
@@ -145,14 +150,15 @@ async function ensureEnrollmentsAndSessions(fenceId: string) {
           },
         });
       }
-    });
+    }
   }
-  console.log(`  enrollments + sessions + attendance for ${COURSES.length} courses Ã— ${students.length} students`);
+  console.log(`  enrollments + sessions + attendance for ${COURSES.length} courses x ${students.length} students`);
 }
 
 async function ensureMarks() {
   const faculty = await prisma.profile.findFirst({ where: { role: "faculty" } });
-  const students = await prisma.profile.findMany({ where: { role: "student" } });
+  // Original demo accounts only; seed-cohort.ts covers the Sem-5 cohort.
+  const students = await prisma.profile.findMany({ where: { role: "student", rollNo: { in: DEMO_ROLLS } } });
   if (!faculty) return;
   for (const [idx, s] of students.entries()) {
     for (const c of COURSES) {
@@ -166,7 +172,7 @@ async function ensureMarks() {
       }
     }
   }
-  console.log(`  marks for ${students.length} students Ã— ${COURSES.length} courses`);
+  console.log(`  marks for ${students.length} students x ${COURSES.length} courses`);
 }
 
 async function ensureRichProfile() {
@@ -207,7 +213,7 @@ async function ensureGpsSettings() {
 }
 
 async function main() {
-  console.log("Seeding demo dataâ€¦");
+  console.log("Seeding demo data...");
   await ensureUsers();
   const fence = await ensureGeofence();
   await ensureCourses();
@@ -215,6 +221,7 @@ async function main() {
   await ensureMarks();
   await ensureRichProfile();
   await ensureGpsSettings();
+  await seedCohort(fence.id);
   console.log("Done.");
 }
 

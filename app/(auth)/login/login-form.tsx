@@ -1,6 +1,6 @@
 ﻿
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowRight, Loader2, Lock, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -115,7 +115,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      
+
       <form onSubmit={handleGoogle}>
         <Button
           type="submit"
@@ -143,11 +143,11 @@ export function LoginForm() {
       </p>
       {googleError && <ErrorAlert message={googleError} />}
 
-      
+
       <div className="flex items-center gap-3" aria-hidden="true">
         <span className="h-px flex-1 bg-border" />
         <span className="text-xs uppercase tracking-wide text-muted-foreground">
-          Faculty &amp; admin
+          Or with email &amp; password
         </span>
         <span className="h-px flex-1 bg-border" />
       </div>
@@ -167,7 +167,15 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              to="/forgot-password"
+              className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <IconInput
             icon={Lock}
             id="password"
