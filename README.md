@@ -1,6 +1,6 @@
 # PES Smart Attendance
 
-A Smart Attendance. It combines faculty-managed attendance sessions, GPS geofencing, face verification, attendance reporting, marks, schedules, and parent read-only access.
+A college attendance system for PES University. Students mark attendance with face verification inside a GPS geofence while their faculty has a session open. On top of that it covers marks and results, attendance health and low-attendance alerts, leave requests and appeals, an audit log, bulk CSV imports, and a read-only parent view.
 
 ## Prerequisites
 
@@ -70,6 +70,17 @@ VITE_FACE_VERIFICATION=true
 > - `GOOGLE_CLIENT_ID`
 > - `GOOGLE_CLIENT_SECRET`
 > - `GOOGLE_CALLBACK_URL=http://localhost:4000/auth/google/callback`
+>
+> Without them the Google button returns to the login page with a short explanation, and everyone signs in with email and password.
+
+> **Optional: AI performance feedback.** The student dashboard can ask a local [Ollama](https://ollama.com) model for study advice. Without it, the card shows rule-based advice instead. These are the defaults:
+> ```env
+> OLLAMA_ENABLED=true
+> OLLAMA_BASE_URL=http://127.0.0.1:11434
+> OLLAMA_MODEL=qwen2.5:7b-instruct
+> OLLAMA_TIMEOUT_MS=8000
+> ```
+> To use it, install Ollama and run `ollama pull qwen2.5:7b-instruct`. Set `OLLAMA_ENABLED=false` to always use the rule-based advice.
 
 ### Step 3: Setup Database
 
@@ -180,7 +191,7 @@ npm --prefix server run build
 ```
 
 ### Testing
-The test files are kept out of the demo build, in a git stash on this branch:
+The test files are kept out of the demo build, in a git stash on this branch. A stash lives only in the local clone and is not pushed:
 
 ```powershell
 git stash list    # "test files (removed from working tree for the demo build)"
@@ -237,6 +248,12 @@ If you see authentication errors:
 - Ensure JWT secrets are generated and set in `.env`
 - Restart the backend service after updating `.env`
 
+### "You appear to be … m from the classroom"
+The seeded room, Room B-204, uses fixed coordinates. Sign in as admin, open Dashboard → Classroom geofences, stand in the real room and click **Use my current location**.
+
+### Face enrolment fails
+With `VITE_FACE_VERIFICATION=true`, enrolment sends one photo to the face service, so that service must be running on port 8000. The camera needs a real webcam, and the browser allows it on `localhost`.
+
 ## Project Structure
 
 ```
@@ -258,20 +275,23 @@ smart-attendance/
 1. **Before the demo**:
    - Start the MySQL service and confirm the connection in MySQL Workbench
    - Verify `.env` is configured correctly
-   - Start all three services (face service, backend, frontend)
+   - Start all three services (face service, backend, frontend). Ollama is optional.
+   - Move the Room B-204 geofence to the room you are presenting in (see Troubleshooting)
+   - Enrol one student's face on the demo laptop beforehand
 
-2. **Demo credentials are seeded** - see Default Demo Users table above
+2. **Demo credentials are seeded** - see Default Demo Users table above. Parents sign in at `/parent-login` with their child's student email and password.
 
-3. **No external services required** - Everything runs locally
+3. **No external services required** - Everything runs locally. Notifications are demo-only; no SMS or email is sent.
 
 4. **Key features to demonstrate**:
-   - Multi-role authentication (Admin, Faculty, Student, Parent)
+   - Multi-role authentication (Admin, Faculty, Student, Parent), with admin password reset for forgotten passwords
    - Face enrollment and verification
-   - GPS-based geofencing for attendance
-   - Real-time attendance tracking
-   - Attendance analytics and reporting
-   - Marks management by faculty
-   - Parent dashboard (read-only access)
-   - Attendance health bands, demo low-attendance alerts, audit logs
-   - Leave requests and appeals with faculty review
-   - Bulk CSV import with preview (students, courses, enrollments, attendance, marks)
+   - GPS-based geofencing for attendance, with a per-session radius (default 100 m)
+   - Live attendance roster as students mark in
+   - Attendance health: students grouped as 75% and above, 65–74%, and below 65%, plus low-attendance alerts
+   - Attendance record search with filters; CSV/PDF export of the filtered rows
+   - Marks and results (CGPA), with performance analytics
+   - Leave requests (date range) and per-session appeals, with faculty review and comments
+   - Audit log of who changed what
+   - Parent dashboard (read-only)
+   - Bulk CSV import with a preview before anything is saved: students, faculty, courses, enrollments, weekly timetable, attendance corrections and marks. Templates can be downloaded on each import screen, and copies are in `public/templates/`.
