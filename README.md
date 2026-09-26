@@ -2,7 +2,7 @@
 
 A college attendance system for PES University. Students mark attendance with face verification inside a GPS geofence while their faculty has a session open. On top of that it covers marks and results, attendance health and low-attendance alerts, leave requests and appeals, an audit log, bulk CSV imports, AI study advice, and a read-only parent view.
 
-This guide assumes **no prior experience**. Follow it top to bottom and you will have the whole system running on your own laptop. It is written for **Windows** (PowerShell); where macOS or Linux differ, there is a note.
+This guide assumes **no prior experience**. Follow it top to bottom and you will have the whole system running on your own laptop. It is written for **Windows 10/11**, and every command is typed into **PowerShell**.
 
 ---
 
@@ -83,9 +83,6 @@ On the first installer screen, **tick "Add python.exe to PATH"**, then click *In
 6. **Windows Service**: keep *Configure MySQL Server as a Windows Service* and *Start the MySQL Server at System Startup* ticked. This keeps MySQL running in the background.
 7. Finish the installer. Install **MySQL Workbench** too if it was not included.
 
-> **macOS:** install with the `.dmg` from the same page, or `brew install mysql@8.4 && brew services start mysql@8.4`.
-> **Linux (Ubuntu):** `sudo apt install mysql-server`, then `sudo mysql_secure_installation`.
-
 ### 2.4 Check that everything installed
 
 **Close and reopen** PowerShell so it picks up the new programs (Start menu → type *PowerShell* → open *Windows PowerShell*). Then run:
@@ -104,8 +101,6 @@ Each should print a version number: Node `v20.x` or `v22.x`, Python `3.11.x`.
 > Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 > ```
 > (Answer `Y` if asked.)
->
-> **macOS/Linux:** use `python3.11 --version` instead of `py -3.11 --version`.
 
 ---
 
@@ -149,9 +144,7 @@ Warnings such as `npm WARN deprecated` are normal. Only a line that says `npm ER
 
 ### 5.1 Make sure MySQL is running
 
-- **Windows:** press `Win + R`, type `services.msc`, press Enter. Find **MySQL80** (or **MySQL84**). Its status should be *Running*. If not, right-click it and choose **Start**.
-- **macOS (Homebrew):** `brew services start mysql@8.4`
-- **Linux:** `sudo systemctl start mysql`
+Press `Win + R`, type `services.msc`, press Enter. Find **MySQL80** (or **MySQL84**). Its status should be *Running*. If not, right-click it and choose **Start**.
 
 ### 5.2 Check your password works (recommended)
 
@@ -178,8 +171,6 @@ The project reads all its settings from one file named `.env` in the project roo
 ```powershell
 copy .env.example .env
 ```
-
-(macOS/Linux: `cp .env.example .env`)
 
 ### 6.2 Generate two secret keys
 
@@ -260,13 +251,6 @@ face-service\.venv\Scripts\python -m pip install -r face-service\requirements.tx
 
 This downloads TensorFlow and other large packages (about 1 GB). It can take 5 to 15 minutes.
 
-> **macOS/Linux:**
-> ```bash
-> python3.11 -m venv face-service/.venv
-> face-service/.venv/bin/python -m pip install --upgrade pip
-> face-service/.venv/bin/python -m pip install -r face-service/requirements.txt
-> ```
-
 ### 8.2 First start downloads the face model
 
 The first time the face service starts (step 10), it downloads its recognition model (about 100 MB) and loads it. Allow a minute or two, and keep the internet on for that first start. Later starts are quick.
@@ -279,7 +263,7 @@ The student dashboard shows study advice. With Ollama running, a local AI model 
 
 ### 9.1 Install and download a model
 
-1. Install Ollama from https://ollama.com/download (version **0.5 or newer**). On Windows and macOS it starts automatically and shows an icon in the system tray / menu bar.
+1. Install Ollama from https://ollama.com/download (version **0.5 or newer**). It starts automatically and shows a llama icon in the system tray (bottom-right, next to the clock).
 2. Download the model the project uses (about 4.7 GB; needs about 8 GB of RAM):
 
    ```powershell
@@ -333,8 +317,6 @@ Start MySQL first (it normally starts with Windows, see 5.1). Then open **three 
 ```powershell
 face-service\.venv\Scripts\python -m uvicorn app:app --app-dir face-service --host 127.0.0.1 --port 8000
 ```
-
-(macOS/Linux: `face-service/.venv/bin/python -m uvicorn app:app --app-dir face-service --host 127.0.0.1 --port 8000`)
 
 Ready when it prints `Application startup complete`.
 
