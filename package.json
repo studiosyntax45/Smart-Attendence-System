@@ -11,7 +11,8 @@
                     "typecheck":  "tsc --noEmit",
                     "download-models":  "node scripts/download-models.mjs",
                     "seed-users":  "node scripts/create-demo-users.mjs",
-                    "check:encoding": "node scripts/check-text-encoding.mjs"
+                    "check:encoding": "node scripts/check-text-encoding.mjs",
+                    "doctor": "node scripts/doctor.mjs"
                 },
     "dependencies":  {
                          "@gsap/react":  "^2.1.2",

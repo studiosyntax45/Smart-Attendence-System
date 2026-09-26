@@ -389,7 +389,7 @@ npm install
 npm --prefix server install
 ```
 
-then start the backend with `npm --prefix server run dev` as usual. It updates the database tables automatically before starting. If `face-service/requirements.txt` changed, also re-run the `pip install` line from 8.1.
+then start the backend with `npm --prefix server run dev` as usual. Read the output of `git pull`: if it says *error* or *Aborting*, nothing was updated (see [Troubleshooting](#13-troubleshooting)). `npm run doctor` tells you whether your code is up to date. It updates the database tables automatically before starting. If `face-service/requirements.txt` changed, also re-run the `pip install` line from 8.1.
 
 **Start over with fresh demo data:** in MySQL Workbench run `DROP DATABASE smart_attendance;`, then repeat [step 7](#7-create-the-tables-and-demo-data). This deletes all data.
 
@@ -398,6 +398,14 @@ then start the backend with `npm --prefix server run dev` as usual. It updates t
 ---
 
 ## 13. Troubleshooting
+
+**Start here:** with the app running, open a new PowerShell window in the project folder and run
+
+```powershell
+npm run doctor
+```
+
+It checks your code version, installed packages, `.env`, MySQL, and every running part, and prints `[FAIL]` lines with the exact command that fixes each problem. Fix them from the top down and run it again.
 
 ### Installation
 
