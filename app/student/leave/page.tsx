@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
@@ -28,11 +28,10 @@ const fmt = (d: string) => new Date(d).toLocaleDateString([], { day: "numeric", 
 
 export default function StudentLeavePage() {
   const { profile, parentView } = useAuth();
-  const qc = useQueryClient();
   const [form, setForm] = useState<LeaveForm>({ ...EMPTY, fromDate: today(), toDate: today() });
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["student-leave", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
@@ -41,19 +40,13 @@ export default function StudentLeavePage() {
     },
   });
 
-  const refresh = () => {
-    qc.invalidateQueries({ queryKey: ["student-leave"] });
-    qc.invalidateQueries({ queryKey: ["student-dashboard"] });
-  };
-
   const submit = useMutation({
     mutationFn: () => createLeaveApplication(form),
     onSuccess: () => {
       setForm({ ...EMPTY, fromDate: today(), toDate: today() });
-      refresh();
     },
   });
-  const withdraw = useMutation({ mutationFn: withdrawLeaveApplication, onSuccess: refresh });
+  const withdraw = useMutation({ mutationFn: withdrawLeaveApplication });
 
   if (!profile || isLoading) return <PageSkeleton />;
   if (isError || !data) return <SectionError error={new Error("Could not load your leave requests.")} reset={() => refetch()} />;

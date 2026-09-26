@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 export default function MarkAttendancePage() {
   const { profile } = useAuth();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["mark-attendance", profile?.id],
     enabled: !!profile,
     queryFn: async () => {

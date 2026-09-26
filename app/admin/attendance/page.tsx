@@ -24,6 +24,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api-client";
+import { clickable, useDrillDown } from "@/components/drilldown";
+import {
+  courseAveragesSpec,
+  courseStudentsSpec,
+  rollupStudents,
+  studentsSpec,
+  type HealthCourseRow,
+} from "@/components/drill-specs";
 
 function pctTone(pct: number | null): string {
   if (pct === null) return "bg-muted-foreground/40";
@@ -32,13 +41,17 @@ function pctTone(pct: number | null): string {
 
 export default function AdminAttendance() {
   const { profile } = useAuth();
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-attendance", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
-      const rows = await fetchAllAttendance();
-      return { rows };
+      const [rows, health] = await Promise.all([
+        fetchAllAttendance(),
+        api.get<{ courseRows: HealthCourseRow[] }>("/attendance-health"),
+      ]);
+      return { rows, courseRows: health.courseRows };
     },
   });
 
@@ -69,6 +82,9 @@ export default function AdminAttendance() {
         ) / 100
       : null;
   const worst = coursesWithData[0] ?? null;
+  const { courseRows } = data;
+  const byCourse = courseAveragesSpec("Attendance by course", courseRows);
+  const openCourse = (code: string, name: string) => open(courseStudentsSpec(code, name, courseRows));
   const exportColumns: ExportColumn[] = [
     { key: "course", label: "Course" },
     { key: "code", label: "Code" },
@@ -113,6 +129,7 @@ export default function AdminAttendance() {
               countTo={courseCount}
               sub="With enrollments"
               icon={<Layers />}
+              drill={byCourse}
             />
             <KpiCard
               label="Students below 75%"
@@ -121,12 +138,18 @@ export default function AdminAttendance() {
               sub="In one or more courses"
               icon={<AlertTriangle />}
               tone={studentsBelow > 0 ? "absent" : "present"}
+              drill={studentsSpec(
+                "Students below 75% in a course",
+                rollupStudents(courseRows.filter((r) => r.status !== "good")),
+                { subtitle: "Attendance shown is across their below-75% courses only. Click a student for every course." }
+              )}
             />
             <KpiCard
               label="Institution average"
               value={institutionAvg !== null ? `${institutionAvg}%` : "—"}
               sub="Mean of course averages"
               icon={<Percent />}
+              drill={byCourse}
               tone={
                 institutionAvg === null
                   ? "neutral"
@@ -144,6 +167,7 @@ export default function AdminAttendance() {
               }
               sub={worst ? worst.course_name : "No data"}
               icon={<TrendingDown />}
+              drill={worst ? courseStudentsSpec(worst.course_code, worst.course_name, courseRows) : undefined}
               tone={
                 worst && worst.avgOfficialPct !== null && worst.avgOfficialPct < 75
                   ? "absent"
@@ -186,9 +210,9 @@ export default function AdminAttendance() {
                     {rollups.map((r) => (
                       <tr
                         key={r.course_code}
-                        className={cn(
-                          "border-b transition-colors last:border-0 hover:bg-muted/50",
-                          r.belowThreshold > 0 && "bg-status-absent/5"
+                        {...clickable(
+                          () => openCourse(r.course_code, r.course_name),
+                          cn("border-b transition-colors last:border-0 hover:bg-muted/50", r.belowThreshold > 0 && "bg-status-absent/5")
                         )}
                       >
                         <td className="py-3 pr-4">

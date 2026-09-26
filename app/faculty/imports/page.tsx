@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { norm } from "@/lib/csv";
@@ -56,12 +56,11 @@ const TABS: Array<{ id: ImportSpecId; adminOnly: boolean; endpoint: string; desc
 
 export default function ImportsPage() {
   const { profile } = useAuth();
-  const qc = useQueryClient();
   const isAdmin = profile?.role === "admin";
   const tabs = TABS.filter((t) => isAdmin || !t.adminOnly);
   const [active, setActive] = useState<ImportSpecId>(tabs[0]?.id ?? "enrollments");
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["import-context"],
     enabled: !!profile,
     queryFn: async () => {
@@ -130,11 +129,6 @@ export default function ImportsPage() {
             ctx={ctx}
             endpoint={tab.endpoint}
             note={tab.note}
-            onDone={() => {
-              qc.invalidateQueries({ queryKey: ["import-context"] });
-              qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
-              qc.invalidateQueries({ queryKey: ["attendance-health"] });
-            }}
           />
         </CardContent>
       </Card>

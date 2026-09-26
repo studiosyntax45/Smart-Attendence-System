@@ -36,7 +36,7 @@ export default function CoursesPage() {
   const course = searchParams.get("course") ?? undefined;
   const edit = searchParams.get("edit") ?? undefined;
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["faculty-courses", profile?.id],
     enabled: !!profile,
     queryFn: async () => {

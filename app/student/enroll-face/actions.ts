@@ -27,7 +27,7 @@ export async function enrollFace(input: EnrollInput): Promise<EnrollResult> {
       descriptor: input.descriptor,
       image: input.image,
       serverVerification: FACE_VERIFICATION_ENABLED,
-    });
+    }, { deferRefresh: true });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Failed to enrol face." };

@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { AttendanceStatus } from "@/lib/utils";
+import { clickable, useDrillDown } from "@/components/drilldown";
 
 interface AttendanceRow {
   id: string;
@@ -44,8 +45,9 @@ export default function ParentDashboard() {
   const { profile } = useAuth();
   const child = profile;
   const overview = useStudentOverview(child?.id);
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["parent-dashboard", child?.id],
     enabled: !!child,
     queryFn: async () => {
@@ -103,6 +105,8 @@ export default function ParentDashboard() {
   const pct = overview.data?.overallPct == null ? null : Math.round(overview.data.overallPct);
   const attended = overview.data?.attended ?? 0;
   const held = overview.data?.conducted ?? 0;
+  const openCourse = (code: string | undefined) =>
+    code && open({ kind: "course", studentId: child.id, courseCode: code });
 
   return (
     <GsapReveal className="space-y-6">
@@ -131,7 +135,12 @@ export default function ParentDashboard() {
             <CardDescription>All closed sessions in {child.fullName.split(" ")[0]}&apos;s courses</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center pb-6 pt-4">
-            <AttendanceRing pct={pct} attended={attended} held={held} />
+            <div
+              {...clickable(() => open({ kind: "student", studentId: child.id, name: child.fullName, usn: child.rollNo }), "rounded-full")}
+              aria-label="Attendance by course"
+            >
+              <AttendanceRing pct={pct} attended={attended} held={held} />
+            </div>
           </CardContent>
         </Card>
         <div className="space-y-4 lg:col-span-3">
@@ -176,7 +185,7 @@ export default function ParentDashboard() {
                     return (
                       <tr
                         key={m.id}
-                        className="border-b transition-colors last:border-0 hover:bg-muted/50"
+                        {...clickable(() => openCourse(m.course), "border-b transition-colors last:border-0 hover:bg-muted/50")}
                       >
                         <td className="py-2.5 pr-4 font-medium">{m.course}</td>
                         <td className="py-2.5 pr-4">{m.assessment}</td>
@@ -223,7 +232,7 @@ export default function ParentDashboard() {
                   {records.slice(0, 10).map((r) => (
                     <tr
                       key={r.id}
-                      className="border-b transition-colors last:border-0 hover:bg-muted/50"
+                      {...clickable(() => openCourse(r.sessions?.course), "border-b transition-colors last:border-0 hover:bg-muted/50")}
                     >
                       <td className="py-2.5 pr-4 font-medium">
                         {r.sessions?.course ?? "—"}

@@ -41,7 +41,7 @@ export default function AuditLogsPage() {
     queryFn: () => api.get<{ profiles: Array<{ id: string; fullName: string; role: string }> }>("/profiles"),
   });
 
-  const { data, isLoading, isFetching, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["audit-logs", filters],
     queryFn: () => {
       const qs = new URLSearchParams(Object.entries(filters).filter(([, v]) => v !== ""));

@@ -28,6 +28,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { clickable, useDrillDown, type DrillSpec } from "@/components/drilldown";
 
 interface CourseOption {
   code: string;
@@ -39,8 +40,9 @@ export default function FacultyAttendance() {
   const { profile } = useAuth();
   const [searchParams] = useSearchParams();
   const course = searchParams.get("course") ?? undefined;
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["faculty-attendance", profile?.id, course ?? null],
     enabled: !!profile,
     queryFn: async () => {
@@ -126,6 +128,31 @@ export default function FacultyAttendance() {
         ) / 100
       : null;
 
+  const courseName = selectedCourse?.name ?? selected ?? "";
+  const openStudent = (studentId: string) =>
+    selected && open({ kind: "course", studentId, courseCode: selected, courseName: `${courseName} · ${nameById.get(studentId)?.full_name ?? ""}` });
+  const studentList = (title: string, list: AttendanceSummaryRow[], empty?: string): DrillSpec => ({
+    kind: "list",
+    title,
+    subtitle: "Click a student for their sessions in this course.",
+    columns: [
+      { key: "name", label: "Student" },
+      { key: "usn", label: "USN" },
+      { key: "classes", label: "Attended", numeric: true },
+      { key: "pct", label: "Official %", numeric: true },
+    ],
+    rows: list.map((r) => ({
+      _studentId: r.student_id,
+      _courseCode: selected ?? undefined,
+      _name: `${courseName} · ${nameById.get(r.student_id)?.full_name ?? ""}`,
+      name: nameById.get(r.student_id)?.full_name ?? "—",
+      usn: nameById.get(r.student_id)?.roll_no ?? "—",
+      classes: r.conducted ? `${attendedCount(r)}/${r.conducted}` : "—",
+      pct: formatPct(r.official_pct),
+    })),
+    empty,
+  });
+
   return (
     <GsapReveal className="space-y-6">
       <PageTitle title="Course Attendance" />
@@ -173,6 +200,7 @@ export default function FacultyAttendance() {
               countTo={rows.length}
               sub={selectedCourse ? selectedCourse.semester : ""}
               icon={<Users />}
+              drill={studentList(`Enrolled in ${courseName}`, sorted)}
             />
             <KpiCard
               label="Below 75%"
@@ -181,12 +209,14 @@ export default function FacultyAttendance() {
               sub="Not eligible"
               icon={<AlertTriangle />}
               tone={belowCount > 0 ? "absent" : "present"}
+              drill={studentList("Below 75%", sorted.filter((r) => r.conducted > 0 && !isEligible(r.official_pct)), "Every student is at 75% or above.")}
             />
             <KpiCard
               label="Class average"
               value={avgOfficial !== null ? `${avgOfficial}%` : "—"}
               sub="Official attendance %"
               icon={<Percent />}
+              drill={studentList(`${courseName}: attendance per student`, sorted)}
               tone={
                 avgOfficial === null
                   ? "neutral"
@@ -253,9 +283,9 @@ export default function FacultyAttendance() {
                         return (
                           <tr
                             key={r.student_id}
-                            className={cn(
-                              "border-b transition-colors last:border-0 hover:bg-muted/50",
-                              short && "bg-status-absent/5"
+                            {...clickable(
+                              () => openStudent(r.student_id),
+                              cn("border-b transition-colors last:border-0 hover:bg-muted/50", short && "bg-status-absent/5")
                             )}
                           >
                             <td className="py-2.5 pr-4 font-medium">

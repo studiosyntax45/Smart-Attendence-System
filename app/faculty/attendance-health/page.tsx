@@ -12,6 +12,7 @@ import { PageTitle } from "@/src/page-title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { clickable, useDrillDown } from "@/components/drilldown";
 
 interface Row {
   studentId: string;
@@ -40,13 +41,14 @@ const selectClass =
 export default function AttendanceHealthPage() {
   const { profile } = useAuth();
   const qc = useQueryClient();
+  const { open } = useDrillDown();
   const [bucket, setBucket] = useState<"all" | HealthLevel>("all");
   const [view, setView] = useState<"student" | "course">("student");
   const [course, setCourse] = useState("");
   const [section, setSection] = useState("");
   const [q, setQ] = useState("");
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["attendance-health"],
     enabled: !!profile,
     queryFn: () => api.get<Health>("/attendance-health"),
@@ -274,7 +276,18 @@ export default function AttendanceHealthPage() {
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={`${r.studentId}-${r.courseCode ?? ""}`} className="border-b last:border-0 hover:bg-muted/40">
+                    <tr
+                      key={`${r.studentId}-${r.courseCode ?? ""}`}
+                      {...clickable(
+                        () =>
+                          open(
+                            r.courseCode
+                              ? { kind: "course", studentId: r.studentId, courseCode: r.courseCode, courseName: `${r.courseName ?? r.courseCode} · ${r.fullName}` }
+                              : { kind: "student", studentId: r.studentId, name: r.fullName, usn: r.rollNo }
+                          ),
+                        "border-b last:border-0 hover:bg-muted/40"
+                      )}
+                    >
                       <td className="py-2.5 pr-4 font-medium">{r.fullName}</td>
                       <td className="py-2.5 pr-4 font-mono text-xs">{r.rollNo ?? "—"}</td>
                       {view === "course" && (

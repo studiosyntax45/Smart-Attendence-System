@@ -9,6 +9,7 @@ import {
   hashPassword,
   isCollegeEmail,
   revokeRefreshToken,
+  rotateRefreshToken,
   signAccessToken,
   signRefreshToken,
   verifyPassword,
@@ -129,7 +130,7 @@ authRouter.post(
     }
 
     const expiry = payload.exp ? new Date(payload.exp * 1000) : undefined;
-    await revokeRefreshToken(payload.jti, expiry);
+    await rotateRefreshToken(payload.jti, expiry);
     const tokens = await issueTokensForUser(payload.sub, res);
     res.json({ user: tokens.user, accessToken: tokens.accessToken });
   })

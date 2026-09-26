@@ -12,6 +12,7 @@ import { MarksForm, type StudentOption } from "@/components/faculty/marks-form";
 import { BulkMarksUpload } from "@/components/faculty/bulk-marks-upload";
 import { ExportMenu } from "@/components/export-menu";
 import { exportFilename } from "@/lib/export";
+import { clickable, useDrillDown } from "@/components/drilldown";
 
 export interface MarkRow {
   id: string;
@@ -33,9 +34,10 @@ import {
 
 export default function MarksPage() {
   const { profile } = useAuth();
+  const { open } = useDrillDown();
   const [exportCourse, setExportCourse] = useState("");
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["faculty-marks", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
@@ -210,7 +212,13 @@ export default function MarksPage() {
                   </thead>
                   <tbody>
                     {marks.map((m) => (
-                      <tr key={m.id} className="border-b transition-colors last:border-0 hover:bg-muted/50">
+                      <tr
+                        key={m.id}
+                        {...clickable(
+                          () => open({ kind: "student", studentId: m.student_id, name: m.profiles?.full_name ?? "Student", usn: m.profiles?.roll_no }),
+                          "border-b transition-colors last:border-0 hover:bg-muted/50"
+                        )}
+                      >
                         <td className="py-2.5 pr-4 font-medium">
                           {m.profiles?.full_name ?? "—"}
                           {m.profiles?.roll_no && (

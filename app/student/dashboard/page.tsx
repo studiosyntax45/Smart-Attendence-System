@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { startOfToday, type AttendanceStatus } from "@/lib/utils";
+import { clickable, useDrillDown } from "@/components/drilldown";
 
 interface AttendanceRow {
   id: string;
@@ -37,8 +38,9 @@ interface AttendanceRow {
 export default function StudentDashboard() {
   const { profile } = useAuth();
   const overview = useStudentOverview(profile?.id);
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["student-dashboard", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
@@ -125,11 +127,13 @@ export default function StudentDashboard() {
         )
       : null;
 
-  const chartData: DurationDatum[] = records
+  const openCourse = (code: string | undefined) =>
+    code && open({ kind: "course", studentId: profile.id, courseCode: code });
+  const timed = records
     .filter((r) => r.duration_min !== null)
     .slice(0, 10)
-    .reverse()
-    .map((r) => ({
+    .reverse();
+  const chartData: DurationDatum[] = timed.map((r) => ({
       label: new Date(r.entry_time).toLocaleDateString([], {
         month: "short",
         day: "numeric",
@@ -175,7 +179,12 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center pb-6 pt-4">
-            <AttendanceRing pct={pct} attended={attended} held={effectiveHeld} />
+            <div
+              {...clickable(() => open({ kind: "student", studentId: profile.id, name: profile.fullName, usn: profile.rollNo }), "rounded-full")}
+              aria-label="Attendance by course"
+            >
+              <AttendanceRing pct={pct} attended={attended} held={effectiveHeld} />
+            </div>
           </CardContent>
         </Card>
         <div className="lg:col-span-3">
@@ -199,7 +208,7 @@ export default function StudentDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DurationBars data={chartData} />
+            <DurationBars data={chartData} onBarClick={(i) => openCourse(timed[i]?.sessions?.course)} />
           </CardContent>
         </Card>
       )}
@@ -245,7 +254,7 @@ export default function StudentDashboard() {
                       (Number(m.score) / Number(m.max_score)) * 100
                     );
                     return (
-                      <tr key={m.id} className="border-b transition-colors last:border-0 hover:bg-muted/50">
+                      <tr key={m.id} {...clickable(() => openCourse(m.course), "border-b transition-colors last:border-0 hover:bg-muted/50")}>
                         <td className="py-2.5 pr-4 font-medium">{m.course}</td>
                         <td className="py-2.5 pr-4">{m.assessment}</td>
                         <td className="py-2.5 pr-4 font-mono text-xs">
@@ -291,7 +300,7 @@ export default function StudentDashboard() {
                   {records.slice(0, 10).map((r) => (
                     <tr
                       key={r.id}
-                      className="border-b transition-colors last:border-0 hover:bg-muted/50"
+                      {...clickable(() => openCourse(r.sessions?.course), "border-b transition-colors last:border-0 hover:bg-muted/50")}
                     >
                       <td className="py-2.5 pr-4 font-medium">
                         {r.sessions?.course ?? "—"}

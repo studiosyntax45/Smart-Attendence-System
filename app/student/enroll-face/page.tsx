@@ -22,7 +22,7 @@ export default function EnrollFacePage() {
   const { profile } = useAuth();
   const serverVerification = FACE_VERIFICATION_ENABLED;
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["enroll-face", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
