@@ -1,4 +1,3 @@
-
 import { api } from "./api-client";
 import type { AttendanceStatus } from "./utils";
 
@@ -26,9 +25,7 @@ export interface LeaveRequest {
 export const REASON_MIN = 5;
 export const REASON_MAX = 500;
 
-
 export const APPEALABLE_STATUSES: AttendanceStatus[] = ["absent", "late", "partial"];
-
 
 export function validateLeaveReason(reason: string): string | null {
   const trimmed = reason.trim();
@@ -36,7 +33,6 @@ export function validateLeaveReason(reason: string): string | null {
   if (trimmed.length > REASON_MAX) return `Reason must be at most ${REASON_MAX} characters.`;
   return null;
 }
-
 
 export function canAppealStatus(
   status: AttendanceStatus | null | undefined,
@@ -46,7 +42,6 @@ export function canAppealStatus(
   if (status == null) return true;
   return APPEALABLE_STATUSES.includes(status);
 }
-
 
 export async function fileLeaveRequest(
   sessionId: string,
@@ -62,7 +57,6 @@ export async function fileLeaveRequest(
     return { error: err instanceof Error ? err.message : "Failed to submit appeal." };
   }
 }
-
 
 interface ApiLeaveRequest {
   id: string;
@@ -107,7 +101,6 @@ export async function listPendingLeaveRequests(): Promise<LeaveRequest[]> {
   }
 }
 
-
 export async function reviewLeaveRequest(
   id: string,
   decision: "approved" | "rejected",
@@ -127,7 +120,6 @@ export async function reviewLeaveRequest(
     return { error: err instanceof Error ? err.message : "Failed to review appeal." };
   }
 }
-
 
 export async function listMyLeaveRequests(): Promise<LeaveRequest[]> {
   try {

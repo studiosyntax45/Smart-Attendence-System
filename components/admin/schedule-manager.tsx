@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -51,7 +50,6 @@ const INITIAL: ScheduleActionState = {};
 
 const selectClass =
   "flex h-11 w-full cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
 
 export function ScheduleManager({
   entries,
@@ -202,7 +200,7 @@ export function ScheduleManager({
 
   return (
     <div className="space-y-5">
-      
+
       {classList.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/40 p-3">
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -364,7 +362,6 @@ export function ScheduleManager({
           )}
         </div>
 
-        
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="classId">Class Section</Label>
@@ -412,7 +409,6 @@ export function ScheduleManager({
           </div>
         </div>
 
-        
         {(selectedCourseOption === "__OTHER__" ||
           selectedCourseOption === "__BREAK__") && (
           <div className="space-y-1.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">

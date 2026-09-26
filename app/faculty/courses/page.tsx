@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { BookMarked, Pencil, UserPlus } from "lucide-react";
 import { api } from "@/lib/api-client";
@@ -105,7 +104,7 @@ export default function CoursesPage() {
       </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
-        
+
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -198,7 +197,6 @@ export default function CoursesPage() {
           </Card>
         </div>
 
-        
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

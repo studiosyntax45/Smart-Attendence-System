@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   Users,
   Plus,
@@ -211,7 +210,7 @@ export function ClassManager({
 
   return (
     <div className="space-y-6">
-      
+
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative w-64">
@@ -244,7 +243,6 @@ export function ClassManager({
         </Button>
       </div>
 
-      
       {isCreating && (
         <Card className="border-primary/20 bg-muted/20">
           <CardHeader>
@@ -329,7 +327,6 @@ export function ClassManager({
         </Card>
       )}
 
-      
       {filtered.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground">
           No class sections found. Click &quot;New Class Section&quot; to create one.
@@ -363,7 +360,6 @@ export function ClassManager({
                   </span>
                 </div>
 
-                
                 {c.assigned_courses && c.assigned_courses.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5">
                     {c.assigned_courses.map((code) => (
@@ -378,7 +374,6 @@ export function ClassManager({
                   </p>
                 )}
 
-                
                 <div className="flex items-center justify-between gap-2 pt-2">
                   <div className="flex gap-2">
                     <Button
@@ -413,7 +408,6 @@ export function ClassManager({
         </div>
       )}
 
-      
       {activeClass && modalMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
           <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col shadow-xl">
@@ -447,10 +441,9 @@ export function ClassManager({
                 </div>
               )}
 
-              
               {modalMode === "students" && (
                 <div className="space-y-6">
-                  
+
                   <div>
                     <h4 className="font-semibold text-sm mb-2 flex items-center gap-1.5">
                       <Users className="h-4 w-4 text-primary" /> Current Roster ({classStudents.length})
@@ -486,7 +479,6 @@ export function ClassManager({
                     )}
                   </div>
 
-                  
                   <div className="border-t pt-4 space-y-3">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="font-semibold text-sm">Add Students to Class</h4>
@@ -569,10 +561,9 @@ export function ClassManager({
                 </div>
               )}
 
-              
               {modalMode === "courses" && (
                 <div className="space-y-6">
-                  
+
                   <div>
                     <h4 className="font-semibold text-sm mb-2 flex items-center gap-1.5">
                       <BookOpen className="h-4 w-4 text-primary" /> Currently Linked Courses
@@ -599,7 +590,6 @@ export function ClassManager({
                     )}
                   </div>
 
-                  
                   <div className="border-t pt-4 space-y-3">
                     <h4 className="font-semibold text-sm">Link Course & Auto-enroll Roster</h4>
                     <p className="text-xs text-muted-foreground">

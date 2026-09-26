@@ -1,7 +1,4 @@
-
 import { config } from "../config/env";
-
-export const FACE_SERVICE_TIMEOUT_MS = 20_000;
 
 export type Fetcher = typeof fetch;
 
@@ -33,7 +30,7 @@ export interface VerifyData {
 export function readFaceServiceConfig(): FaceServiceConfig | null {
   const baseUrl = config.faceService.url;
   if (!baseUrl) return null;
-  return { baseUrl, token: config.faceService.token ?? null, timeoutMs: FACE_SERVICE_TIMEOUT_MS };
+  return { baseUrl, token: config.faceService.token ?? null, timeoutMs: config.faceService.timeoutMs };
 }
 
 export function buildServiceUrl(baseUrl: string, path: string): string {

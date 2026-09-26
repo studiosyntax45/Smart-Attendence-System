@@ -8,10 +8,9 @@ export interface MarkResult {
   ok: boolean;
   error?: string;
   status?: "present" | "late";
-  
+
   lateAfterMin?: number;
 }
-
 
 export async function markEntry(input: {
   sessionId: string;
@@ -73,7 +72,6 @@ export async function markEntry(input: {
     return { ok: false, error: err instanceof Error ? err.message : "Mark failed." };
   }
 }
-
 
 export async function markExit(attendanceId: string): Promise<MarkResult> {
   try {

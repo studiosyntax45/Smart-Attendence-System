@@ -1,6 +1,4 @@
-﻿
-export const TILE_SIZE = 256;
-
+﻿export const TILE_SIZE = 256;
 
 const EQUATOR_MPP = 156543.03392804097;
 
@@ -11,7 +9,6 @@ export interface Point {
 
 const clampLat = (lat: number) => Math.max(Math.min(lat, 85.05112878), -85.05112878);
 
-
 export function project(lng: number, lat: number, zoom: number): Point {
   const worldPx = TILE_SIZE * 2 ** zoom;
   const x = ((lng + 180) / 360) * worldPx;
@@ -20,7 +17,6 @@ export function project(lng: number, lat: number, zoom: number): Point {
   return { x, y };
 }
 
-
 export function unproject(x: number, y: number, zoom: number): { lng: number; lat: number } {
   const worldPx = TILE_SIZE * 2 ** zoom;
   const lng = (x / worldPx) * 360 - 180;
@@ -28,22 +24,20 @@ export function unproject(x: number, y: number, zoom: number): { lng: number; la
   return { lng, lat: (latRad * 180) / Math.PI };
 }
 
-
 export function metersPerPixel(lat: number, zoom: number): number {
   return (EQUATOR_MPP * Math.cos((clampLat(lat) * Math.PI) / 180)) / 2 ** zoom;
 }
 
 export interface TileRef {
-  
+
   x: number;
-  
+
   y: number;
   z: number;
-  
+
   left: number;
   top: number;
 }
-
 
 export function tilesForViewport(
   center: { lng: number; lat: number },
@@ -76,7 +70,6 @@ export function tilesForViewport(
   }
   return tiles;
 }
-
 
 export function panCenter(
   center: { lng: number; lat: number },

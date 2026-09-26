@@ -9,7 +9,6 @@
 import { Badge } from "@/components/ui/badge";
 import type { LetterGrade } from "@/lib/results";
 
-
 const CONFIG: Record<
   LetterGrade,
   { variant: "present" | "secondary" | "late" | "absent"; Icon: typeof Award }

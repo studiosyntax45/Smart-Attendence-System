@@ -1,4 +1,3 @@
-
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { randomUUID } from "node:crypto";
@@ -54,7 +53,7 @@ export async function revokeRefreshToken(jti: string, expiresAt?: Date): Promise
 
 // A reload or second tab can reuse a refresh token that was rotated a moment ago
 // (the response carrying the new cookie never landed). Accept it briefly instead of signing the user out.
-// ponytail: in-memory, so a restart ends the window early; worst case is one extra sign-in.
+// In memory only: a restart ends the grace window early, costing at most one extra sign-in.
 const ROTATION_GRACE_MS = 30_000;
 const rotatedAt = new Map<string, number>();
 
@@ -135,7 +134,6 @@ export interface AuthenticatedUser {
   role: Role;
   fullName: string;
 }
-
 
 export async function getUserWithProfile(userId: string): Promise<AuthenticatedUser | null> {
   const user = await prisma.authUser.findUnique({

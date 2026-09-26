@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import { AlertCircle, CheckCircle2, LoaderCircle, Save } from "lucide-react";
 import { upsertMark, type MarkFormState } from "@/app/faculty/marks/actions";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ export interface StudentOption {
 }
 
 const INITIAL: MarkFormState = {};
-
 
 export function MarksForm({
   students,

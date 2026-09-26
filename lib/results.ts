@@ -1,6 +1,4 @@
-﻿
-
-export const GRADE_BANDS = [
+﻿export const GRADE_BANDS = [
   { grade: "S", points: 10, minPct: 90 },
   { grade: "A", points: 9, minPct: 80 },
   { grade: "B", points: 8, minPct: 70 },
@@ -11,7 +9,6 @@ export const GRADE_BANDS = [
 ] as const;
 
 export type LetterGrade = (typeof GRADE_BANDS)[number]["grade"];
-
 
 export const ASSESSMENT_ORDER = ["ISA-1", "ISA-2", "Assignment", "ESA"] as const;
 
@@ -34,27 +31,26 @@ export interface CourseResult {
   name: string;
   credits: number;
   semester: string;
-  
+
   assessments: Map<string, { score: number; max: number }>;
   totalScore: number;
   totalMax: number;
-  
+
   totalPct: number | null;
   grade: LetterGrade | null;
   gradePoints: number | null;
-  
+
   passed: boolean;
 }
 
 export interface SemesterResult {
   semester: string;
   courses: CourseResult[];
-  
+
   sgpa: number | null;
   creditsRegistered: number;
   creditsEarned: number;
 }
-
 
 export function gradeForPct(pct: number): { grade: LetterGrade; points: number } {
   for (const band of GRADE_BANDS) {
@@ -64,9 +60,7 @@ export function gradeForPct(pct: number): { grade: LetterGrade; points: number }
   return { grade: f.grade, points: f.points };
 }
 
-
 const r2 = (n: number) => Math.round(n * 100) / 100;
-
 
 export function computeCourseResults(
   marks: MarkRow[],
@@ -113,7 +107,6 @@ export function computeCourseResults(
   return results.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-
 export function computeSemesters(results: CourseResult[]): SemesterResult[] {
   const bySem = new Map<string, CourseResult[]>();
   for (const r of results) {
@@ -143,7 +136,6 @@ export function computeSemesters(results: CourseResult[]): SemesterResult[] {
   return semesters.sort((a, b) => a.semester.localeCompare(b.semester));
 }
 
-
 export function computeCgpa(results: CourseResult[]): number | null {
   const graded = results.filter((c) => c.gradePoints !== null && c.credits > 0);
   const creditSum = graded.reduce((s, c) => s + c.credits, 0);
@@ -154,7 +146,6 @@ export function computeCgpa(results: CourseResult[]): number | null {
   );
   return r2(weighted / creditSum);
 }
-
 
 export function orderedAssessmentNames(results: CourseResult[]): string[] {
   const seen = new Set<string>();

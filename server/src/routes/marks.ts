@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db";
@@ -28,7 +27,7 @@ marksRouter.get(
         ? [{ course: "asc" }, { assessment: "asc" }]
         : [{ updatedAt: "desc" }],
       // No cap: the Marks page exports these and uses them to flag CSV overwrites.
-      // ponytail: fine at class scale (students x courses x assessments); page it if that grows past ~10k.
+      // Fine at class scale (students x courses x assessments); page it if that grows past ~10k.
     });
     res.json({ marks: rows });
   })

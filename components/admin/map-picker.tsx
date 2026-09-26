@@ -1,5 +1,4 @@
-﻿
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import {
   metersPerPixel,
@@ -10,7 +9,6 @@ import {
 const MIN_ZOOM = 3;
 const MAX_ZOOM = 19;
 const HEIGHT = 288;
-
 
 export function MapPicker({
   lat,
@@ -83,7 +81,7 @@ export function MapPicker({
         role="application"
         aria-label="Map — drag to place the geofence centre"
       >
-        
+
         {tiles.map((t) => (
           <img
             key={`${t.z}/${t.x}/${t.y}`}
@@ -95,7 +93,6 @@ export function MapPicker({
           />
         ))}
 
-        
         {circleDiameter > 0 && (
           <div
             aria-hidden="true"
@@ -108,13 +105,11 @@ export function MapPicker({
           />
         )}
 
-        
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary shadow"
         />
 
-        
         <div className="absolute right-2 top-2 flex flex-col overflow-hidden rounded-md border bg-card shadow">
           <button
             type="button"
@@ -136,12 +131,10 @@ export function MapPicker({
           </button>
         </div>
 
-        
         <div className="absolute bottom-1 left-1 rounded bg-card/85 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
           {lat.toFixed(6)}, {lng.toFixed(6)}
         </div>
 
-        
         <div className="absolute bottom-1 right-1 rounded bg-card/85 px-1.5 py-0.5 text-[10px] text-muted-foreground">
           ©{" "}
           <a

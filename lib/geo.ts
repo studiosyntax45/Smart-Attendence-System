@@ -5,7 +5,6 @@ export interface LatLng {
 
 const EARTH_RADIUS_M = 6371e3;
 
-
 export function distanceMeters(a: LatLng, b: LatLng): number {
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);

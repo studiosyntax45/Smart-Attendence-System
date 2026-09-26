@@ -1,15 +1,13 @@
-﻿
-import { api } from "./api-client";
+﻿import { api } from "./api-client";
 
 export interface GpsSettings {
-  
+
   accuracyGraceM: number;
-  
+
   lateAfterMin: number;
-  
+
   highAccuracy: boolean;
 }
-
 
 export const DEFAULT_GPS_SETTINGS: GpsSettings = {
   accuracyGraceM: 25,
@@ -28,7 +26,6 @@ interface GpsSettingsRow {
   highAccuracy: boolean;
 }
 
-
 export async function fetchGpsSettings(): Promise<GpsSettings> {
   try {
     const { settings } = await api.get<{ settings: GpsSettingsRow }>("/gps-settings");
@@ -41,7 +38,6 @@ export async function fetchGpsSettings(): Promise<GpsSettings> {
     return DEFAULT_GPS_SETTINGS;
   }
 }
-
 
 export function clampSetting(
   key: keyof typeof GPS_LIMITS,

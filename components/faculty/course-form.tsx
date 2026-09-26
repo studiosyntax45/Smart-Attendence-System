@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import { AlertCircle, CheckCircle2, LoaderCircle, Plus } from "lucide-react";
 import {
   upsertCourse,
@@ -11,11 +10,10 @@ import { Label } from "@/components/ui/label";
 
 const INITIAL: CourseActionState = {};
 
-
 export function CourseForm({
   editing,
 }: {
-  
+
   editing: {
     code: string;
     name: string;

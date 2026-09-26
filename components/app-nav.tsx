@@ -1,5 +1,4 @@
-﻿
-import { Link, useLocation } from "react-router-dom";
+﻿import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export interface NavItem {

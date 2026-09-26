@@ -1,5 +1,4 @@
-﻿
-import { useRef } from "react";
+﻿import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -7,7 +6,6 @@ gsap.registerPlugin(useGSAP);
 
 const CIRCLE_C = 2 * Math.PI * 26;
 const CHECK_LEN = 40;
-
 
 export function SuccessCheck() {
   const scope = useRef<SVGSVGElement>(null);

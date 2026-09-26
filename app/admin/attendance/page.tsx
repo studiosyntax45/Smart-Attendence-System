@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Layers, AlertTriangle, Percent, TrendingDown } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -121,7 +120,7 @@ export default function AdminAttendance() {
         </Card>
       ) : (
         <>
-          
+
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard
               label="Courses"
@@ -176,7 +175,6 @@ export default function AdminAttendance() {
             />
           </div>
 
-          
           <Card>
             <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
               <div className="space-y-1">

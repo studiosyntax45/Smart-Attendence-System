@@ -1,5 +1,4 @@
-﻿
-import { useRef } from "react";
+﻿import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CheckCircle2, AlertTriangle, XCircle, CircleDashed } from "lucide-react";
@@ -11,7 +10,6 @@ const SIZE = 168;
 const STROKE = 12;
 const R = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
-
 
 export function AttendanceRing({
   pct,
@@ -91,14 +89,14 @@ export function AttendanceRing({
     >
       <div className="relative" style={{ width: SIZE, height: SIZE }}>
         <svg width={SIZE} height={SIZE} className="-rotate-90">
-          
+
           <circle
             cx={SIZE / 2} cy={SIZE / 2} r={R}
             fill="none"
             strokeWidth={STROKE}
             className="stroke-muted"
           />
-          
+
           {pct !== null && (
             <circle
               ref={arcRef}

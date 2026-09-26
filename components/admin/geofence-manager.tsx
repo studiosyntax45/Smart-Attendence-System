@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -30,9 +29,7 @@ export interface GeofenceRow {
 
 const INITIAL: AdminActionState = {};
 
-
 const DEFAULT_CENTER = { lat: 12.9351, lng: 77.5358 };
-
 
 export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
   const [state, setState] = useState<AdminActionState>(INITIAL);
@@ -92,7 +89,7 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
 
   return (
     <div className="space-y-5">
-      
+
       {geofences.length === 0 ? (
         <p className="py-4 text-center text-sm text-muted-foreground">
           No geofences yet — add your first classroom below.
@@ -135,7 +132,6 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
         </p>
       )}
 
-      
       <form
         onSubmit={(e) => {
           e.preventDefault();

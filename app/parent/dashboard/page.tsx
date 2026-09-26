@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { BookOpenCheck } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
@@ -111,7 +110,7 @@ export default function ParentDashboard() {
   return (
     <GsapReveal className="space-y-6">
       <PageTitle title="Parent Dashboard" />
-      
+
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">{child.fullName}</h1>
@@ -125,7 +124,6 @@ export default function ParentDashboard() {
         </span>
       </div>
 
-      
       <StudentKpis studentId={child.id} variant="parent" />
 
       <section className="grid items-start gap-4 lg:grid-cols-5">
@@ -149,7 +147,6 @@ export default function ParentDashboard() {
         </div>
       </section>
 
-      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -203,7 +200,6 @@ export default function ParentDashboard() {
         </CardContent>
       </Card>
 
-      
       <Card>
         <CardHeader>
           <CardTitle>Recent attendance</CardTitle>
@@ -273,7 +269,6 @@ export default function ParentDashboard() {
     </GsapReveal>
   );
 }
-
 
 function ParentLeaveStatus() {
   const { data, isLoading } = useQuery({ queryKey: ["student-leave-parent"], queryFn: () => listLeaveApplications() });

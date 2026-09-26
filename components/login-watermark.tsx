@@ -1,10 +1,8 @@
-﻿
-import { useRef } from "react";
+﻿import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(useGSAP);
-
 
 export function LoginWatermark({
   variant = "strong",
@@ -61,7 +59,7 @@ export function LoginWatermark({
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 overflow-hidden"
     >
-      
+
       <svg
         className={`wm-ring absolute -right-16 -top-20 size-[24rem] ${strong ? "opacity-[0.12]" : "opacity-[0.05]"}`}
         viewBox="0 0 200 200"
@@ -72,7 +70,7 @@ export function LoginWatermark({
           cx="100" cy="100" r="70"
           stroke="#E8792B" strokeWidth="1.5" strokeDasharray="4 10"
         />
-        
+
         {Array.from({ length: 8 }).map((_, i) => {
           const a = (i * Math.PI) / 4;
           return (
@@ -89,7 +87,6 @@ export function LoginWatermark({
         })}
       </svg>
 
-      
       <svg
         className={`wm-needle absolute -right-16 -top-20 size-[24rem] ${strong ? "opacity-[0.15]" : "opacity-[0.06]"}`}
         viewBox="0 0 200 200"
@@ -98,7 +95,6 @@ export function LoginWatermark({
         <path d="M100 40 L114 100 L100 160 L86 100 Z" fill="currentColor" className="text-white" />
       </svg>
 
-      
       <svg
         className={`wm-ring absolute -bottom-40 -left-40 size-[30rem] ${strong ? "opacity-[0.08]" : "opacity-[0.04]"}`}
         viewBox="0 0 200 200"
@@ -108,14 +104,12 @@ export function LoginWatermark({
         <circle cx="100" cy="100" r="60" stroke="#E8792B" strokeWidth="1" />
       </svg>
 
-      
       <p
         className={`wm-text absolute -right-4 bottom-36 select-none font-display text-[8rem] font-bold leading-none tracking-tighter ${strong ? "text-white/[0.05]" : "text-foreground/[0.03]"}`}
       >
         PES
       </p>
 
-      
       <span className={`wm-orb absolute left-[18%] top-[22%] size-2.5 rounded-full ${strong ? "bg-[#E8792B]/40" : "bg-[#E8792B]/15"}`} />
       <span className={`wm-orb absolute left-[68%] top-[58%] size-1.5 rounded-full ${strong ? "bg-white/30" : "bg-foreground/10"}`} />
       <span className={`wm-orb absolute left-[34%] top-[74%] size-2 rounded-full ${strong ? "bg-[#E8792B]/30" : "bg-[#E8792B]/10"}`} />

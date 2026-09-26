@@ -1,5 +1,4 @@
-﻿
-import type { NextFunction, Request, Response } from "express";
+﻿import type { NextFunction, Request, Response } from "express";
 import { getUserWithProfile, verifyAccessToken, type AuthenticatedUser, type Role } from "../services/auth";
 
 declare global {
@@ -11,7 +10,6 @@ declare global {
   }
 }
 
-
 function unauthorized(res: Response, message = "Not signed in."): void {
   res.status(401).json({ error: message });
 }
@@ -19,7 +17,6 @@ function unauthorized(res: Response, message = "Not signed in."): void {
 function forbidden(res: Response, message = "Access denied."): void {
   res.status(403).json({ error: message });
 }
-
 
 export function extractToken(req: Request): string | null {
   const header = req.header("authorization");

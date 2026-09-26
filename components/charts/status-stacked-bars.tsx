@@ -1,5 +1,4 @@
-﻿
-import {
+﻿import {
   Bar,
   BarChart,
   CartesianGrid,
@@ -11,20 +10,19 @@ import {
 import { CheckCircle2, Clock, LogOut } from "lucide-react";
 
 export interface DayStatusDatum {
-  
+
   label: string;
   present: number;
   late: number;
   partial: number;
 }
 
-
 export function StatusStackedBars({ data, onDayClick }: { data: DayStatusDatum[]; onDayClick?: (index: number) => void }) {
   const total = data.reduce((s, d) => s + d.present + d.late + d.partial, 0);
 
   return (
     <div className="space-y-3">
-      
+
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium">
         <span className="flex items-center gap-1.5 text-status-present">
           <span className="size-2.5 rounded-sm bg-status-present" aria-hidden="true" />
@@ -78,7 +76,7 @@ export function StatusStackedBars({ data, onDayClick }: { data: DayStatusDatum[]
                 );
               }}
             />
-            
+
             <Bar dataKey="present" stackId="day" fill="hsl(var(--status-present))" stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={30} animationDuration={900} animationEasing="ease-out" />
             <Bar dataKey="late" stackId="day" fill="hsl(var(--status-late))" stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={30} animationDuration={900} animationEasing="ease-out" />
             <Bar dataKey="partial" stackId="day" fill="hsl(var(--status-partial))" stroke="hsl(var(--card))" strokeWidth={2} maxBarSize={30} radius={[4, 4, 0, 0]} animationDuration={900} animationEasing="ease-out" />

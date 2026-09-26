@@ -1,4 +1,3 @@
-
 import { prisma } from "../config/db";
 import { hashPassword } from "../services/auth";
 import { alignSession, classDay, istMorning, seedCohort } from "./seed-cohort";

@@ -16,7 +16,6 @@ export interface EnrollInput {
   image?: string | null;
 }
 
-
 export async function enrollFace(input: EnrollInput): Promise<EnrollResult> {
   if (!isValidDescriptor(input.descriptor)) {
     return { ok: false, error: "Face data was malformed — please retry enrolment." };

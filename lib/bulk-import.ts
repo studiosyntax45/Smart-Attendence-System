@@ -58,7 +58,6 @@ export interface ImportPreview {
   payload: Record<string, string>[];
 }
 
-
 export function buildImportPreview(text: string, spec: ImportSpec, ctx: ImportContext): ImportPreview {
   const empty = (error?: string): ImportPreview => ({
     rows: [],

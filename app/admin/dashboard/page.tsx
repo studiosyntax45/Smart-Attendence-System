@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   BookOpen,
@@ -185,7 +184,6 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Students" value={String(studentCount)} countTo={studentCount} sub="Registered accounts" icon={<GraduationCap />} drill={peopleSpec("Students", people("student"), true)} />
         <KpiCard label="Faculty" value={String(facultyCount)} countTo={facultyCount} sub="Teaching accounts" icon={<ShieldCheck />} drill={peopleSpec("Faculty", people("faculty"), false)} />
@@ -258,7 +256,6 @@ export default function AdminDashboard() {
         />
       </div>
 
-      
       {weekTotal > 0 && (
         <Card>
           <CardHeader>
@@ -283,7 +280,6 @@ export default function AdminDashboard() {
         </Card>
       )}
 
-      
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card className="lg:col-span-2">
           <CardHeader>

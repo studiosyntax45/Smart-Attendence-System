@@ -8,7 +8,6 @@ export interface SettingsResult {
   error?: string;
 }
 
-
 export async function updateGpsSettings(
   _prev: SettingsResult,
   formData: FormData

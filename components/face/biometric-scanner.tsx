@@ -1,5 +1,4 @@
-﻿
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import {
   Camera,
   CameraOff,
@@ -27,7 +26,6 @@ import {
   type FaceReading,
 } from "@/lib/face-client";
 
-
 const BLINKS_REQUIRED = 0;
 
 const BLINK_INTERVAL_MS = 120;
@@ -45,17 +43,17 @@ export type ScanPhase =
 
 export interface ScanStatus {
   phase: ScanPhase;
-  
+
   score: number;
-  
+
   liveness: boolean;
-  
+
   distance: number | null;
-  
+
   matched: boolean | null;
-  
+
   descriptor: number[] | null;
-  
+
   imageDataUrl: string | null;
 }
 
@@ -69,7 +67,6 @@ const IDLE: ScanStatus = {
   imageDataUrl: null,
 };
 
-
 export function BiometricScanner({
   mode,
   targetDescriptor,
@@ -77,9 +74,9 @@ export function BiometricScanner({
   onStatus,
 }: {
   mode: "enroll" | "verify";
-  
+
   targetDescriptor?: number[] | null;
-  
+
   captureImage?: boolean;
   onStatus?: (status: ScanStatus) => void;
 }) {
@@ -105,7 +102,6 @@ export function BiometricScanner({
       onStatusRef.current?.(next);
     }
 
-    
     function captureFrame(video: HTMLVideoElement): string | null {
       if (!captureImageRef.current) return null;
       const w = video.videoWidth || video.clientWidth || 640;
@@ -334,7 +330,6 @@ function ScannerView({
           </Overlay>
         )}
 
-        
         {status.phase !== "loading" &&
           status.phase !== "denied" &&
           status.phase !== "no-models" && (
@@ -344,7 +339,6 @@ function ScannerView({
             />
           )}
 
-        
         {status.phase === "blink" && !status.liveness && (
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
             <span className="flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-sm font-medium text-white">

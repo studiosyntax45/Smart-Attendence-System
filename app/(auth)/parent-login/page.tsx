@@ -1,5 +1,4 @@
-﻿
-import { Link, Navigate } from "react-router-dom";
+﻿import { Link, Navigate } from "react-router-dom";
 import { ArrowLeft, BarChart3, CalendarCheck2, ShieldCheck } from "lucide-react";
 import { useAuth, roleHome } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -14,7 +13,6 @@ const FEATURES = [
   { Icon: BarChart3, text: "Follow results and performance trends" },
   { Icon: ShieldCheck, text: "Sign in with your child's student login" },
 ];
-
 
 const DOTS_LIGHT = {
   backgroundImage:
@@ -39,9 +37,9 @@ export default function ParentLoginPage() {
     <>
     <PageTitle title="Parent sign in" />
     <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
-      
+
       <aside className="relative hidden flex-col overflow-hidden bg-[hsl(var(--pes-navy))] p-10 text-white lg:flex">
-        
+
         <div
           aria-hidden="true"
           className="absolute inset-0"
@@ -53,7 +51,6 @@ export default function ParentLoginPage() {
         <div aria-hidden="true" className="absolute inset-0" style={DOTS_DARKPANEL} />
         <LoginWatermark variant="strong" />
 
-        
         <div className="relative z-10 flex items-center gap-3.5">
           <span className="flex items-center rounded-lg bg-white/10 px-3 py-2 ring-1 ring-white/15">
             <PesLogo variant="dark" priority className="h-9" />
@@ -89,9 +86,8 @@ export default function ParentLoginPage() {
         </div>
       </aside>
 
-      
       <div className="relative flex flex-col items-center justify-center overflow-hidden bg-background p-6 sm:p-10">
-        
+
         <div aria-hidden="true" className="absolute inset-0" style={DOTS_LIGHT} />
         <div
           aria-hidden="true"
@@ -105,7 +101,6 @@ export default function ParentLoginPage() {
           <LoginWatermark variant="faint" />
         </div>
 
-        
         <div className="relative z-10 mb-6 flex flex-col items-center gap-2 lg:hidden">
           <PesLogo priority className="h-11" />
           <p className="font-display text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -113,9 +108,8 @@ export default function ParentLoginPage() {
           </p>
         </div>
 
-        
         <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border bg-card shadow-pop">
-          
+
           <div
             aria-hidden="true"
             className="h-1 w-full bg-gradient-to-r from-[hsl(var(--pes-orange))] via-[hsl(var(--pes-amber-aa))] to-transparent"
@@ -123,7 +117,6 @@ export default function ParentLoginPage() {
           <div className="space-y-6 p-6 sm:p-8">
             <ParentLoginForm />
 
-            
             <Link
               to="/login"
               className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"

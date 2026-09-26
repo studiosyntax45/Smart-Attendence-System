@@ -7,7 +7,6 @@ export interface SessionFormState {
   message?: string;
 }
 
-
 export async function openSession(
   _prev: SessionFormState,
   formData: FormData
@@ -27,7 +26,6 @@ export async function openSession(
     return { error: err instanceof Error ? err.message : "Failed to open session." };
   }
 }
-
 
 export async function closeSession(sessionId: string): Promise<SessionFormState> {
   try {

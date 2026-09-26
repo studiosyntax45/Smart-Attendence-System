@@ -1,5 +1,4 @@
-﻿
-import { useState, useTransition } from "react";
+﻿import { useState, useTransition } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -19,7 +18,6 @@ export interface StudentOption {
   full_name: string;
   roll_no: string | null;
 }
-
 
 export function EnrollmentManager({
   courseCode,

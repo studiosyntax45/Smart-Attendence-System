@@ -1,12 +1,8 @@
-﻿
-import { api } from "./api-client";
-
+﻿import { api } from "./api-client";
 
 export const ELIGIBILITY_THRESHOLD = 75;
 /** Below this is critical; between it and ELIGIBILITY_THRESHOLD is a warning. Matches the server. */
 export const WARNING_THRESHOLD = 65;
-
-
 
 export interface AttendanceSummaryRow {
   student_id: string;
@@ -19,22 +15,19 @@ export interface AttendanceSummaryRow {
   late_cnt: number;
   partial_cnt: number;
   absent_cnt: number;
-  
+
   official_pct: number | null;
   weighted_pct: number | null;
 }
-
 
 export function attendedCount(r: AttendanceSummaryRow): number {
   return r.present_cnt + r.late_cnt + r.partial_cnt;
 }
 
-
 export function isEligible(officialPct: number | null): boolean {
   if (officialPct === null || Number.isNaN(officialPct)) return false;
   return officialPct >= ELIGIBILITY_THRESHOLD;
 }
-
 
 export function classesNeededForEligibility(
   attended: number,
@@ -56,27 +49,25 @@ export function classesNeededForEligibility(
   return Math.max(0, Math.ceil(raw - 1e-9));
 }
 
-
 export function formatPct(n: number | null): string {
   if (n === null || Number.isNaN(n)) return "No data";
   return `${n.toFixed(2)}%`;
 }
 
 export interface StudentSummary {
-  
+
   coursesWithData: number;
-  
+
   eligibleCourses: number;
-  
+
   shortfallCourses: AttendanceSummaryRow[];
-  
+
   worstCourse: AttendanceSummaryRow | null;
-  
+
   anyShortfall: boolean;
-  
+
   overallOfficialPct: number | null;
 }
-
 
 export function summarizeStudent(rows: AttendanceSummaryRow[]): StudentSummary {
   const withData = rows.filter((r) => r.conducted > 0);
@@ -130,7 +121,6 @@ function normalizeRow(raw: Record<string, unknown>): AttendanceSummaryRow {
   };
 }
 
-
 export async function fetchStudentAttendance(
   studentId: string,
   semester?: string
@@ -143,7 +133,6 @@ export async function fetchStudentAttendance(
   return (rows ?? []).map(normalizeRow);
 }
 
-
 export async function fetchCourseAttendance(
   courseCode: string
 ): Promise<AttendanceSummaryRow[]> {
@@ -152,7 +141,6 @@ export async function fetchCourseAttendance(
   );
   return (rows ?? []).map(normalizeRow);
 }
-
 
 export async function fetchAllAttendance(): Promise<AttendanceSummaryRow[]> {
   const { rows } = await api.get<{ rows: Record<string, unknown>[] }>("/attendance-summary");
@@ -165,13 +153,12 @@ export interface CourseRollup {
   credits: number;
   semester: string;
   enrolled: number;
-  
+
   withData: number;
   belowThreshold: number;
-  
+
   avgOfficialPct: number | null;
 }
-
 
 export function rollupByCourse(rows: AttendanceSummaryRow[]): CourseRollup[] {
   const byCourse = new Map<string, AttendanceSummaryRow[]>();
@@ -207,7 +194,6 @@ export function rollupByCourse(rows: AttendanceSummaryRow[]): CourseRollup[] {
     (a, b) => (a.avgOfficialPct ?? 200) - (b.avgOfficialPct ?? 200)
   );
 }
-
 
 export async function fetchStudentSemesters(studentId: string): Promise<string[]> {
   const rows = await fetchStudentAttendance(studentId);

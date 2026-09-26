@@ -7,7 +7,6 @@ export interface MarkFormState {
   message?: string;
 }
 
-
 export async function upsertMark(
   _prev: MarkFormState,
   formData: FormData
@@ -34,13 +33,11 @@ export async function upsertMark(
   }
 }
 
-
 export interface BulkMarksResult {
   error?: string;
   saved?: number;
   skipped?: Array<{ usn: string; reason: string }>;
 }
-
 
 export async function bulkUploadMarks(input: {
   course: string;

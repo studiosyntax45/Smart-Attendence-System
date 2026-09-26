@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -15,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-
 
 export function AppealControl({
   sessionId,

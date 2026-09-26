@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
   Droplets,
@@ -10,7 +9,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { api } from "@/lib/api-client";
+import { formatDob, getStudentDetails, pctOrNull, personalDetailsMissing } from "@/lib/student-details";
 import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { SectionError } from "@/components/section-error";
@@ -25,26 +24,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-interface StudentDetails {
-  pesu_id: string;
-  branch: string;
-  section: string;
-  dob: string;
-  blood_group: string;
-  sslc_pct: number;
-  puc_pct: number;
-  father_name: string;
-  father_phone: string;
-  mother_name: string;
-  mother_phone: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  aadhaar_last4: string;
-}
-
 
 const show = (v: string | null | undefined) => (v && v.trim() ? v : "—");
 
@@ -78,7 +57,6 @@ function Row({
   );
 }
 
-
 function PctRow({ label, pct }: { label: string; pct: number | null }) {
   return (
     <div className="space-y-1.5 py-2.5">
@@ -106,33 +84,7 @@ export default function StudentProfile() {
   const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["student-profile", profile?.id],
     enabled: !!profile,
-    queryFn: async () => {
-      const res = await api.get<{ details: Record<string, unknown> | null }>(
-        `/student-details/${profile!.id}`
-      );
-      const raw = res.details;
-      const details: StudentDetails | null = raw
-        ? {
-            pesu_id: String(raw.pesuId ?? raw.pesu_id ?? ""),
-            branch: String(raw.branch ?? ""),
-            section: String(raw.section ?? ""),
-            dob: String(raw.dob ?? ""),
-            blood_group: String(raw.bloodGroup ?? raw.blood_group ?? ""),
-            sslc_pct: Number(raw.sslcPct ?? raw.sslc_pct ?? 0),
-            puc_pct: Number(raw.pucPct ?? raw.puc_pct ?? 0),
-            father_name: String(raw.fatherName ?? raw.father_name ?? ""),
-            father_phone: String(raw.fatherPhone ?? raw.father_phone ?? ""),
-            mother_name: String(raw.motherName ?? raw.mother_name ?? ""),
-            mother_phone: String(raw.motherPhone ?? raw.mother_phone ?? ""),
-            address: String(raw.address ?? ""),
-            city: String(raw.city ?? ""),
-            state: String(raw.state ?? ""),
-            pincode: String(raw.pincode ?? ""),
-            aadhaar_last4: String(raw.aadhaarLast4 ?? raw.aadhaar_last4 ?? ""),
-          }
-        : null;
-      return { details };
-    },
+    queryFn: () => getStudentDetails(profile!.id),
   });
 
   if (!profile || isLoading) return <PageSkeleton />;
@@ -144,19 +96,13 @@ export default function StudentProfile() {
       />
     );
 
-  const d = data?.details ?? null;
-  const dob = d?.dob
-    ? new Date(d.dob).toLocaleDateString([], {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
-    : null;
+  const d = data ?? null;
+  const dob = formatDob(d?.dob);
 
   return (
     <GsapReveal className="space-y-6">
       <PageTitle title="My Profile" />
-      
+
       <Card className="overflow-hidden">
         <div
           className="h-20 bg-gradient-to-r from-[hsl(var(--pes-navy))] via-[hsl(var(--pes-navy-bright))] to-[hsl(var(--pes-orange))]"
@@ -173,10 +119,10 @@ export default function StudentProfile() {
             <h1 className="truncate text-2xl font-bold">{profile.fullName}</h1>
             <p className="text-sm text-muted-foreground">
               <span className="font-mono">{show(profile.rollNo)}</span>
-              {d?.pesu_id && (
+              {d?.pesuId && d.pesuId !== profile.rollNo && (
                 <>
                   {" · "}
-                  <span className="font-mono">{d.pesu_id}</span>
+                  <span className="font-mono">{d.pesuId}</span>
                 </>
               )}
             </p>
@@ -189,26 +135,25 @@ export default function StudentProfile() {
               </Badge>
             )}
             {d?.section && <Badge variant="outline">Section {d.section}</Badge>}
-            {d?.blood_group && (
+            {d?.bloodGroup && (
               <Badge variant="absent">
                 <Droplets className="size-3" aria-hidden="true" />
-                {d.blood_group}
+                {d.bloodGroup}
               </Badge>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {!d && (
+      {personalDetailsMissing(d) && (
         <Card className="border-dashed">
           <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            Your detailed profile hasn&apos;t been filled in yet — the sections
-            below populate once your details are added (via seed or admin).
+            Your personal details haven&apos;t been added yet. Ask your faculty or the admin office to fill them in; they
+            appear here as soon as they are saved.
           </CardContent>
         </Card>
       )}
 
-      
       <section className="grid items-start gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -220,7 +165,7 @@ export default function StudentProfile() {
           <CardContent>
             <dl>
               <Row label="Date of birth" value={dob ?? "—"} />
-              <Row label="Blood group" value={show(d?.blood_group)} />
+              <Row label="Blood group" value={show(d?.bloodGroup)} />
               <Row label="Branch" value={show(d?.branch)} />
               <Row label="Section" value={show(d?.section)} />
             </dl>
@@ -236,8 +181,8 @@ export default function StudentProfile() {
             <CardDescription>Qualifying examination scores</CardDescription>
           </CardHeader>
           <CardContent>
-            <PctRow label="SSLC / 10th" pct={d?.sslc_pct ?? null} />
-            <PctRow label="PUC / 12th" pct={d?.puc_pct ?? null} />
+            <PctRow label="SSLC / 10th" pct={pctOrNull(d?.sslcPct)} />
+            <PctRow label="PUC / 12th" pct={pctOrNull(d?.pucPct)} />
           </CardContent>
         </Card>
 
@@ -250,12 +195,12 @@ export default function StudentProfile() {
           </CardHeader>
           <CardContent>
             <dl>
-              <Row label="Father" value={show(d?.father_name)} />
-              <Row label="Father's phone" value={show(d?.father_phone)} mono />
-              <Row label="Mother" value={show(d?.mother_name)} />
-              <Row label="Mother's phone" value={show(d?.mother_phone)} mono />
+              <Row label="Father" value={show(d?.fatherName)} />
+              <Row label="Father's phone" value={show(d?.fatherPhone)} mono />
+              <Row label="Mother" value={show(d?.motherName)} />
+              <Row label="Mother's phone" value={show(d?.motherPhone)} mono />
             </dl>
-            {(d?.father_phone || d?.mother_phone) && (
+            {(d?.fatherPhone || d?.motherPhone) && (
               <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Phone className="size-3.5" aria-hidden="true" />
                 Used for attendance-shortfall alerts (planned).
@@ -282,7 +227,6 @@ export default function StudentProfile() {
         </Card>
       </section>
 
-      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -298,13 +242,13 @@ export default function StudentProfile() {
           <dl>
             <Row
               label="Aadhaar"
-              value={d?.aadhaar_last4 ? `••••-••••-${d.aadhaar_last4}` : "—"}
+              value={d?.aadhaarLast4 ? `••••-••••-${d.aadhaarLast4}` : "—"}
               mono
             />
           </dl>
           <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
             <ShieldCheck className="size-3.5" aria-hidden="true" />
-            Masked by design; visible to you and administrators only.
+            Masked by design; visible only to you, your faculty and administrators.
           </p>
         </CardContent>
       </Card>

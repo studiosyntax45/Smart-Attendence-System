@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   BookOpenCheck,
@@ -48,7 +47,6 @@ import {
 import { cn, type AttendanceStatus } from "@/lib/utils";
 import { clickable, useDrillDown } from "@/components/drilldown";
 import { studentCoursesSpec } from "@/components/drill-specs";
-
 
 function barTone(officialPct: number | null): string {
   if (officialPct === null) return "bg-muted-foreground/40";
@@ -315,7 +313,6 @@ export default function StudentAttendance() {
             </div>
           </section>
 
-          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -464,7 +461,6 @@ export default function StudentAttendance() {
             </CardContent>
           </Card>
 
-          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

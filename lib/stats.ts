@@ -3,7 +3,6 @@ export interface Point {
   y: number;
 }
 
-
 export function pearsonR(points: Point[]): number | null {
   const n = points.length;
   if (n < 3) return null;
@@ -25,7 +24,6 @@ export function pearsonR(points: Point[]): number | null {
   return cov / Math.sqrt(varX * varY);
 }
 
-
 export function linearRegression(
   points: Point[]
 ): { slope: number; intercept: number } | null {
@@ -46,7 +44,6 @@ export function linearRegression(
   const slope = cov / varX;
   return { slope, intercept: meanY - slope * meanX };
 }
-
 
 export function describeR(r: number): string {
   const abs = Math.abs(r);

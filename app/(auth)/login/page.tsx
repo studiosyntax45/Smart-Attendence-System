@@ -1,5 +1,4 @@
-﻿
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+﻿import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { AlertCircle, MapPin, ScanFace, TrendingUp, Users } from "lucide-react";
 import { useAuth, roleHome } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -15,7 +14,6 @@ const FEATURES = [
   { Icon: MapPin, text: "Geofenced to your classroom" },
   { Icon: TrendingUp, text: "Attendance ↔ performance insights" },
 ];
-
 
 const DOTS_LIGHT = {
   backgroundImage:
@@ -38,7 +36,7 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
       <PageTitle title="Sign in" />
-      
+
       <aside className="relative hidden flex-col overflow-hidden bg-[hsl(var(--pes-navy))] p-10 text-white lg:flex">
         <div
           aria-hidden="true"
@@ -87,7 +85,6 @@ export default function LoginPage() {
         </div>
       </aside>
 
-      
       <div className="relative flex flex-col items-center justify-center overflow-hidden bg-background p-6 sm:p-10">
         <div aria-hidden="true" className="absolute inset-0" style={DOTS_LIGHT} />
         <div

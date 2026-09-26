@@ -1,20 +1,16 @@
-﻿
-export interface ExportColumn {
-  
+﻿export interface ExportColumn {
+
   key: string;
-  
+
   label: string;
 }
 
-
 export type ExportRow = Record<string, string | number | null | undefined>;
-
 
 function cellText(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return "";
   return String(value);
 }
-
 
 function csvField(raw: string): string {
   let value = raw;
@@ -24,7 +20,6 @@ function csvField(raw: string): string {
   }
   return value;
 }
-
 
 export function rowsToCsv(rows: string[][]): string {
   return rows.map((r) => r.map(csvField).join(",")).join("\r\n");
@@ -49,7 +44,6 @@ export function downloadCsv(filename: string, csv: string): void {
   URL.revokeObjectURL(url);
 }
 
-
 function escapeHtml(raw: string): string {
   return raw
     .replace(/&/g, "&amp;")
@@ -60,12 +54,11 @@ function escapeHtml(raw: string): string {
 
 export interface PrintableOptions {
   title: string;
-  
+
   subtitle?: string;
   columns: ExportColumn[];
   rows: ExportRow[];
 }
-
 
 export function toPrintableHtml({
   title,
@@ -113,7 +106,6 @@ export function toPrintableHtml({
 </html>`;
 }
 
-
 export function slugifyFilename(raw: string): string {
   return (
     raw
@@ -123,7 +115,6 @@ export function slugifyFilename(raw: string): string {
       .slice(0, 80) || "export"
   );
 }
-
 
 /** exportFilename("attendance", ["CS301", "A"]) -> "attendance_CS301_A_2026-09-24" */
 export function exportFilename(prefix: string, parts: Array<string | null | undefined>, date = new Date()): string {

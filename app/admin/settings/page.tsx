@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Satellite } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";

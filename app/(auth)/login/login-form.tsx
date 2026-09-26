@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowRight, Loader2, Lock, Mail } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth, roleHome, signInWithGoogle, signInWithPassword } from "@/lib/auth";
 import { resolveOrigin } from "@/lib/origin";
-
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -33,7 +31,6 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-
 function ErrorAlert({ message }: { message: string }) {
   return (
     <p
@@ -45,7 +42,6 @@ function ErrorAlert({ message }: { message: string }) {
     </p>
   );
 }
-
 
 function IconInput({
   icon: Icon,
@@ -115,7 +111,6 @@ export function LoginForm() {
         </p>
       </div>
 
-
       <form onSubmit={handleGoogle}>
         <Button
           type="submit"
@@ -142,7 +137,6 @@ export function LoginForm() {
         account.
       </p>
       {googleError && <ErrorAlert message={googleError} />}
-
 
       <div className="flex items-center gap-3" aria-hidden="true">
         <span className="h-px flex-1 bg-border" />

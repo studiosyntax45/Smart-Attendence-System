@@ -1,4 +1,3 @@
-
 import { api } from "./api-client";
 
 export interface ClassInput {
@@ -35,7 +34,6 @@ export interface ClassActionState {
   message?: string;
 }
 
-
 export function validateClassInput(input: Partial<ClassInput>): {
   isValid: boolean;
   errors: Record<string, string>;
@@ -67,7 +65,6 @@ export function validateClassInput(input: Partial<ClassInput>): {
   };
 }
 
-
 export function filterClasses<T extends { name: string; branch: string; semester: string }>(
   classes: T[],
   searchTerm: string = "",
@@ -90,7 +87,6 @@ export function filterClasses<T extends { name: string; branch: string; semester
   });
 }
 
-
 export async function listAllClasses(): Promise<ClassItem[]> {
   try {
     const { classes } = await api.get<{
@@ -102,7 +98,6 @@ export async function listAllClasses(): Promise<ClassItem[]> {
     return [];
   }
 }
-
 
 export async function createClass(input: ClassInput): Promise<ClassActionState> {
   const { isValid, errors } = validateClassInput(input);
@@ -121,7 +116,6 @@ export async function createClass(input: ClassInput): Promise<ClassActionState> 
   }
 }
 
-
 export async function deleteClass(classId: string): Promise<ClassActionState> {
   if (!classId) return { error: "Missing class ID" };
   try {
@@ -131,7 +125,6 @@ export async function deleteClass(classId: string): Promise<ClassActionState> {
     return { error: err instanceof Error ? err.message : "Failed to delete class." };
   }
 }
-
 
 export async function listStudentsInClass(classId: string): Promise<ClassStudentItem[]> {
   if (!classId) return [];
@@ -146,7 +139,6 @@ export async function listStudentsInClass(classId: string): Promise<ClassStudent
   }
 }
 
-
 export async function listStudentPool(): Promise<{ id: string; full_name: string; roll_no: string | null }[]> {
   try {
     const { profiles } = await api.get<{
@@ -157,7 +149,6 @@ export async function listStudentPool(): Promise<{ id: string; full_name: string
     return [];
   }
 }
-
 
 export async function assignStudentsToClass(
   classId: string,
@@ -173,7 +164,6 @@ export async function assignStudentsToClass(
   }
 }
 
-
 export async function removeStudentFromClass(
   classId: string,
   studentId: string
@@ -187,7 +177,6 @@ export async function removeStudentFromClass(
   }
 }
 
-
 export async function assignCourseToClass(
   classId: string,
   courseCode: string
@@ -200,7 +189,6 @@ export async function assignCourseToClass(
     return { error: err instanceof Error ? err.message : "Failed to assign course." };
   }
 }
-
 
 export async function removeCourseFromClass(
   classId: string,

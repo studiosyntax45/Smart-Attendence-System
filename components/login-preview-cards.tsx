@@ -1,11 +1,9 @@
-﻿
-import { useRef } from "react";
+﻿import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CheckCircle2, MapPin, ScanFace } from "lucide-react";
 
 gsap.registerPlugin(useGSAP);
-
 
 export function LoginPreviewCards() {
   const scope = useRef<HTMLDivElement>(null);
@@ -45,7 +43,7 @@ export function LoginPreviewCards() {
       aria-hidden="true"
       className="pointer-events-none relative mx-auto h-64 w-full max-w-sm select-none"
     >
-      
+
       <div className={`${glass} absolute left-0 top-2 flex -rotate-2 items-center gap-3 p-3.5`}>
         <span className="flex size-9 items-center justify-center rounded-full bg-[hsl(var(--status-present))]/25">
           <CheckCircle2 className="size-5 text-[hsl(142,71%,55%)]" />
@@ -56,7 +54,6 @@ export function LoginPreviewCards() {
         </div>
       </div>
 
-      
       <div className={`${glass} absolute right-0 top-20 flex rotate-3 items-center gap-3 p-3.5`}>
         <svg viewBox="0 0 44 44" className="size-11 -rotate-90">
           <circle cx="22" cy="22" r="18" fill="none" strokeWidth="5" className="stroke-white/15" />
@@ -73,7 +70,6 @@ export function LoginPreviewCards() {
         </div>
       </div>
 
-      
       <div className={`${glass} absolute bottom-2 left-6 flex -rotate-1 items-center gap-2.5 p-3.5`}>
         <span className="relative flex size-4 items-center justify-center">
           <span className="absolute size-4 animate-ping rounded-full bg-[hsl(142,71%,55%)]/50 [animation-duration:2.4s]" />
@@ -84,7 +80,6 @@ export function LoginPreviewCards() {
         </p>
       </div>
 
-      
       <div className={`${glass} absolute right-10 top-2 flex rotate-2 items-center gap-2 p-2.5 opacity-80`}>
         <ScanFace className="size-4 text-[#E8792B]" />
         <p className="text-xs font-medium text-white/85">Quality 96%</p>

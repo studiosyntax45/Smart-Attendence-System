@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import { AlertCircle, CheckCircle2, LoaderCircle, Save } from "lucide-react";
 import {
   updateGpsSettings,

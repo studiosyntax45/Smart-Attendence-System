@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
@@ -233,7 +232,6 @@ export default function FacultyDashboard() {
         </p>
       </div>
 
-      
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="Live session"
@@ -312,11 +310,10 @@ export default function FacultyDashboard() {
         />
       </div>
 
-      
       <PendingAppeals requests={pendingAppeals} />
 
       {openSession ? (
-        
+
         <Card>
           <CardHeader className="flex-row items-start justify-between space-y-0">
             <div className="space-y-1">
@@ -393,7 +390,7 @@ export default function FacultyDashboard() {
           </CardContent>
         </Card>
       ) : (
-        
+
         <div className="grid gap-4 lg:grid-cols-2">
           <TodaysClasses
             entries={schedule}
@@ -428,7 +425,6 @@ export default function FacultyDashboard() {
             </CardContent>
           </Card>
 
-          
           <Card className="lg:col-span-2">
             <CardHeader className="p-0">
               <button
@@ -469,7 +465,6 @@ export default function FacultyDashboard() {
         </div>
       )}
 
-      
       {openSession && (
         <TodaysClasses
           entries={schedule}
