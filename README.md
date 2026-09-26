@@ -95,6 +95,10 @@ npm --prefix server run prisma:push
 npm --prefix server run seed
 ```
 
+> **After every `git pull`**, run `npm --prefix server run prisma:push` again (and
+> restart the server). If the schema changed and you skip this, pages that use the
+> new tables show "This page didn't load".
+
 5. Browse and edit rows with Prisma Studio (http://localhost:5555):
 
 ```powershell
