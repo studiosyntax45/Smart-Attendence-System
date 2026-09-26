@@ -1,4 +1,3 @@
-
 export interface RowError {
   row: number; // line in the CSV file; the header is line 1, so data starts at 2
   key: string;

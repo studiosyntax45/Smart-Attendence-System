@@ -2,7 +2,6 @@
 const LOGO_LIGHT = "/pes-university-logo.png";
 const LOGO_DARK = "/pes-university-logo-dark.png";
 
-
 export function PesLogo({
   className,
   priority: _priority = false,

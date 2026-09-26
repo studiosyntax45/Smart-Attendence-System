@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -29,12 +28,11 @@ import {
 
 interface TodaysClassesProps {
   entries: ScheduleEntry[];
-  
+
   liveCourses: Set<string>;
-  
+
   hasOpenSession: boolean;
 }
-
 
 export function TodaysClasses({
   entries,

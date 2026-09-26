@@ -1,11 +1,9 @@
-﻿
-import type { Point } from "./face.ts";
+﻿import type { Point } from "./face.ts";
 
 type FaceApi = typeof import("@vladmandic/face-api");
 
 let faceapiPromise: Promise<FaceApi> | null = null;
 let modelsPromise: Promise<void> | null = null;
-
 
 export async function loadFaceModels(): Promise<FaceApi> {
   if (!faceapiPromise) faceapiPromise = import("@vladmandic/face-api");
@@ -22,11 +20,11 @@ export async function loadFaceModels(): Promise<FaceApi> {
 }
 
 export interface FaceReading {
-  
+
   score: number;
-  
+
   descriptor: Float32Array | null;
-  
+
   leftEye: Point[];
   rightEye: Point[];
 }
@@ -40,7 +38,6 @@ function detectorOptions(faceapi: FaceApi) {
     scoreThreshold: 0.3,
   });
 }
-
 
 export async function detectFaceLandmarks(
   faceapi: FaceApi,
@@ -59,7 +56,6 @@ export async function detectFaceLandmarks(
     rightEye: toPoints(result.landmarks.getRightEye()),
   };
 }
-
 
 export async function detectFace(
   faceapi: FaceApi,

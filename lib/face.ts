@@ -1,13 +1,8 @@
-﻿
-
-export const DESCRIPTOR_LENGTH = 128;
-
+﻿export const DESCRIPTOR_LENGTH = 128;
 
 export const FACE_MATCH_THRESHOLD = 0.9;
 
-
 export type FaceDescriptor = number[];
-
 
 export function euclideanDistance(
   a: ArrayLike<number>,
@@ -26,7 +21,6 @@ export function euclideanDistance(
   return Math.sqrt(sum);
 }
 
-
 export function isFaceMatch(
   distance: number,
   threshold: number = FACE_MATCH_THRESHOLD
@@ -34,16 +28,13 @@ export function isFaceMatch(
   return distance <= threshold;
 }
 
-
 export function matchConfidence(distance: number): number {
   return Math.max(0, Math.min(1, 1 - distance));
 }
 
-
 export function serializeDescriptor(d: ArrayLike<number>): FaceDescriptor {
   return Array.from(d, (x) => Number(x));
 }
-
 
 export function isValidDescriptor(value: unknown): value is FaceDescriptor {
   return (
@@ -58,11 +49,9 @@ export interface Point {
   y: number;
 }
 
-
 function dist(a: Point, b: Point): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
-
 
 export function eyeAspectRatio(eye: Point[]): number {
   if (eye.length !== 6) {
@@ -74,20 +63,18 @@ export function eyeAspectRatio(eye: Point[]): number {
   return vertical / (2 * horizontal);
 }
 
-
 export function blinkRatio(left: Point[], right: Point[]): number {
   return (eyeAspectRatio(left) + eyeAspectRatio(right)) / 2;
 }
 
 export interface BlinkState {
-  
+
   baseline: number;
-  
+
   closed: boolean;
-  
+
   count: number;
 }
-
 
 export const BLINK_CLOSE_FRACTION = 0.75;
 
@@ -95,11 +82,9 @@ export const BLINK_OPEN_FRACTION = 0.85;
 
 const BASELINE_DECAY = 0.98;
 
-
 export function initBlinkState(): BlinkState {
   return { baseline: 0, closed: false, count: 0 };
 }
-
 
 export function updateBlinkState(state: BlinkState, ear: number): BlinkState {
   if (!Number.isFinite(ear) || ear <= 0) return state;

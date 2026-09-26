@@ -2,7 +2,6 @@ import { CheckCircle2, Clock, XCircle, LogOut, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { AttendanceStatus } from "@/lib/utils";
 
-
 const CONFIG: Record<
   AttendanceStatus,
   { label: string; Icon: typeof CheckCircle2 }

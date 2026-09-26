@@ -1,4 +1,3 @@
-
 import { Router, type Response } from "express";
 import { z } from "zod";
 import passport from "passport";

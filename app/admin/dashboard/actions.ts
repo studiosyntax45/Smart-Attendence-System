@@ -10,7 +10,6 @@ export interface AdminActionState {
 
 const VALID_ROLES: Role[] = ["student", "faculty", "admin"];
 
-
 export async function setUserRole(userId: string, role: Role): Promise<AdminActionState> {
   if (!VALID_ROLES.includes(role)) return { error: "Invalid role." };
   try {
@@ -21,7 +20,6 @@ export async function setUserRole(userId: string, role: Role): Promise<AdminActi
   }
 }
 
-
 export async function resetFaceEnrollment(userId: string): Promise<AdminActionState> {
   try {
     await api.post(`/profiles/${userId}/reset-face`);
@@ -30,7 +28,6 @@ export async function resetFaceEnrollment(userId: string): Promise<AdminActionSt
     return { error: err instanceof Error ? err.message : "Failed to reset face." };
   }
 }
-
 
 export async function resetUserPassword(
   userId: string,
@@ -44,7 +41,6 @@ export async function resetUserPassword(
     return { error: err instanceof Error ? err.message : "Failed to reset password." };
   }
 }
-
 
 export async function createGeofence(
   _prev: AdminActionState,
@@ -68,7 +64,6 @@ export async function createGeofence(
     return { error: err instanceof Error ? err.message : "Failed to create geofence." };
   }
 }
-
 
 export async function deleteGeofence(id: string): Promise<AdminActionState> {
   try {

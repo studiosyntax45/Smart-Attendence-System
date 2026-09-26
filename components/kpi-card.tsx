@@ -1,5 +1,4 @@
-﻿
-import { useRef, type ReactNode } from "react";
+﻿import { useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -11,15 +10,15 @@ gsap.registerPlugin(useGSAP);
 
 interface KpiCardProps {
   label: string;
-  
+
   value: string;
   sub?: string;
-  
+
   icon: ReactNode;
   tone?: "neutral" | "present" | "late" | "absent";
-  
+
   countTo?: number;
-  
+
   suffix?: string;
   href?: string;
   /** Opens the records behind the number in the drill-down popup. */
@@ -32,7 +31,6 @@ const TONE_CLASS = {
   late: "text-status-late bg-status-late/10",
   absent: "text-status-absent bg-status-absent/10",
 } as const;
-
 
 export function KpiCard({
   label,
@@ -84,7 +82,7 @@ export function KpiCard({
           <p className="text-xs font-medium uppercase leading-snug tracking-wide text-muted-foreground">
             {label}
           </p>
-          
+
           <p
             ref={numberRef}
             aria-label={value}

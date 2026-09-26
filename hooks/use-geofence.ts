@@ -13,10 +13,9 @@ export type GeofenceState =
       distance: number;
       accuracy: number;
       coords: LatLng;
-      
+
       stale?: boolean;
     };
-
 
 export function useGeofence(
   center: LatLng,

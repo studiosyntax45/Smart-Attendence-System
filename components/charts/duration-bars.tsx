@@ -1,5 +1,4 @@
-﻿
-import {
+﻿import {
   Bar,
   BarChart,
   CartesianGrid,
@@ -10,12 +9,11 @@ import {
 } from "recharts";
 
 export interface DurationDatum {
-  
+
   label: string;
   course: string;
   minutes: number;
 }
-
 
 export function DurationBars({ data, onBarClick }: { data: DurationDatum[]; onBarClick?: (index: number) => void }) {
   return (

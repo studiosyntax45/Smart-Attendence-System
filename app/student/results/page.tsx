@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   GraduationCap,
@@ -152,7 +151,7 @@ export default function StudentResults() {
   return (
     <GsapReveal className="space-y-6">
       <PageTitle title="My Results" />
-      
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">My Results</h1>
@@ -199,7 +198,7 @@ export default function StudentResults() {
         </Card>
       ) : (
         <>
-          
+
           {failed.length > 0 && (
             <div
               className="flex items-start gap-3 rounded-lg border border-status-absent/30 bg-status-absent/10 px-4 py-3"
@@ -222,7 +221,6 @@ export default function StudentResults() {
             </div>
           )}
 
-          
           <section className="grid gap-4 lg:grid-cols-5">
             <Card className="lg:col-span-2">
               <CardHeader className="pb-0">
@@ -271,7 +269,6 @@ export default function StudentResults() {
             </div>
           </section>
 
-          
           <Card>
             <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
               <div className="space-y-1">

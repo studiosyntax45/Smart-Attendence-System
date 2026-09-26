@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   AlertCircle,
   Check,
@@ -21,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 
 export function PendingAppeals({ requests }: { requests: LeaveRequest[] }) {
   const [busyId, setBusyId] = useState<string | null>(null);

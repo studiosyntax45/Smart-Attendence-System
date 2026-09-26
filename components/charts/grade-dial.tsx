@@ -1,5 +1,4 @@
-﻿
-import { useRef } from "react";
+﻿import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Award, TrendingUp, AlertTriangle, CircleDashed } from "lucide-react";
@@ -12,15 +11,14 @@ const STROKE = 12;
 const R = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-
 export function GradeDial({
   value,
   label,
   sub,
 }: {
-  
+
   value: number | null;
-  
+
   label: string;
   sub?: string;
 }) {

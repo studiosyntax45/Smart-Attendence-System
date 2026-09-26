@@ -1,6 +1,5 @@
 ﻿import { COLLEGE_EMAIL_DOMAIN } from "@/lib/utils";
 
-
 export type LoginErrorCode =
   | "domain"
   | "not_student"
@@ -19,7 +18,6 @@ const MESSAGES: Record<LoginErrorCode, string> = {
   google_unavailable:
     "Google sign-in isn't set up on this server. Students can sign in below with their college email and password (default Pes@12345).",
 };
-
 
 export function loginErrorMessage(code: string | undefined): string | null {
   if (!code) return null;

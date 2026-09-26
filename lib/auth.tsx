@@ -16,7 +16,6 @@ import {
   type Role,
 } from "./utils";
 
-
 const PARENT_VIEW_KEY = "pes-parent-view";
 
 export function getParentView(): boolean {
@@ -44,9 +43,9 @@ export interface SessionProfile {
 interface AuthContextValue {
   loading: boolean;
   user: SessionUser | null;
-  
+
   profile: SessionProfile | null;
-  
+
   parentView: boolean;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -125,7 +124,6 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
-
 export function roleHome(role: Role): string {
   return ROLE_HOME[role];
 }
@@ -137,7 +135,6 @@ export interface AuthResult {
 
 const NOT_CONFIGURED =
   "API backend is not configured. Set VITE_API_BASE_URL in .env.local.";
-
 
 export async function signInWithPassword(
   email: string,
@@ -153,7 +150,6 @@ export async function signInWithPassword(
     return { error: err instanceof Error ? err.message : "Sign-in failed." };
   }
 }
-
 
 export async function signInAsParent(
   email: string,
@@ -179,7 +175,6 @@ export async function signInAsParent(
   }
 }
 
-
 export async function signInWithGoogle(
   redirectOrigin: string
 ): Promise<AuthResult> {
@@ -190,7 +185,6 @@ export async function signInWithGoogle(
   window.location.href = googleOAuthUrl();
   return {};
 }
-
 
 export { isCollegeEmail };
 export type { SessionUser };

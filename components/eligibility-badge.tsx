@@ -2,7 +2,6 @@
 import { Badge } from "@/components/ui/badge";
 import { isEligible } from "@/lib/attendance";
 
-
 export function EligibilityBadge({ officialPct }: { officialPct: number | null }) {
   if (officialPct === null) {
     return (

@@ -1,5 +1,4 @@
-﻿
-import { useRef, useState, useTransition } from "react";
+﻿import { useRef, useState, useTransition } from "react";
 import { notifyApiWrite } from "@/lib/api-client";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -25,15 +24,15 @@ interface Props {
     center: { lat: number; lng: number };
     radiusM: number;
   };
-  
+
   openAttendanceId: string | null;
-  
+
   enrolledDescriptor: number[] | null;
-  
+
   highAccuracy: boolean;
-  
+
   accuracyGraceM: number;
-  
+
   serverVerification?: boolean;
 }
 

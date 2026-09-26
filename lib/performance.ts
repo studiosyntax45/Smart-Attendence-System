@@ -1,10 +1,7 @@
-﻿
-import { gradeForPct, type LetterGrade } from "./results.ts";
+﻿import { gradeForPct, type LetterGrade } from "./results.ts";
 import { ELIGIBILITY_THRESHOLD } from "./attendance.ts";
 
-
 export const MARKS_GOOD_THRESHOLD = 70;
-
 
 const MARKS_WEIGHT = 0.8;
 const ATTENDANCE_WEIGHT = 0.2;
@@ -35,7 +32,6 @@ export interface PerformancePrediction {
   improvementProbability: Likelihood;
   recommendedAction: string;
 }
-
 
 function clampPct(n: number): number {
   if (Number.isNaN(n)) return 0;
@@ -83,7 +79,6 @@ const RUBRIC: Record<
   },
 };
 
-
 export function analyzePerformance(
   input: PerformanceInput
 ): PerformanceAnalysis | null {
@@ -105,7 +100,6 @@ export function analyzePerformance(
     atRisk: aBand === "low" || mBand === "low",
   };
 }
-
 
 export function predictPerformance(
   input: PerformanceInput

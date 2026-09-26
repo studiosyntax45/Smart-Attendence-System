@@ -1,4 +1,3 @@
-
 import { api } from "./api-client";
 
 export interface ScheduleActionState {
@@ -78,7 +77,6 @@ export const DAY_NAMES = [
   "Saturday",
 ] as const;
 
-
 export function normaliseTime(t: string): string | null {
   const raw = t.trim();
   const m = raw.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
@@ -89,7 +87,6 @@ export function normaliseTime(t: string): string | null {
   if (h < 0 || h > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) return null;
   return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
-
 
 export function validateScheduleInput(input: ScheduleEntryInput): string | null {
   const course = input.course.trim();
@@ -107,13 +104,11 @@ export function validateScheduleInput(input: ScheduleEntryInput): string | null 
   return null;
 }
 
-
 export function formatTimeRange(start: string, end: string): string {
   const s = start.slice(0, 5);
   const e = end.slice(0, 5);
   return `${s} – ${e}`;
 }
-
 
 export async function listScheduleForFaculty(
   facultyId: string,
@@ -132,7 +127,6 @@ export async function listScheduleForFaculty(
   }
 }
 
-
 export async function listAllSchedule(): Promise<ScheduleEntry[]> {
   try {
     const { schedule } = await api.get<{ schedule: ApiScheduleEntry[] }>("/class-schedule");
@@ -142,7 +136,6 @@ export async function listAllSchedule(): Promise<ScheduleEntry[]> {
     return [];
   }
 }
-
 
 export async function upsertScheduleEntry(input: ScheduleEntryInput): Promise<ScheduleActionState> {
   const validationError = validateScheduleInput(input);
@@ -160,7 +153,6 @@ export async function upsertScheduleEntry(input: ScheduleEntryInput): Promise<Sc
     return { error: err instanceof Error ? err.message : "Failed to save schedule entry." };
   }
 }
-
 
 export async function deleteScheduleEntry(id: string): Promise<ScheduleActionState> {
   if (!id) return { error: "Missing schedule entry id." };

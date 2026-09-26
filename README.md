@@ -373,6 +373,16 @@ The seed also creates a CSE Sem-5 cohort of 24 students (`PES1UG23CS001`–`024`
 
 The browser only allows camera and location on `localhost` (or HTTPS), so always use `http://localhost:3000`, not your PC's IP address.
 
+### Add or edit a student's details
+
+A student's **Profile** page shows their personal details: date of birth, blood group, SSLC/PUC marks, parents' names and phones, address and the last 4 digits of Aadhaar. Students can only view them; **faculty and admins fill them in**:
+
+1. Sign in as faculty or admin and open **Students** in the menu.
+2. Search for the student (name, USN, email or branch). The *Details* column shows **Missing** for students whose personal details are empty.
+3. Click **Edit**, fill in the form and click **Save details**. The student sees the changes on their Profile at once, and the change is recorded in the admin's **Audit Logs**.
+
+New students are added by an **admin** through **Bulk Import → Students** (CSV). That sets name, USN, email, branch, section, year and parent email; everything else is added with **Edit** as above. Every new account gets the password `Pes@12345`.
+
 ---
 
 ## 12. Everyday use
@@ -389,7 +399,11 @@ npm install
 npm --prefix server install
 ```
 
-then start the backend with `npm --prefix server run dev` as usual. Read the output of `git pull`: if it says *error* or *Aborting*, nothing was updated (see [Troubleshooting](#13-troubleshooting)). `npm run doctor` tells you whether your code is up to date. It updates the database tables automatically before starting. If `face-service/requirements.txt` changed, also re-run the `pip install` line from 8.1.
+- Read what `git pull` prints. If it says *error* or *Aborting*, nothing was updated. This usually means a file was changed on your PC; run `git stash`, then `git pull` again.
+- Always run both `npm install` lines, even if nothing seems to have changed: new code sometimes needs new packages, and the backend will not start without them.
+- Then start everything as in [step 10](#10-start-everything). The backend updates the database tables automatically before it starts.
+- If `face-service/requirements.txt` changed, also re-run the `pip install` line from 8.1.
+- Not sure it worked? Run `npm run doctor` (see [Troubleshooting](#13-troubleshooting)).
 
 **Start over with fresh demo data:** in MySQL Workbench run `DROP DATABASE smart_attendance;`, then repeat [step 7](#7-create-the-tables-and-demo-data). This deletes all data.
 
@@ -518,6 +532,7 @@ npm --prefix server run seed            # add demo data (safe to repeat)
 npm --prefix server run prisma:studio   # browse data at http://localhost:5555
 
 # Checks
+npm run doctor                       # checks your whole setup and says what to fix
 npm run typecheck                    # frontend type check
 npm --prefix server run typecheck    # backend type check
 npm run check:encoding               # catches broken characters in text files
@@ -576,5 +591,6 @@ Smart-Attendence-System/
    - Marks and results (CGPA), with performance analytics and AI study advice
    - Leave requests (date range) and per-session appeals, with faculty review and comments
    - Audit log of who changed what
+   - Student details: faculty and admins add or edit each student's profile (DOB, parents, address, SSLC/PUC, Aadhaar last 4); students see them read-only
    - Parent dashboard (read-only)
    - Bulk CSV import with a preview before anything is saved: students, faculty, courses, enrollments, weekly timetable, attendance corrections and marks. Templates can be downloaded on each import screen, and copies are in `public/templates/`.

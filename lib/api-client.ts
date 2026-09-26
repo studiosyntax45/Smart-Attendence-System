@@ -1,4 +1,3 @@
-
 import type { Role } from "./utils";
 
 export const API_BASE_URL =
@@ -34,9 +33,9 @@ export class ApiError extends Error {
 }
 
 interface ApiOptions {
-  
+
   skipAuth?: boolean;
-  
+
   form?: boolean;
   /** Skip the automatic cache refresh; the caller calls notifyApiWrite() later (e.g. after a success animation). */
   deferRefresh?: boolean;
@@ -161,12 +160,6 @@ export async function login(email: string, password: string): Promise<AuthResult
   return res;
 }
 
-export async function register(email: string, password: string, fullName: string): Promise<AuthResult> {
-  const res = await request<AuthResult>("POST", "/auth/register", { email, password, fullName }, { skipAuth: true });
-  setAccessToken(res.accessToken);
-  return res;
-}
-
 export async function logout(): Promise<void> {
   try {
     await request<void>("POST", "/auth/logout", undefined, { skipAuth: true });
@@ -189,7 +182,6 @@ export async function me(): Promise<SessionUser | null> {
     return null;
   }
 }
-
 
 export function googleOAuthUrl(opts: { parentView?: boolean } = {}): string {
   const qs = opts.parentView ? "?parentView=1" : "";

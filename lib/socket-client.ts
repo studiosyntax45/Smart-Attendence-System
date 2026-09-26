@@ -1,4 +1,3 @@
-
 import { io as createSocket, type Socket } from "socket.io-client";
 import { API_BASE_URL, getAccessToken } from "./api-client";
 
@@ -18,7 +17,6 @@ export function getSocket(): Socket {
   });
   return socket;
 }
-
 
 export function disconnectSocket(): void {
   if (socket) {

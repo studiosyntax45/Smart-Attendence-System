@@ -1,4 +1,3 @@
-
 export const DESCRIPTOR_LENGTH = 128;
 export const FACE_MATCH_THRESHOLD = 0.9;
 

@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { CalendarX2, ScanFace } from "lucide-react";
 import { api } from "@/lib/api-client";

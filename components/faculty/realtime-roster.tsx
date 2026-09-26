@@ -1,9 +1,7 @@
-﻿
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getSocket, disconnectSocket } from "@/lib/socket-client";
 import { apiConfigured } from "@/lib/utils";
-
 
 export function RealtimeRoster({
   sessionId,

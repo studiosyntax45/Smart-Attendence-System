@@ -1,4 +1,3 @@
-
 import type { Server as SocketIOServer, Socket } from "socket.io";
 import { prisma } from "../config/db";
 import { verifyAccessToken } from "../services/auth";

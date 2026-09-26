@@ -1,5 +1,4 @@
-﻿
-import { useState, useTransition } from "react";
+﻿import { useState, useTransition } from "react";
 import { notifyApiWrite } from "@/lib/api-client";
 import { CheckCircle2, LoaderCircle, ScanFace, ShieldCheck, XCircle } from "lucide-react";
 import { BiometricScanner, type ScanStatus } from "@/components/face/biometric-scanner";
@@ -16,7 +15,7 @@ export function FaceEnrollment({
   serverVerification = false,
 }: {
   alreadyEnrolled: boolean;
-  
+
   serverVerification?: boolean;
 }) {
   const [status, setStatus] = useState<ScanStatus | null>(null);

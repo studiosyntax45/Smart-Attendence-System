@@ -6,7 +6,6 @@ import { apiConfigured, ROLE_HOME, isCollegeEmail, type Role } from "@/lib/utils
 import { logout, me, setAccessToken } from "@/lib/api-client";
 import type { LoginErrorCode } from "@/app/(auth)/login/login-errors";
 
-
 export default function AuthCallback() {
   const navigate = useNavigate();
   const [search] = useSearchParams();

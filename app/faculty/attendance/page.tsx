@@ -1,5 +1,4 @@
-﻿
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { BookOpenCheck, AlertTriangle, Percent, Users } from "lucide-react";
 import { api } from "@/lib/api-client";
@@ -172,7 +171,7 @@ export default function FacultyAttendance() {
         </Card>
       ) : (
         <>
-          
+
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Course">
             {courses.map((c) => (
               <Link
@@ -192,7 +191,6 @@ export default function FacultyAttendance() {
             ))}
           </div>
 
-          
           <div className="grid gap-3 sm:grid-cols-3">
             <KpiCard
               label="Enrolled"
@@ -227,7 +225,6 @@ export default function FacultyAttendance() {
             />
           </div>
 
-          
           <Card>
             <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
               <div className="space-y-1">

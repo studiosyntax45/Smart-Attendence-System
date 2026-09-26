@@ -19,8 +19,6 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-
-
 const BAND_VARIANT: Record<Band, "present" | "late"> = {
   good: "present",
   low: "late",
@@ -37,7 +35,6 @@ const LIKELIHOOD_VARIANT: Record<Likelihood, "present" | "late" | "absent"> = {
   Medium: "late",
   Low: "absent",
 };
-
 
 const RISK_TONE: Record<RiskLevel, string> = {
   Low: "text-status-present",
@@ -68,7 +65,7 @@ function QuadrantLocator({
       role="img"
       aria-hidden="true"
     >
-      
+
       <rect
         x={PLOT.x0}
         y={PLOT.y0}
@@ -78,7 +75,7 @@ function QuadrantLocator({
         className="fill-muted/40 stroke-border"
         strokeWidth="1"
       />
-      
+
       <rect
         x={VX}
         y={PLOT.y0}
@@ -86,7 +83,7 @@ function QuadrantLocator({
         height={HY - PLOT.y0}
         className="fill-status-present/10"
       />
-      
+
       <line
         x1={VX}
         y1={PLOT.y0}
@@ -105,7 +102,7 @@ function QuadrantLocator({
         strokeWidth="1"
         strokeDasharray="2 3"
       />
-      
+
       <g className={cn(tone, "animate-dot-in")}>
         <circle
           cx={px}
@@ -128,7 +125,7 @@ function QuadrantLocator({
           strokeWidth="1.5"
         />
       </g>
-      
+
       <text
         x={PLOT.x0 + PLOT.size / 2}
         y="120"
@@ -149,7 +146,6 @@ function QuadrantLocator({
     </svg>
   );
 }
-
 
 function StatCell({
   icon: Icon,
@@ -204,14 +200,14 @@ export function PerformanceInsight({
         className
       )}
     >
-      
+
       <div
         aria-hidden="true"
         className="h-1 w-full bg-gradient-to-r from-[hsl(var(--pes-orange))] via-[hsl(var(--pes-amber-aa))] to-transparent"
       />
 
       <CardHeader className="relative">
-        
+
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
@@ -241,7 +237,7 @@ export function PerformanceInsight({
           </p>
         ) : (
           <div className="space-y-5">
-            
+
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <QuadrantLocator
                 attendancePct={analysis.attendancePct}
@@ -324,7 +320,6 @@ export function PerformanceInsight({
               )}
             </div>
 
-            
             <div className="grid gap-5 rounded-xl border bg-muted/40 p-4 sm:grid-cols-3">
               <StatCell icon={TrendingUp} label="Expected grade">
                 <GradeBadge grade={prediction.expectedGrade} />
@@ -341,7 +336,6 @@ export function PerformanceInsight({
               </StatCell>
             </div>
 
-            
             <p className="flex items-start gap-2.5 rounded-lg bg-primary/5 p-3.5 text-sm">
               <Lightbulb
                 className="mt-0.5 size-4 shrink-0 text-[hsl(var(--pes-orange))]"

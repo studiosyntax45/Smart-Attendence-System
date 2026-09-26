@@ -1,4 +1,3 @@
-
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
@@ -49,6 +48,7 @@ export const config = {
   faceService: {
     url: optional("FACE_SERVICE_URL"),
     token: optional("FACE_SERVICE_TOKEN"),
+    timeoutMs: Number(process.env.FACE_SERVICE_TIMEOUT_MS ?? 15_000),
   },
 
   ollama: {

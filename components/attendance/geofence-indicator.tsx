@@ -1,8 +1,6 @@
-﻿
-import { MapPin, MapPinOff, LoaderCircle, Ban } from "lucide-react";
+﻿import { MapPin, MapPinOff, LoaderCircle, Ban } from "lucide-react";
 import type { GeofenceState } from "@/hooks/use-geofence";
 import { cn } from "@/lib/utils";
-
 
 export function GeofenceIndicator({
   state,
@@ -32,7 +30,7 @@ export function GeofenceIndicator({
     case "seeking":
       return (
         <div role="status" className={cn(base, "border-status-late/40 bg-status-late/10 text-status-late")}>
-          
+
           <span className="relative flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-status-late opacity-60" />
             <LoaderCircle className="relative size-4 animate-spin" />
@@ -43,7 +41,7 @@ export function GeofenceIndicator({
     case "inside":
       return (
         <div role="status" className={cn(base, "border-status-present/40 bg-status-present/10 text-status-present")}>
-          
+
           <span className="relative flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
             <span className="absolute inline-flex size-2.5 animate-ping rounded-full bg-status-present opacity-40 [animation-duration:2.5s]" />
             <MapPin className="relative size-4" />

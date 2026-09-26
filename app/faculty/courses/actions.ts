@@ -7,7 +7,6 @@ export interface CourseActionState {
   message?: string;
 }
 
-
 export async function upsertCourse(
   _prev: CourseActionState,
   formData: FormData
@@ -33,7 +32,6 @@ export async function upsertCourse(
     return { error: err instanceof Error ? err.message : "Failed to save course." };
   }
 }
-
 
 export async function setEnrollments(
   courseCode: string,

@@ -4,7 +4,6 @@ import { AppShell } from "@/components/app-shell";
 import { PageSkeleton } from "@/components/page-skeleton";
 import type { Role } from "@/lib/utils";
 
-
 export function RequireRole({ allowed }: { allowed: Role[] }) {
   const { loading, user, profile, parentView } = useAuth();
   const location = useLocation();
@@ -24,7 +23,6 @@ export function RequireRole({ allowed }: { allowed: Role[] }) {
     </AppShell>
   );
 }
-
 
 export function RequireParentView() {
   const { loading, user, profile, parentView } = useAuth();

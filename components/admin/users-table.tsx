@@ -1,6 +1,4 @@
-﻿
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+﻿import { useState } from "react";
 import { KeyRound, LoaderCircle, RotateCcw, ScanFace, ShieldCheck } from "lucide-react";
 import { resetFaceEnrollment, resetUserPassword, setUserRole } from "@/app/admin/dashboard/actions";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +12,7 @@ export interface UserRow {
   roll_no: string | null;
   role: Role;
   created_at: string;
-  
+
   face_enrolled: boolean;
 }
 
@@ -35,7 +33,6 @@ const ROLE_BADGE: Record<Role, "default" | "secondary" | "outline"> = {
   parent: "outline",
 };
 
-
 export function UsersTable({
   users,
   currentUserId,
@@ -51,7 +48,6 @@ export function UsersTable({
   const [pwSaving, setPwSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const qc = useQueryClient();
 
   async function changeRole(userId: string, role: Role) {
     setPendingId(userId);
