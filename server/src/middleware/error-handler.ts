@@ -42,6 +42,19 @@ export function errorHandler(
     res.status(409).json({ error: "Referenced record is in use and cannot be modified." });
     return;
   }
+  // P2021/P2022: a table or column the code expects is missing, i.e. the database
+  // predates the current schema.prisma.
+  if (e?.code === "P2021" || e?.code === "P2022") {
+    console.error(
+      "[db] Database schema is out of date. Run `npm --prefix server run prisma:push`, then restart the server.\n",
+      err
+    );
+    res.status(500).json({
+      error: "Database schema is out of date. Ask an admin to run prisma:push.",
+      code: "SCHEMA_OUTDATED",
+    });
+    return;
+  }
   console.error("[unhandled]", err);
   res.status(500).json({ error: "Server error." });
 }

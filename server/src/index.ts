@@ -5,6 +5,7 @@ import { createApp } from "./app";
 import { config } from "./config/env";
 import { attachSocketIO } from "./sockets/index";
 import { pruneExpiredRevokedTokens } from "./services/auth";
+import { reportDatabaseSchema } from "./services/schema-check";
 
 const app = createApp();
 const httpServer = createServer(app);
@@ -19,5 +20,6 @@ httpServer.listen(config.port, () => {
   pruneExpiredRevokedTokens().catch((err) =>
     console.warn("[auth] token prune failed (non-fatal):", err)
   );
+  reportDatabaseSchema().catch((err) => console.warn("[db] schema check failed (non-fatal):", err));
 });
 app.set("io", io);

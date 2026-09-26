@@ -3,20 +3,29 @@ import react from "@vitejs/plugin-react";
 import path from "node:path";
 const permissionsPolicy = "camera=(self), geolocation=(self)";
 
+// index.html must never be cached: it names the hashed page chunks of the current build,
+// and a stale copy points at chunks that no longer exist. Hashed assets can cache freely.
+function setHeaders(req: { url?: string }, res: { setHeader(name: string, value: string): void }) {
+  res.setHeader("Permissions-Policy", permissionsPolicy);
+  const url = (req.url ?? "/").split("?")[0];
+  const isPage = url.endsWith(".html") || !/\.[a-z0-9]+$/i.test(url); // "/", "/student/dashboard", ...
+  if (isPage) res.setHeader("Cache-Control", "no-cache");
+}
+
 export default defineConfig({
   plugins: [
     react(),
     {
       name: "permissions-policy-header",
       configureServer(server) {
-        server.middlewares.use((_req, res, next) => {
-          res.setHeader("Permissions-Policy", permissionsPolicy);
+        server.middlewares.use((req, res, next) => {
+          setHeaders(req, res);
           next();
         });
       },
       configurePreviewServer(server) {
-        server.middlewares.use((_req, res, next) => {
-          res.setHeader("Permissions-Policy", permissionsPolicy);
+        server.middlewares.use((req, res, next) => {
+          setHeaders(req, res);
           next();
         });
       },

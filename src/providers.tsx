@@ -5,8 +5,11 @@ import { ApiError, onApiWrite } from "@/lib/api-client";
 
 // Network errors and 5xx are usually the API restarting: keep trying for about 30 s.
 // A 4xx will not change on retry, so fail fast.
+// An outdated database schema won't fix itself either, so show its error straight away.
 function retry(failureCount: number, error: unknown): boolean {
   const status = error instanceof ApiError ? error.status : 0;
+  const body = error instanceof ApiError ? (error.body as { code?: string } | null) : null;
+  if (body?.code === "SCHEMA_OUTDATED") return false;
   return (status === 0 || status >= 500) && failureCount < 5;
 }
 

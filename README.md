@@ -95,6 +95,10 @@ npm --prefix server run prisma:push
 npm --prefix server run seed
 ```
 
+> `npm --prefix server run dev` runs `prisma:push` first, so the database picks up
+> schema changes from a `git pull` automatically. If you start the backend any other
+> way, run `npm --prefix server run prisma:push` yourself after pulling.
+
 5. Browse and edit rows with Prisma Studio (http://localhost:5555):
 
 ```powershell
@@ -226,6 +230,16 @@ npm --prefix server run seed
 ```
 
 ## Troubleshooting
+
+### "This page didn't load"
+The card now shows the reason under the message:
+- **Can't reach the server**: start the backend (`npm --prefix server run dev`) and check `VITE_API_BASE_URL`.
+- **Database schema is out of date**: stop the backend and run `npm --prefix server run prisma:push`
+  (or just restart it with `npm --prefix server run dev`). The backend also prints a
+  `DATABASE PROBLEM` banner at startup listing the missing tables/columns, and
+  http://localhost:4000/health reports `"status": "degraded"`.
+- **Session expired**: click *Sign in again*.
+- Any other server error: the full stack trace is in the backend terminal.
 
 ### MySQL Connection Issues
 - Ensure the MySQL 8 service is running
