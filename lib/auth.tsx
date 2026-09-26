@@ -4,8 +4,10 @@
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { api, googleOAuthUrl, login, logout, me, refreshBootstrap, type SessionUser } from "./api-client";
 import {
   ROLE_HOME,
@@ -69,13 +71,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [profile, setProfile] = useState<SessionProfile | null>(null);
   const [parentView, setParentViewState] = useState<boolean>(getParentView());
+  const qc = useQueryClient();
+  const userId = useRef<string | null>(null);
 
   const applyUser = useCallback(async (u: SessionUser | null) => {
+    // Cached queries belong to whoever fetched them; a different account starts empty.
+    if ((u?.id ?? null) !== userId.current) qc.clear();
+    userId.current = u?.id ?? null;
     setUser(u);
     setProfile(u ? await fetchProfile(u.id) : null);
     setParentViewState(getParentView());
     setLoading(false);
-  }, []);
+  }, [qc]);
 
   useEffect(() => {
     if (!apiConfigured()) {
@@ -94,12 +101,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [applyUser]);
 
   const signOut = useCallback(async () => {
-    await logout();
+    // Drop the user first so protected pages unmount and stop refetching, then clear their cache.
     setParentView(false);
     setParentViewState(false);
     setUser(null);
     setProfile(null);
-  }, []);
+    userId.current = null;
+    await logout();
+    qc.clear();
+  }, [qc]);
 
   const value = useMemo(
     () => ({ loading, user, profile, parentView, refresh, signOut }),

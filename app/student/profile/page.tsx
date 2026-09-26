@@ -103,7 +103,7 @@ function PctRow({ label, pct }: { label: string; pct: number | null }) {
 export default function StudentProfile() {
   const { profile } = useAuth();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["student-profile", profile?.id],
     enabled: !!profile,
     queryFn: async () => {

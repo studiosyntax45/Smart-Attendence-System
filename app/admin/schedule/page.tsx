@@ -26,7 +26,7 @@ import {
 export default function AdminSchedulePage() {
   const { profile } = useAuth();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-schedule", profile?.id],
     enabled: !!profile,
     queryFn: async () => {

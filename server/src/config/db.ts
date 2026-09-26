@@ -9,7 +9,9 @@ declare global {
 export const prisma =
   global.__prisma ??
   new PrismaClient({
-    log: ["error", "warn"],
+    // Errors are thrown; the error handler logs the unhandled ones. Logging here too
+    // printed a stack for every expected duplicate (P2002) that routes turn into a 409.
+    log: ["warn"],
   });
 
 global.__prisma = prisma;

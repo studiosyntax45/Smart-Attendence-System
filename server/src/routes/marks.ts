@@ -27,7 +27,8 @@ marksRouter.get(
       orderBy: studentId
         ? [{ course: "asc" }, { assessment: "asc" }]
         : [{ updatedAt: "desc" }],
-      take: studentId ? undefined : 200,
+      // No cap: the Marks page exports these and uses them to flag CSV overwrites.
+      // ponytail: fine at class scale (students x courses x assessments); page it if that grows past ~10k.
     });
     res.json({ marks: rows });
   })

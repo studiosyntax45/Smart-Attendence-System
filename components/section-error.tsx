@@ -1,9 +1,19 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle, LogIn, RotateCcw } from "lucide-react";
+import { AlertTriangle, LogIn, RotateCcw, ServerOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL, ApiError } from "@/lib/api-client";
+
+const HEALTH_POLL_MS = 3000;
+
+async function apiUp(): Promise<boolean> {
+  try {
+    return (await fetch(`${API_BASE_URL}/health`, { cache: "no-store" })).ok;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Pages pass a generic "Could not load X" error, so the underlying ApiError is
@@ -19,7 +29,7 @@ function useUnderlyingError(error: Error): unknown {
       .getAll()
       .filter((q) => q.state.status === "error" && q.state.error)
       .sort((a, b) => b.state.errorUpdatedAt - a.state.errorUpdatedAt);
-    return failed[0]?.state.error ?? null;
+    return failed[0]?.state.error ?? error;
   }, [error, queryClient]);
 }
 
@@ -67,30 +77,69 @@ export function SectionError({
   const navigate = useNavigate();
   const cause = useUnderlyingError(error);
   const { hint, detail, signIn } = describe(cause);
+  const [serverDown, setServerDown] = useState(false);
+  const resetRef = useRef(reset);
+  resetRef.current = reset;
 
   useEffect(() => {
     console.error("Section error boundary:", error, cause);
   }, [error, cause]);
+
+  // If the API is unreachable, say so and reload the section as soon as it answers again.
+  useEffect(() => {
+    let stopped = false;
+    let wasDown = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const check = async () => {
+      const up = await apiUp();
+      if (stopped) return;
+      setServerDown(!up);
+      if (up && wasDown) resetRef.current();
+      if (!up) timer = setTimeout(check, HEALTH_POLL_MS);
+      wasDown = !up;
+    };
+    check();
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, []);
 
   return (
     <div
       role="alert"
       className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-lg border bg-card p-8 text-center"
     >
-      <AlertTriangle className="size-10 text-status-late" aria-hidden="true" />
-      <h1 className="text-xl font-semibold">This page didn&apos;t load</h1>
-      <p className="text-sm text-muted-foreground">{hint}</p>
-      {detail && (
-        <p className="break-words rounded bg-muted px-3 py-2 font-mono text-xs text-muted-foreground">
-          {detail}
+      {serverDown ? (
+        <ServerOff className="size-10 text-status-late" aria-hidden="true" />
+      ) : (
+        <AlertTriangle className="size-10 text-status-late" aria-hidden="true" />
+      )}
+      <h1 className="text-xl font-semibold">
+        {serverDown ? "Can't reach the server" : "This page didn't load"}
+      </h1>
+      {serverDown ? (
+        <p className="text-sm text-muted-foreground">
+          The API at <span className="font-mono">{API_BASE_URL}</span> is not answering. If you are running the demo,
+          start it with <span className="font-mono">npm run dev</span> in the <span className="font-mono">server</span>{" "}
+          folder. This page reloads by itself once it is back.
         </p>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground">{hint}</p>
+          {detail && (
+            <p className="break-words rounded bg-muted px-3 py-2 font-mono text-xs text-muted-foreground">
+              {detail}
+            </p>
+          )}
+        </>
       )}
       {error.digest && (
         <p className="font-mono text-xs text-muted-foreground">
           Ref: {error.digest}
         </p>
       )}
-      {signIn ? (
+      {signIn && !serverDown ? (
         <Button
           onClick={() => navigate(`/login?next=${encodeURIComponent(window.location.pathname)}`)}
           variant="outline"

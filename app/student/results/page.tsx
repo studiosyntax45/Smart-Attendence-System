@@ -35,13 +35,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { clickable, useDrillDown, type DrillSpec } from "@/components/drilldown";
 
 export default function StudentResults() {
   const { profile } = useAuth();
   const [searchParams] = useSearchParams();
   const sem = searchParams.get("sem") ?? undefined;
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["student-results", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
@@ -84,6 +86,46 @@ export default function StudentResults() {
     : [];
   const failed = selected?.courses.filter((c) => c.grade === "F") ?? [];
   const totalEarned = semesters.reduce((s, x) => s + x.creditsEarned, 0);
+  const bySemester: DrillSpec = {
+    kind: "list",
+    title: "GPA by semester",
+    columns: [
+      { key: "semester", label: "Semester" },
+      { key: "sgpa", label: "SGPA", numeric: true },
+      { key: "credits", label: "Credits earned", numeric: true },
+      { key: "backlogs", label: "Backlogs", numeric: true },
+    ],
+    rows: semesters.map((s) => ({
+      semester: s.semester,
+      sgpa: s.sgpa === null ? "—" : s.sgpa.toFixed(2),
+      credits: `${s.creditsEarned}/${s.creditsRegistered}`,
+      backlogs: String(s.courses.filter((c) => c.grade === "F").length),
+    })),
+  };
+  const semesterCourses: DrillSpec | null = selected && {
+    kind: "list",
+    title: `Courses — ${selected.semester}`,
+    subtitle: "Click a course for its attendance.",
+    columns: [
+      { key: "code", label: "Course" },
+      { key: "name", label: "Name" },
+      { key: "credits", label: "Credits", numeric: true },
+      { key: "total", label: "Total", numeric: true },
+      { key: "grade", label: "Grade" },
+      { key: "points", label: "Points", numeric: true },
+    ],
+    rows: selected.courses.map((c) => ({
+      _studentId: profile.id,
+      _courseCode: c.code,
+      _name: c.name,
+      code: c.code,
+      name: c.name,
+      credits: String(c.credits),
+      total: c.totalPct === null ? "—" : `${Math.round(c.totalPct)}%`,
+      grade: c.grade ?? "—",
+      points: c.gradePoints === null ? "—" : String(c.gradePoints),
+    })),
+  };
   const exportColumns: ExportColumn[] = [
     { key: "course", label: "Course" },
     { key: "code", label: "Code" },
@@ -190,10 +232,12 @@ export default function StudentResults() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-center pb-6 pt-4">
-                <GradeDial
-                  value={selected.sgpa}
-                  label={`SGPA ${selected.semester}`}
-                />
+                <div {...clickable(() => semesterCourses && open(semesterCourses), "rounded-full")} aria-label={`Courses in ${selected.semester}`}>
+                  <GradeDial
+                    value={selected.sgpa}
+                    label={`SGPA ${selected.semester}`}
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -203,6 +247,7 @@ export default function StudentResults() {
                 value={cgpa !== null ? cgpa.toFixed(2) : "—"}
                 sub="All semesters"
                 icon={<Sigma />}
+                drill={bySemester}
                 tone={
                   cgpa === null ? "neutral" : cgpa >= 8.5 ? "present" : "neutral"
                 }
@@ -213,6 +258,7 @@ export default function StudentResults() {
                 sub={selected.semester}
                 icon={<Layers />}
                 tone={failed.length > 0 ? "late" : "present"}
+                drill={semesterCourses ?? undefined}
               />
               <KpiCard
                 label="Total earned"
@@ -220,6 +266,7 @@ export default function StudentResults() {
                 countTo={totalEarned}
                 sub="Across all semesters"
                 icon={<GraduationCap />}
+                drill={bySemester}
               />
             </div>
           </section>
@@ -268,9 +315,9 @@ export default function StudentResults() {
                     {selected.courses.map((c) => (
                       <tr
                         key={c.code}
-                        className={cn(
-                          "border-b transition-colors last:border-0 hover:bg-muted/50",
-                          c.grade === "F" && "bg-status-absent/5"
+                        {...clickable(
+                          () => open({ kind: "course", studentId: profile.id, courseCode: c.code, courseName: c.name }),
+                          cn("border-b transition-colors last:border-0 hover:bg-muted/50", c.grade === "F" && "bg-status-absent/5")
                         )}
                       >
                         <td className="py-3 pr-4">

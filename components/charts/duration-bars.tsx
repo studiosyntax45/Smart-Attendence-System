@@ -17,11 +17,11 @@ export interface DurationDatum {
 }
 
 
-export function DurationBars({ data }: { data: DurationDatum[] }) {
+export function DurationBars({ data, onBarClick }: { data: DurationDatum[]; onBarClick?: (index: number) => void }) {
   return (
     <div className="h-48 w-full" role="img" aria-label={`Class duration for the last ${data.length} attended sessions, in minutes.`}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 4, left: -18, bottom: 0 }} barCategoryGap="28%">
+        <BarChart data={data} margin={{ top: 8, right: 4, left: -18, bottom: 0 }} barCategoryGap="28%" onClick={(e: { activeTooltipIndex?: number | string | null } | null) => { if (e?.activeTooltipIndex != null) onBarClick?.(Number(e.activeTooltipIndex)); }} style={onBarClick ? { cursor: "pointer" } : undefined}>
           <CartesianGrid
             vertical={false}
             stroke="hsl(var(--border))"

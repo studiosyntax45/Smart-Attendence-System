@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check, LoaderCircle, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
@@ -22,12 +22,11 @@ const fmt = (d: string) => new Date(d).toLocaleDateString([], { day: "numeric", 
 
 export default function FacultyLeavePage() {
   const { profile } = useAuth();
-  const qc = useQueryClient();
   const [status, setStatus] = useState<LeaveAppStatus | "">("pending");
   const [comments, setComments] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["faculty-leave", status],
     enabled: !!profile,
     queryFn: async () => {
@@ -45,9 +44,6 @@ export default function FacultyLeavePage() {
       reviewLeaveApplication(v.id, v.decision, comments[v.id]),
     onSuccess: (res) => {
       setMessage(res.message);
-      qc.invalidateQueries({ queryKey: ["faculty-leave"] });
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["attendance-health"] });
     },
   });
 

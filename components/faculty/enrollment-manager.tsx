@@ -1,6 +1,5 @@
 ﻿
 import { useState, useTransition } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   CheckCircle2,
@@ -31,7 +30,6 @@ export function EnrollmentManager({
   students: StudentOption[];
   enrolledIds: string[];
 }) {
-  const qc = useQueryClient();
   const [selected, setSelected] = useState<Set<string>>(new Set(enrolledIds));
   const [result, setResult] = useState<CourseActionState>({});
   const [pending, startTransition] = useTransition();
@@ -156,10 +154,6 @@ export function EnrollmentManager({
             startTransition(async () => {
               const res = await setEnrollments(courseCode, [...selected]);
               setResult(res);
-              if (res.message) {
-                qc.invalidateQueries({ queryKey: ["faculty-courses"] });
-                qc.invalidateQueries({ queryKey: ["faculty-attendance"] });
-              }
             })
           }
         >

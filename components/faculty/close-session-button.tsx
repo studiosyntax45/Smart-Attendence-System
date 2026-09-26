@@ -1,12 +1,10 @@
 ﻿
 import { useState, useTransition } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { closeSession } from "@/app/faculty/dashboard/actions";
 
 export function CloseSessionButton({ sessionId }: { sessionId: string }) {
-  const qc = useQueryClient();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -19,11 +17,6 @@ export function CloseSessionButton({ sessionId }: { sessionId: string }) {
           startTransition(async () => {
             const res = await closeSession(sessionId);
             setError(res.error ?? null);
-            if (!res.error) {
-              qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
-              qc.invalidateQueries({ queryKey: ["mark-attendance"] });
-              qc.invalidateQueries({ queryKey: ["student-dashboard"] });
-            }
           })
         }
       >

@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { clickable, useDrillDown, type DrillSpec } from "@/components/drilldown";
 
 gsap.registerPlugin(useGSAP);
 
@@ -21,6 +22,8 @@ interface KpiCardProps {
   
   suffix?: string;
   href?: string;
+  /** Opens the records behind the number in the drill-down popup. */
+  drill?: DrillSpec;
 }
 
 const TONE_CLASS = {
@@ -40,7 +43,9 @@ export function KpiCard({
   countTo,
   suffix = "",
   href,
+  drill,
 }: KpiCardProps) {
+  const { open } = useDrillDown();
   const numberRef = useRef<HTMLParagraphElement>(null);
 
   useGSAP(() => {
@@ -92,6 +97,14 @@ export function KpiCard({
       </CardContent>
     </Card>
   );
+  if (drill) {
+    const props = clickable(() => open(drill));
+    return (
+      <div {...props} aria-label={`${label}: ${value}. Show details`} className={`${props.className} block rounded-lg`}>
+        {card}
+      </div>
+    );
+  }
   return href ? (
     <Link to={href} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       {card}

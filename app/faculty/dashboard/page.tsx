@@ -35,9 +35,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn, startOfToday, type AttendanceStatus } from "@/lib/utils";
+import { clickable, useDrillDown } from "@/components/drilldown";
+import {
+  courseAveragesSpec,
+  pendingLeaveSpec,
+  recordsSpec,
+  rollupStudents,
+  sessionsSpec,
+  studentsSpec,
+  type HealthCourseRow,
+  type PendingLeave,
+} from "@/components/drill-specs";
+
+type AttendanceRes = { attendance: Array<{ id: string; sessionId: string; studentId: string; entryTime: string; exitTime: string | null; status: AttendanceStatus; faceConfidence: number | null; excused?: boolean; student?: { id: string; fullName: string; rollNo: string | null }; session?: { course: string } }> };
 
 interface RosterRow {
   id: string;
+  student_id: string;
   entry_time: string;
   exit_time: string | null;
   status: AttendanceStatus;
@@ -49,8 +63,9 @@ interface RosterRow {
 export default function FacultyDashboard() {
   const { profile } = useAuth();
   const [adhocOpen, setAdhocOpen] = useState(false);
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["faculty-dashboard", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
@@ -67,16 +82,17 @@ export default function FacultyDashboard() {
         healthRes,
         leaveAppsRes,
       ] = await Promise.all([
-        api.get<{ sessions: Array<{ id: string; course: string; openedAt: string; closedAt: string | null; geofence?: { roomName: string }; faculty?: { id: string } | null }> }>("/sessions"),
-        api.get<{ attendance: Array<{ id: string; sessionId: string; entryTime: string; exitTime: string | null; status: AttendanceStatus; faceConfidence: number | null; excused?: boolean; student?: { fullName: string; rollNo: string | null } }> }>("/attendance"),
+        api.get<{ sessions: Array<{ id: string; course: string; openedAt: string; closedAt: string | null; geofence?: { roomName: string }; faculty?: { id: string; fullName: string } | null }> }>("/sessions"),
+        // Today only: the full history is ~1 MB and this page shows today and the live session.
+        api.get<AttendanceRes>(`/attendance?from=${todayStart.toLocaleDateString("en-CA")}`),
         api.get<{ geofences: Array<{ id: string; roomName: string; radiusM: number }> }>("/geofences"),
         api.get<{ courses: Array<{ code: string; name: string }> }>("/courses"),
         listScheduleForFaculty(profile!.id, todayDayOfWeek),
         listPendingLeaveRequests().catch(() => []),
         api
-          .get<{ courseRows: Array<{ studentId: string; courseCode: string; attended: number; conducted: number }> }>("/attendance-health")
+          .get<{ courseRows: HealthCourseRow[] }>("/attendance-health")
           .catch(() => ({ courseRows: [] })),
-        api.get<{ leaveApplications: unknown[] }>("/leave-applications?status=pending").catch(() => ({ leaveApplications: [] })),
+        api.get<{ leaveApplications: PendingLeave[] }>("/leave-applications?status=pending").catch(() => ({ leaveApplications: [] })),
       ]);
 
       const allSessions = sessionsRes.sessions ?? [];
@@ -106,27 +122,28 @@ export default function FacultyDashboard() {
           }
         : null;
 
-      let roster: RosterRow[] = [];
-      if (openSession) {
-        roster = (attendanceRes.attendance ?? [])
-          .filter((a) => a.sessionId === openSession.id)
-          .map((a) => ({
-            id: a.id,
-            entry_time: a.entryTime,
-            exit_time: a.exitTime,
-            status: a.status,
-            face_confidence: a.faceConfidence,
-            excused: a.excused,
-            profiles: a.student ? { full_name: a.student.fullName, roll_no: a.student.rollNo } : null,
-          }));
-      }
+      // A session left open since an earlier day is not in today's rows.
+      const liveRecords = !openSession
+        ? []
+        : new Date(openSession.opened_at) >= todayStart
+          ? attendanceRes.attendance.filter((a) => a.sessionId === openSession.id)
+          : (await api.get<AttendanceRes>(`/attendance?sessionId=${openSession.id}`)).attendance;
+      const roster: RosterRow[] = liveRecords.map((a) => ({
+        id: a.id,
+        student_id: a.studentId,
+        entry_time: a.entryTime,
+        exit_time: a.exitTime,
+        status: a.status,
+        face_confidence: a.faceConfidence,
+        excused: a.excused,
+        profiles: a.student ? { full_name: a.student.fullName, roll_no: a.student.rollNo } : null,
+      }));
 
       const todayAttendance = (attendanceRes.attendance ?? []).filter(
         (a) => new Date(a.entryTime) >= todayStart
       );
-      const sessionsTodayCount = allSessions.filter(
-        (s) => new Date(s.openedAt) >= todayStart
-      ).length;
+      const sessionsTodayList = allSessions.filter((s) => new Date(s.openedAt) >= todayStart);
+      const sessionsTodayCount = sessionsTodayList.length;
 
       const geofences = (geofencesRes.geofences ?? []).map((g) => ({
         id: g.id,
@@ -147,6 +164,10 @@ export default function FacultyDashboard() {
         roster,
         todayRows: todayAttendance,
         sessionsToday: sessionsTodayCount,
+        sessionsTodayList,
+        liveRecords,
+        myRows,
+        leaveApps: leaveAppsRes.leaveApplications,
         geofences,
         courses,
         schedule,
@@ -177,7 +198,17 @@ export default function FacultyDashboard() {
     pendingAppeals,
     liveCourses,
     kpis,
+    sessionsTodayList,
+    liveRecords,
+    myRows,
+    leaveApps,
   } = data;
+  const liveSpec = recordsSpec(openSession ? `${openSession.course}: live roster` : "Live session", liveRecords, {
+    empty: openSession ? "No students have marked yet." : "No session is open.",
+  });
+  const byCourse = courseAveragesSpec("Attendance by course", myRows, {
+    link: { to: "/faculty/attendance-health", label: "Open Attendance Health" },
+  });
 
   const today = todayRows;
   const presentToday = today.filter((r: { status: AttendanceStatus }) => r.status === "present").length;
@@ -217,6 +248,7 @@ export default function FacultyDashboard() {
           }
           icon={<Radio />}
           tone={openSession ? "present" : "neutral"}
+          drill={liveSpec}
         />
         <KpiCard
           label="Marked (live)"
@@ -224,6 +256,7 @@ export default function FacultyDashboard() {
           countTo={openSession ? roster.length : undefined}
           sub={openSession ? "Students so far" : "No live session"}
           icon={<Users />}
+          drill={liveSpec}
         />
         <KpiCard
           label="My courses"
@@ -231,6 +264,7 @@ export default function FacultyDashboard() {
           countTo={kpis.myCourses}
           sub="Sessions or timetable slots"
           icon={<Layers />}
+          drill={{ ...byCourse, title: "My courses" }}
         />
         <KpiCard
           label="Students"
@@ -238,6 +272,7 @@ export default function FacultyDashboard() {
           countTo={kpis.myStudents}
           sub="Enrolled in my courses"
           icon={<GraduationCap />}
+          drill={studentsSpec("Students in my courses", rollupStudents(myRows))}
         />
         <KpiCard
           label="Today's sessions"
@@ -245,6 +280,7 @@ export default function FacultyDashboard() {
           countTo={sessionsToday ?? 0}
           sub={`${schedule.length} on the timetable`}
           icon={<CalendarDays />}
+          drill={sessionsSpec("Today's sessions", sessionsTodayList, { empty: "No sessions opened today." })}
         />
         <KpiCard
           label="Today's attendance"
@@ -253,6 +289,7 @@ export default function FacultyDashboard() {
           sub={`${presentToday} present · ${lateToday} late`}
           icon={<CheckCircle2 />}
           tone="present"
+          drill={recordsSpec("Today's marks", todayRows.filter((r) => r.status !== "absent"))}
         />
         <KpiCard
           label="Pending leave"
@@ -261,7 +298,7 @@ export default function FacultyDashboard() {
           sub="Leave requests + appeals"
           icon={<FileClock />}
           tone={kpis.pendingLeave > 0 ? "late" : "neutral"}
-          href="/faculty/leave"
+          drill={pendingLeaveSpec(leaveApps, pendingAppeals, { to: "/faculty/leave", label: "Open Leave & Appeals" })}
         />
         <KpiCard
           label="Average attendance"
@@ -271,7 +308,7 @@ export default function FacultyDashboard() {
           sub="My courses, closed sessions"
           icon={<Percent />}
           tone={kpis.avgAttendance === null ? "neutral" : kpis.avgAttendance >= 75 ? "present" : "late"}
-          href="/faculty/attendance-health"
+          drill={byCourse}
         />
       </div>
 
@@ -319,7 +356,10 @@ export default function FacultyDashboard() {
                     {roster.map((r) => (
                       <tr
                         key={r.id}
-                        className="border-b transition-colors last:border-0 hover:bg-muted/50"
+                        {...clickable(
+                          () => open({ kind: "student", studentId: r.student_id, name: r.profiles?.full_name ?? "Student", usn: r.profiles?.roll_no }),
+                          "border-b transition-colors last:border-0 hover:bg-muted/50"
+                        )}
                       >
                         <td className="py-2.5 pr-4 font-medium">
                           {r.profiles?.full_name ?? "—"}

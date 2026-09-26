@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   CheckCircle2,
@@ -42,7 +41,6 @@ export function TodaysClasses({
   liveCourses,
   hasOpenSession,
 }: TodaysClassesProps) {
-  const qc = useQueryClient();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [state, setState] = useState<SessionFormState>({});
 
@@ -55,10 +53,6 @@ export function TodaysClasses({
     const result = await openSession({}, fd);
     setState(result);
     setPendingId(null);
-    if (result.message) {
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["mark-attendance"] });
-    }
   }
 
   return (

@@ -1,52 +1,31 @@
-﻿import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { RequireRole, RequireParentView } from "@/src/guards";
 import { RouteError } from "@/src/route-error";
 import RootRedirect from "@/src/routes/root-redirect";
 import AuthCallback from "@/src/routes/auth-callback";
-import LoginPage from "@/app/(auth)/login/page";
-import ParentLoginPage from "@/app/(auth)/parent-login/page";
-import ForgotPasswordPage from "@/app/(auth)/forgot-password/page";
-import StudentDashboard from "@/app/student/dashboard/page";
-import StudentAttendance from "@/app/student/attendance/page";
-import StudentResults from "@/app/student/results/page";
-import StudentMarkAttendance from "@/app/student/mark-attendance/page";
-import StudentEnrollFace from "@/app/student/enroll-face/page";
-import StudentProfile from "@/app/student/profile/page";
-import StudentLeave from "@/app/student/leave/page";
-import FacultyDashboard from "@/app/faculty/dashboard/page";
-import FacultyAttendance from "@/app/faculty/attendance/page";
-import FacultyCourses from "@/app/faculty/courses/page";
-import FacultyMarks from "@/app/faculty/marks/page";
-import FacultyPerformance from "@/app/faculty/performance/page";
-import FacultyAttendanceHealth from "@/app/faculty/attendance-health/page";
-import FacultyLeave from "@/app/faculty/leave/page";
-import FacultyImports from "@/app/faculty/imports/page";
-import AdminDashboard from "@/app/admin/dashboard/page";
-import AdminClasses from "@/app/admin/classes/page";
-import AdminAttendance from "@/app/admin/attendance/page";
-import AdminSettings from "@/app/admin/settings/page";
-import AdminSchedule from "@/app/admin/schedule/page";
-import AdminAuditLogs from "@/app/admin/audit-logs/page";
-import ParentDashboard from "@/app/parent/dashboard/page";
+
+// Each page is its own chunk, fetched on first visit (one bundle was 1.3 MB).
+const page = (load: () => Promise<{ default: React.ComponentType }>) => () =>
+  load().then((m) => ({ Component: m.default }));
 
 export const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> },
-  { path: "/login", element: <LoginPage />, errorElement: <RouteError /> },
-  { path: "/forgot-password", element: <ForgotPasswordPage />, errorElement: <RouteError /> },
-  { path: "/parent-login", element: <ParentLoginPage />, errorElement: <RouteError /> },
+  { path: "/login", lazy: page(() => import("@/app/(auth)/login/page")), errorElement: <RouteError /> },
+  { path: "/forgot-password", lazy: page(() => import("@/app/(auth)/forgot-password/page")), errorElement: <RouteError /> },
+  { path: "/parent-login", lazy: page(() => import("@/app/(auth)/parent-login/page")), errorElement: <RouteError /> },
   { path: "/auth/callback", element: <AuthCallback /> },
 
   {
     element: <RequireRole allowed={["student"]} />,
     errorElement: <RouteError />,
     children: [
-      { path: "/student/dashboard", element: <StudentDashboard /> },
-      { path: "/student/attendance", element: <StudentAttendance /> },
-      { path: "/student/results", element: <StudentResults /> },
-      { path: "/student/mark-attendance", element: <StudentMarkAttendance /> },
-      { path: "/student/enroll-face", element: <StudentEnrollFace /> },
-      { path: "/student/profile", element: <StudentProfile /> },
-      { path: "/student/leave", element: <StudentLeave /> },
+      { path: "/student/dashboard", lazy: page(() => import("@/app/student/dashboard/page")) },
+      { path: "/student/attendance", lazy: page(() => import("@/app/student/attendance/page")) },
+      { path: "/student/results", lazy: page(() => import("@/app/student/results/page")) },
+      { path: "/student/mark-attendance", lazy: page(() => import("@/app/student/mark-attendance/page")) },
+      { path: "/student/enroll-face", lazy: page(() => import("@/app/student/enroll-face/page")) },
+      { path: "/student/profile", lazy: page(() => import("@/app/student/profile/page")) },
+      { path: "/student/leave", lazy: page(() => import("@/app/student/leave/page")) },
     ],
   },
 
@@ -54,14 +33,14 @@ export const router = createBrowserRouter([
     element: <RequireRole allowed={["faculty", "admin"]} />,
     errorElement: <RouteError />,
     children: [
-      { path: "/faculty/dashboard", element: <FacultyDashboard /> },
-      { path: "/faculty/attendance", element: <FacultyAttendance /> },
-      { path: "/faculty/courses", element: <FacultyCourses /> },
-      { path: "/faculty/marks", element: <FacultyMarks /> },
-      { path: "/faculty/performance", element: <FacultyPerformance /> },
-      { path: "/faculty/attendance-health", element: <FacultyAttendanceHealth /> },
-      { path: "/faculty/leave", element: <FacultyLeave /> },
-      { path: "/faculty/imports", element: <FacultyImports /> },
+      { path: "/faculty/dashboard", lazy: page(() => import("@/app/faculty/dashboard/page")) },
+      { path: "/faculty/attendance", lazy: page(() => import("@/app/faculty/attendance/page")) },
+      { path: "/faculty/courses", lazy: page(() => import("@/app/faculty/courses/page")) },
+      { path: "/faculty/marks", lazy: page(() => import("@/app/faculty/marks/page")) },
+      { path: "/faculty/performance", lazy: page(() => import("@/app/faculty/performance/page")) },
+      { path: "/faculty/attendance-health", lazy: page(() => import("@/app/faculty/attendance-health/page")) },
+      { path: "/faculty/leave", lazy: page(() => import("@/app/faculty/leave/page")) },
+      { path: "/faculty/imports", lazy: page(() => import("@/app/faculty/imports/page")) },
     ],
   },
 
@@ -69,19 +48,19 @@ export const router = createBrowserRouter([
     element: <RequireRole allowed={["admin"]} />,
     errorElement: <RouteError />,
     children: [
-      { path: "/admin/dashboard", element: <AdminDashboard /> },
-      { path: "/admin/classes", element: <AdminClasses /> },
-      { path: "/admin/attendance", element: <AdminAttendance /> },
-      { path: "/admin/schedule", element: <AdminSchedule /> },
-      { path: "/admin/settings", element: <AdminSettings /> },
-      { path: "/admin/audit-logs", element: <AdminAuditLogs /> },
+      { path: "/admin/dashboard", lazy: page(() => import("@/app/admin/dashboard/page")) },
+      { path: "/admin/classes", lazy: page(() => import("@/app/admin/classes/page")) },
+      { path: "/admin/attendance", lazy: page(() => import("@/app/admin/attendance/page")) },
+      { path: "/admin/schedule", lazy: page(() => import("@/app/admin/schedule/page")) },
+      { path: "/admin/settings", lazy: page(() => import("@/app/admin/settings/page")) },
+      { path: "/admin/audit-logs", lazy: page(() => import("@/app/admin/audit-logs/page")) },
     ],
   },
 
   {
     element: <RequireParentView />,
     errorElement: <RouteError />,
-    children: [{ path: "/parent/dashboard", element: <ParentDashboard /> }],
+    children: [{ path: "/parent/dashboard", lazy: page(() => import("@/app/parent/dashboard/page")) }],
   },
 
   { path: "*", element: <Navigate to="/" replace /> },

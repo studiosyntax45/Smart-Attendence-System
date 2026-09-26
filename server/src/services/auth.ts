@@ -42,6 +42,7 @@ async function ensureDbCacheLoaded(): Promise<void> {
 export async function revokeRefreshToken(jti: string, expiresAt?: Date): Promise<void> {
   const expiry = expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   revokedRefreshJtis.add(jti);
+  rotatedAt.delete(jti);
   try {
     await prisma.revokedToken.upsert({
       where: { jti },
@@ -49,6 +50,19 @@ export async function revokeRefreshToken(jti: string, expiresAt?: Date): Promise
       update: { expiresAt: expiry },
     });
   } catch {}
+}
+
+// A reload or second tab can reuse a refresh token that was rotated a moment ago
+// (the response carrying the new cookie never landed). Accept it briefly instead of signing the user out.
+// ponytail: in-memory, so a restart ends the window early; worst case is one extra sign-in.
+const ROTATION_GRACE_MS = 30_000;
+const rotatedAt = new Map<string, number>();
+
+export async function rotateRefreshToken(jti: string, expiresAt?: Date): Promise<void> {
+  await revokeRefreshToken(jti, expiresAt);
+  const now = Date.now();
+  for (const [old, at] of rotatedAt) if (now - at >= ROTATION_GRACE_MS) rotatedAt.delete(old);
+  rotatedAt.set(jti, now);
 }
 
 export async function pruneExpiredRevokedTokens(): Promise<void> {
@@ -89,6 +103,12 @@ export async function verifyRefreshToken(token: string): Promise<RefreshTokenPay
   const decoded = jwt.verify(token, config.jwt.refreshSecret) as RefreshTokenPayload;
 
   await ensureDbCacheLoaded();
+
+  const rotated = rotatedAt.get(decoded.jti);
+  if (rotated !== undefined) {
+    if (Date.now() - rotated < ROTATION_GRACE_MS) return decoded;
+    rotatedAt.delete(decoded.jti);
+  }
 
   if (revokedRefreshJtis.has(decoded.jti)) {
     throw new Error("Refresh token revoked");

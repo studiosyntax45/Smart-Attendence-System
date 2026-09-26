@@ -34,11 +34,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { startOfToday, type AttendanceStatus } from "@/lib/utils";
+import { useDrillDown } from "@/components/drilldown";
+import {
+  peopleSpec,
+  pendingLeaveSpec,
+  recordsSpec,
+  sessionsSpec,
+  studentsSpec,
+  type HealthStudent,
+  type PendingAppeal,
+  type PendingLeave,
+  type RecordLite,
+  type SessionLite,
+} from "@/components/drill-specs";
 
 export default function AdminDashboard() {
   const { profile } = useAuth();
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-dashboard", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
@@ -57,15 +71,16 @@ export default function AdminDashboard() {
       ] = await Promise.all([
         api.get<{ profiles: Array<{ id: string; fullName: string; rollNo: string | null; role: string; createdAt?: string; faceEnrolled: boolean }> }>("/profiles"),
         api.get<{ geofences: Array<{ id: string; roomName: string; lat: number; lng: number; radiusM: number }> }>("/geofences"),
-        api.get<{ sessions: Array<{ id: string; openedAt: string; closedAt: string | null }> }>("/sessions"),
-        api.get<{ attendance: Array<{ entryTime: string; status: AttendanceStatus }> }>("/attendance"),
-        api.get<{ courses: unknown[] }>("/courses"),
+        api.get<{ sessions: Array<SessionLite & { id: string }> }>("/sessions"),
+        api.get<{ attendance: Array<RecordLite & { status: AttendanceStatus }> }>(`/attendance?from=${weekAgo.toLocaleDateString("en-CA")}`),
+        api.get<{ courses: Array<{ code: string; name: string; semester: string; credits: string | number }> }>("/courses"),
         api.get<{
           totals: { present: number; late: number; partial: number; conducted: number };
           buckets: { good: number; warning: number; critical: number };
+          students: HealthStudent[];
         }>("/attendance-health"),
-        api.get<{ leaveApplications: unknown[] }>("/leave-applications?status=pending"),
-        api.get<{ leaveRequests: Array<{ status: string }> }>("/leave-requests"),
+        api.get<{ leaveApplications: PendingLeave[] }>("/leave-applications?status=pending"),
+        api.get<{ leaveRequests: Array<PendingAppeal & { status: string }> }>("/leave-requests"),
       ]);
       const t = healthRes.totals;
       const avgAttendance = t.conducted === 0 ? null : Math.round((100 * (t.present + t.late + t.partial)) / t.conducted);
@@ -90,23 +105,24 @@ export default function AdminDashboard() {
       const sessionsToday = (sessionsRes.sessions ?? []).filter(
         (s) => new Date(s.openedAt) >= todayStart
       ).length;
+      const pendingAppeals = (appealsRes.leaveRequests ?? []).filter((r) => r.status === "pending");
 
       const weekRows = (attendanceRes.attendance ?? [])
         .filter((a) => new Date(a.entryTime) >= weekAgo)
-        .map((a) => ({
-          entry_time: a.entryTime,
-          status: a.status,
-        }));
+        .map((a) => ({ ...a, entry_time: a.entryTime }));
 
       return {
+        courses: coursesRes.courses,
         courseCount: coursesRes.courses.length,
+        openSessions: (sessionsRes.sessions ?? []).filter((s) => !s.closedAt),
         activeSessions: (sessionsRes.sessions ?? []).filter((s) => !s.closedAt).length,
+        healthStudents: healthRes.students ?? [],
+        leaveApps: leaveAppsRes.leaveApplications,
+        pendingAppeals,
         avgAttendance,
         lowAttendance: healthRes.buckets.warning + healthRes.buckets.critical,
         criticalAttendance: healthRes.buckets.critical,
-        pendingLeave:
-          leaveAppsRes.leaveApplications.length +
-          (appealsRes.leaveRequests ?? []).filter((r) => r.status === "pending").length,
+        pendingLeave: leaveAppsRes.leaveApplications.length + pendingAppeals.length,
         users: users ?? [],
         geofences: geofences ?? [],
         sessionsToday: sessionsToday ?? 0,
@@ -153,6 +169,9 @@ export default function AdminDashboard() {
     }
   }
   const weekTotal = days.reduce((s, d) => s + d.present + d.late + d.partial, 0);
+  const dayIndex = (t: string) => Math.floor((new Date(t).getTime() - weekAgo.getTime()) / (24 * 60 * 60 * 1000));
+  const people = (role: string) =>
+    allUsers.filter((u) => u.role === role).map((u) => ({ id: u.id, name: u.full_name, rollNo: u.roll_no, role: u.role }));
 
   return (
     <GsapReveal className="space-y-6">
@@ -168,9 +187,22 @@ export default function AdminDashboard() {
 
       
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Students" value={String(studentCount)} countTo={studentCount} sub="Registered accounts" icon={<GraduationCap />} />
-        <KpiCard label="Faculty" value={String(facultyCount)} countTo={facultyCount} sub="Teaching accounts" icon={<ShieldCheck />} />
-        <KpiCard label="Courses" value={String(data.courseCount)} countTo={data.courseCount} sub="In the catalogue" icon={<BookOpen />} href="/faculty/courses" />
+        <KpiCard label="Students" value={String(studentCount)} countTo={studentCount} sub="Registered accounts" icon={<GraduationCap />} drill={peopleSpec("Students", people("student"), true)} />
+        <KpiCard label="Faculty" value={String(facultyCount)} countTo={facultyCount} sub="Teaching accounts" icon={<ShieldCheck />} drill={peopleSpec("Faculty", people("faculty"), false)} />
+        <KpiCard label="Courses" value={String(data.courseCount)} countTo={data.courseCount} sub="In the catalogue" icon={<BookOpen />}
+          drill={{
+            kind: "list",
+            title: "Courses",
+            columns: [
+              { key: "code", label: "Code" },
+              { key: "name", label: "Name" },
+              { key: "semester", label: "Semester" },
+              { key: "credits", label: "Credits", numeric: true },
+            ],
+            rows: data.courses.map((c) => ({ code: c.code, name: c.name, semester: c.semester, credits: String(c.credits) })),
+            link: { to: "/faculty/courses", label: "Open Courses" },
+          }}
+        />
         <KpiCard
           label="Active sessions"
           value={String(data.activeSessions)}
@@ -178,6 +210,7 @@ export default function AdminDashboard() {
           sub={`${sessionsToday} opened today · ${weekTotal} marks this week`}
           icon={<Radio />}
           tone={data.activeSessions > 0 ? "present" : "neutral"}
+          drill={sessionsSpec("Open sessions", data.openSessions, { empty: "No session is open right now." })}
         />
         <KpiCard
           label="Average attendance"
@@ -187,7 +220,7 @@ export default function AdminDashboard() {
           sub="All closed sessions"
           icon={<Percent />}
           tone={data.avgAttendance === null ? "neutral" : data.avgAttendance >= 75 ? "present" : "late"}
-          href="/admin/attendance"
+          drill={studentsSpec("Attendance by student", data.healthStudents, { link: { to: "/admin/attendance", label: "Open Attendance" } })}
         />
         <KpiCard
           label="Low attendance"
@@ -196,7 +229,11 @@ export default function AdminDashboard() {
           sub={`${data.criticalAttendance} below 65% · view list`}
           icon={<AlertTriangle />}
           tone={data.criticalAttendance > 0 ? "absent" : data.lowAttendance > 0 ? "late" : "present"}
-          href="/faculty/attendance-health"
+          drill={studentsSpec(
+            "Students below 75%",
+            data.healthStudents.filter((s) => s.status === "warning" || s.status === "critical"),
+            { empty: "Every student is at 75% or above.", link: { to: "/faculty/attendance-health", label: "Open Attendance Health" } }
+          )}
         />
         <KpiCard
           label="Pending leave"
@@ -205,9 +242,20 @@ export default function AdminDashboard() {
           sub="Leave requests + appeals"
           icon={<FileClock />}
           tone={data.pendingLeave > 0 ? "late" : "neutral"}
-          href="/faculty/leave"
+          drill={pendingLeaveSpec(data.leaveApps, data.pendingAppeals, { to: "/faculty/leave", label: "Open Leave & Appeals" })}
         />
-        <KpiCard label="Geofences" value={String(geofences?.length ?? 0)} countTo={geofences?.length ?? 0} sub="Configured classrooms" icon={<MapPin />} />
+        <KpiCard label="Geofences" value={String(geofences?.length ?? 0)} countTo={geofences?.length ?? 0} sub="Configured classrooms" icon={<MapPin />}
+          drill={{
+            kind: "list",
+            title: "Geofences",
+            columns: [
+              { key: "room", label: "Room" },
+              { key: "radius", label: "Radius", numeric: true },
+              { key: "at", label: "Location" },
+            ],
+            rows: geofences.map((g) => ({ room: g.room_name, radius: `${g.radius_m} m`, at: `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}` })),
+          }}
+        />
       </div>
 
       
@@ -220,7 +268,17 @@ export default function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <StatusStackedBars data={days} />
+            <StatusStackedBars
+              data={days}
+              onDayClick={(i) =>
+                open(
+                  recordsSpec(
+                    `Marks on ${days[i].label}`,
+                    weekRows.filter((r) => r.status !== "absent" && dayIndex(r.entryTime) === i)
+                  )
+                )
+              }
+            />
           </CardContent>
         </Card>
       )}

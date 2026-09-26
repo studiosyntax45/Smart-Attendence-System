@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   CheckCircle2,
@@ -25,7 +24,6 @@ export function AppealControl({
   sessionId: string;
   leaveStatus?: LeaveStatus | null;
 }) {
-  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [pending, setPending] = useState(false);
@@ -61,8 +59,6 @@ export function AppealControl({
     setState(res);
     setPending(false);
     if (!res.error) {
-      qc.invalidateQueries({ queryKey: ["student-attendance"] });
-      qc.invalidateQueries({ queryKey: ["student-dashboard"] });
       setOpen(false);
       setReason("");
     }

@@ -66,7 +66,7 @@ export async function markEntry(input: {
       faceConfidence: input.faceConfidence,
       descriptor: input.descriptor,
       image: input.image,
-    });
+    }, { deferRefresh: true });
     void attendance;
     return { ok: true, status, lateAfterMin };
   } catch (err) {

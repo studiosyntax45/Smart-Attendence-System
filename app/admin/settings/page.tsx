@@ -19,7 +19,7 @@ import {
 export default function AdminSettings() {
   const { profile } = useAuth();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-settings", profile?.id],
     enabled: !!profile,
     queryFn: async () => {

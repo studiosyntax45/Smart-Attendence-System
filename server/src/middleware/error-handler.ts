@@ -49,7 +49,10 @@ export function errorHandler(
       "[db] Database schema is out of date. Run `npm --prefix server run prisma:push`, then restart the server.\n",
       err
     );
-    res.status(500).json({ error: "Database schema is out of date. Ask an admin to run prisma:push." });
+    res.status(500).json({
+      error: "Database schema is out of date. Ask an admin to run prisma:push.",
+      code: "SCHEMA_OUTDATED",
+    });
     return;
   }
   console.error("[unhandled]", err);

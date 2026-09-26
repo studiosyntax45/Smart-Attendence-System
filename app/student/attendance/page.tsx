@@ -46,6 +46,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn, type AttendanceStatus } from "@/lib/utils";
+import { clickable, useDrillDown } from "@/components/drilldown";
+import { studentCoursesSpec } from "@/components/drill-specs";
 
 
 function barTone(officialPct: number | null): string {
@@ -66,8 +68,9 @@ export default function StudentAttendance() {
   const { profile } = useAuth();
   const [searchParams] = useSearchParams();
   const sem = searchParams.get("sem") ?? undefined;
+  const { open } = useDrillDown();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isPending: isLoading, isError, refetch } = useQuery({
     queryKey: ["student-attendance", profile?.id, sem ?? null],
     enabled: !!profile,
     queryFn: async () => {
@@ -273,11 +276,13 @@ export default function StudentAttendance() {
                 <CardDescription>Attended of conducted, all subjects</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-center pb-6 pt-4">
-                <AttendanceRing
-                  pct={summary.overallOfficialPct}
-                  attended={totalAttended}
-                  held={totalConducted}
-                />
+                <div {...clickable(() => open(studentCoursesSpec(`Courses — ${selected}`, profile.id, rows)), "rounded-full")} aria-label="Attendance by course">
+                  <AttendanceRing
+                    pct={summary.overallOfficialPct}
+                    attended={totalAttended}
+                    held={totalConducted}
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -288,6 +293,7 @@ export default function StudentAttendance() {
                 countTo={rows.length}
                 sub={`${selected}`}
                 icon={<Layers />}
+                drill={studentCoursesSpec(`Courses — ${selected}`, profile.id, rows)}
               />
               <KpiCard
                 label="Eligible"
@@ -295,6 +301,7 @@ export default function StudentAttendance() {
                 sub="At or above 75%"
                 icon={<CheckCircle2 />}
                 tone={summary.anyShortfall ? "late" : "present"}
+                drill={studentCoursesSpec("Eligible courses", profile.id, withData.filter((r) => isEligible(r.official_pct)))}
               />
               <KpiCard
                 label="Shortfall"
@@ -303,6 +310,7 @@ export default function StudentAttendance() {
                 sub="Below 75%"
                 icon={<AlertTriangle />}
                 tone={summary.anyShortfall ? "absent" : "present"}
+                drill={studentCoursesSpec("Courses below 75%", profile.id, withData.filter((r) => !isEligible(r.official_pct)), { empty: "Every course is at 75% or above." })}
               />
             </div>
           </section>
@@ -407,7 +415,10 @@ export default function StudentAttendance() {
                     {rows.map((r) => (
                       <tr
                         key={r.course_code}
-                        className="border-b transition-colors last:border-0 hover:bg-muted/50"
+                        {...clickable(
+                          () => open({ kind: "course", studentId: profile.id, courseCode: r.course_code, courseName: r.course_name }),
+                          "border-b transition-colors last:border-0 hover:bg-muted/50"
+                        )}
                       >
                         <td className="py-3 pr-4">
                           <div className="font-medium">{r.course_name}</div>
