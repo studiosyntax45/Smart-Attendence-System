@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   Check,
@@ -25,7 +24,6 @@ import {
 
 
 export function PendingAppeals({ requests }: { requests: LeaveRequest[] }) {
-  const qc = useQueryClient();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [state, setState] = useState<LeaveActionState>({});
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -36,13 +34,6 @@ export function PendingAppeals({ requests }: { requests: LeaveRequest[] }) {
     const result = await reviewLeaveRequest(id, decision, comments[id]);
     setState(result);
     setBusyId(null);
-    if (!result.error) {
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["student-attendance"] });
-      qc.invalidateQueries({ queryKey: ["student-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["parent-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["faculty-leave"] });
-    }
   }
 
   return (

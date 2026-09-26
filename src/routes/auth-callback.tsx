@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { apiConfigured, ROLE_HOME, isCollegeEmail, type Role } from "@/lib/utils";
-import { setAccessToken } from "@/lib/api-client";
+import { logout, me, setAccessToken } from "@/lib/api-client";
 import type { LoginErrorCode } from "@/app/(auth)/login/login-errors";
 
 
@@ -31,25 +31,23 @@ export default function AuthCallback() {
 
       setAccessToken(access);
 
-      const { me, googleOAuthUrl } = await import("@/lib/api-client");
       const user = await me();
       if (!user) {
         return bounce("oauth");
       }
 
       if (!isCollegeEmail(user.email)) {
-        await (await import("@/lib/api-client")).logout();
+        await logout();
         return bounce("domain");
       }
       if (user.role !== ("student" as Role)) {
-        await (await import("@/lib/api-client")).logout();
+        await logout();
         return bounce("not_student");
       }
 
       setMessage("Signed in — redirecting…");
       await refresh();
       navigate(search.get("next") ?? ROLE_HOME.student, { replace: true });
-      void googleOAuthUrl;
     })();
   }, [navigate, refresh, search]);
 

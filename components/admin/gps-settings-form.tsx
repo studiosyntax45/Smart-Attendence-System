@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, LoaderCircle, Save } from "lucide-react";
 import {
   updateGpsSettings,
@@ -14,7 +13,6 @@ import { Label } from "@/components/ui/label";
 const INITIAL: SettingsResult = {};
 
 export function GpsSettingsForm({ settings }: { settings: GpsSettings }) {
-  const qc = useQueryClient();
   const [state, setState] = useState<SettingsResult>(INITIAL);
   const [pending, setPending] = useState(false);
 
@@ -22,10 +20,6 @@ export function GpsSettingsForm({ settings }: { settings: GpsSettings }) {
     setPending(true);
     const res = await updateGpsSettings(state, formData);
     setState(res);
-    if (res.ok) {
-      qc.invalidateQueries({ queryKey: ["admin-settings"] });
-      qc.invalidateQueries({ queryKey: ["mark-attendance"] });
-    }
     setPending(false);
   }
 

@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   CheckCircle2,
@@ -36,7 +35,6 @@ const DEFAULT_CENTER = { lat: 12.9351, lng: 77.5358 };
 
 
 export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
-  const qc = useQueryClient();
   const [state, setState] = useState<AdminActionState>(INITIAL);
   const [pending, setPending] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -48,10 +46,6 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
     setPending(true);
     const res = await createGeofence(state, formData);
     setState(res);
-    if (!res.error) {
-      qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
-    }
     setPending(false);
   }
   const [lat, setLat] = useState("");
@@ -93,10 +87,6 @@ export function GeofenceManager({ geofences }: { geofences: GeofenceRow[] }) {
     setDeletingId(id);
     const res = await deleteGeofence(id);
     if (res.error) setDelError(res.error);
-    else {
-      qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
-    }
     setDeletingId(null);
   }
 

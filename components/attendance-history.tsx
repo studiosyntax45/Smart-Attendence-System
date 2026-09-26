@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AttendanceStatus } from "@/lib/utils";
+import { clickable, useDrillDown } from "@/components/drilldown";
 
 interface HistoryRow {
   id: string;
@@ -18,6 +19,7 @@ interface HistoryRow {
   exitTime: string | null;
   status: AttendanceStatus;
   excused: boolean;
+  studentId: string;
   student: { fullName: string; rollNo: string | null; studentDetails: { section: string | null } | null } | null;
   session: { course: string; openedAt: string; faculty: { id: string; fullName: string } | null } | null;
 }
@@ -25,12 +27,22 @@ interface HistoryRow {
 const EMPTY = { q: "", courseCode: "", section: "", facultyId: "", from: "", to: "", status: "" };
 type Filters = typeof EMPTY;
 
+// Drawing all 1000 rows at once took ~4 s; the export still gets every row.
+const PAGE = 100;
+// Shared formatters: toLocale*String builds a new one per call, ~70x slower over 1000 rows.
+const exportDate = new Intl.DateTimeFormat();
+const shortDate = new Intl.DateTimeFormat([], { day: "2-digit", month: "short", year: "numeric" });
+const time = new Intl.DateTimeFormat([], { hour: "2-digit", minute: "2-digit" });
+const fmt = (f: Intl.DateTimeFormat, t: string) => f.format(new Date(t));
+
 const selectClass =
   "flex h-10 w-full rounded-md border border-input bg-card px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function AttendanceHistory({ showFacultyFilter = false }: { showFacultyFilter?: boolean }) {
   const [draft, setDraft] = useState<Filters>(EMPTY);
   const [filters, setFilters] = useState<Filters>(EMPTY);
+  const [shown, setShown] = useState(PAGE);
+  const { open } = useDrillDown();
 
   const options = useQuery({
     queryKey: ["history-options", showFacultyFilter],
@@ -95,14 +107,14 @@ export function AttendanceHistory({ showFacultyFilter = false }: { showFacultyFi
               { key: "status", label: "Status" },
             ]}
             rows={rows.map((r) => ({
-              date: new Date(r.session?.openedAt ?? r.entryTime).toLocaleDateString(),
+              date: fmt(exportDate, r.session?.openedAt ?? r.entryTime),
               student: r.student?.fullName ?? "",
               usn: r.student?.rollNo ?? "",
               section: r.student?.studentDetails?.section ?? "",
               course: r.session?.course ?? "",
               faculty: r.session?.faculty?.fullName ?? "",
-              entry: r.status === "absent" ? "" : new Date(r.entryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              exit: r.status === "absent" ? "" : r.exitTime ? new Date(r.exitTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
+              entry: r.status === "absent" ? "" : fmt(time, r.entryTime),
+              exit: r.status === "absent" ? "" : r.exitTime ? fmt(time, r.exitTime) : "",
               status: r.excused ? "excused" : r.status,
             }))}
           />
@@ -113,6 +125,7 @@ export function AttendanceHistory({ showFacultyFilter = false }: { showFacultyFi
           onSubmit={(e) => {
             e.preventDefault();
             setFilters(draft);
+            setShown(PAGE);
           }}
         >
           <div className="space-y-1.5 sm:col-span-2">
@@ -176,6 +189,7 @@ export function AttendanceHistory({ showFacultyFilter = false }: { showFacultyFi
               onClick={() => {
                 setDraft(EMPTY);
                 setFilters(EMPTY);
+                setShown(PAGE);
               }}
             >
               Reset
@@ -217,10 +231,16 @@ export function AttendanceHistory({ showFacultyFilter = false }: { showFacultyFi
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.id} className="border-t hover:bg-muted/40">
+                  {rows.slice(0, shown).map((r) => (
+                    <tr
+                      key={r.id}
+                      {...clickable(
+                        () => open({ kind: "student", studentId: r.studentId, name: r.student?.fullName ?? "Student", usn: r.student?.rollNo }),
+                        "border-t hover:bg-muted/40"
+                      )}
+                    >
                       <td className="whitespace-nowrap py-2 pl-3 pr-4 font-mono text-xs tabular-nums">
-                        {new Date(r.session?.openedAt ?? r.entryTime).toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" })}
+                        {fmt(shortDate, r.session?.openedAt ?? r.entryTime)}
                       </td>
                       <td className="py-2 pr-4">
                         <span className="font-medium">{r.student?.fullName ?? "—"}</span>
@@ -232,7 +252,7 @@ export function AttendanceHistory({ showFacultyFilter = false }: { showFacultyFi
                       <td className="py-2 pr-4">{r.session?.course ?? "—"}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{r.session?.faculty?.fullName ?? "—"}</td>
                       <td className="py-2 pr-4 font-mono text-xs tabular-nums">
-                        {r.status === "absent" ? "—" : new Date(r.entryTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {r.status === "absent" ? "—" : fmt(time, r.entryTime)}
                       </td>
                       <td className="py-2 pr-3">
                         <StatusPill status={r.status} excused={r.excused} />
@@ -242,6 +262,11 @@ export function AttendanceHistory({ showFacultyFilter = false }: { showFacultyFi
                 </tbody>
               </table>
             </div>
+            {rows.length > shown && (
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => setShown(shown + PAGE)}>
+                Show {Math.min(PAGE, rows.length - shown)} more (showing {shown} of {rows.length})
+              </Button>
+            )}
           </>
         )}
       </CardContent>

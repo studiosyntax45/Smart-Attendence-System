@@ -26,13 +26,11 @@ export function BulkImport({
   spec,
   ctx,
   endpoint,
-  onDone,
   note,
 }: {
   spec: ImportSpec;
   ctx: ImportContext;
   endpoint: string;
-  onDone?: () => void;
   note?: string;
 }) {
   const fileInput = useRef<HTMLInputElement>(null);
@@ -72,7 +70,6 @@ export function BulkImport({
       const res = await api.post<{ summary: ServerImportSummary }>(endpoint, { rows: preview.payload });
       setSummary(res.summary);
       reset();
-      onDone?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Import failed.");
     } finally {

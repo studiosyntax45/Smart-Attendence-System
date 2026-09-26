@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   CheckCircle2,
@@ -67,7 +66,6 @@ export function ScheduleManager({
   courses?: CourseOption[];
   classList?: ClassOption[];
 }) {
-  const qc = useQueryClient();
   const [state, setState] = useState<ScheduleActionState>(INITIAL);
   const [pending, setPending] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -168,8 +166,6 @@ export function ScheduleManager({
     setState(res);
     setPending(false);
     if (!res.error) {
-      qc.invalidateQueries({ queryKey: ["admin-schedule"] });
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
       resetForm();
     }
   }
@@ -181,8 +177,6 @@ export function ScheduleManager({
     const res = await deleteScheduleEntry(id);
     if (res.error) setDelError(res.error);
     else {
-      qc.invalidateQueries({ queryKey: ["admin-schedule"] });
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
       if (editing?.id === id) resetForm();
     }
     setDeletingId(null);

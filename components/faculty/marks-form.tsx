@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, LoaderCircle, Save } from "lucide-react";
 import { upsertMark, type MarkFormState } from "@/app/faculty/marks/actions";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,6 @@ export function MarksForm({
   students: StudentOption[];
   courses: Array<{ code: string; name: string }>;
 }) {
-  const qc = useQueryClient();
   const [state, setState] = useState<MarkFormState>(INITIAL);
   const [pending, setPending] = useState(false);
 
@@ -34,11 +32,6 @@ export function MarksForm({
     const result = await upsertMark(state, formData);
     setState(result);
     setPending(false);
-    if (result.message) {
-      qc.invalidateQueries({ queryKey: ["faculty-marks"] });
-      qc.invalidateQueries({ queryKey: ["faculty-performance"] });
-      qc.invalidateQueries({ queryKey: ["student-dashboard"] });
-    }
   }
 
   return (

@@ -58,7 +58,6 @@ export function UsersTable({
     setError(null);
     const res = await setUserRole(userId, role);
     if (res.error) setError(res.error);
-    else qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
     setPendingId(null);
   }
   async function resetFace(userId: string) {
@@ -70,7 +69,6 @@ export function UsersTable({
     if (res.error) setError(res.error);
     else {
       setNotice(res.message ?? "Face enrolment reset.");
-      qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
     }
     setResettingId(null);
   }

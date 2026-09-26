@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, LoaderCircle, Plus } from "lucide-react";
 import {
   upsertCourse,
@@ -24,7 +23,6 @@ export function CourseForm({
     semester: string;
   } | null;
 }) {
-  const qc = useQueryClient();
   const [state, setState] = useState<CourseActionState>(INITIAL);
   const [pending, setPending] = useState(false);
 
@@ -35,9 +33,6 @@ export function CourseForm({
     const result = await upsertCourse(state, formData);
     setState(result);
     setPending(false);
-    if (result.message) {
-      qc.invalidateQueries({ queryKey: ["faculty-courses"] });
-    }
   }
 
   return (

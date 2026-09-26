@@ -1,6 +1,5 @@
 ﻿
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, LoaderCircle, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +33,6 @@ export function OpenSessionForm({
   geofences: GeofenceOption[];
   courses: CourseOption[];
 }) {
-  const qc = useQueryClient();
   const [state, setState] = useState<SessionFormState>(INITIAL);
   const [pending, setPending] = useState(false);
   const [radiusM, setRadiusM] = useState(DEFAULT_SESSION_RADIUS_M);
@@ -46,10 +44,6 @@ export function OpenSessionForm({
     const result = await openSession(state, formData);
     setState(result);
     setPending(false);
-    if (result.message) {
-      qc.invalidateQueries({ queryKey: ["faculty-dashboard"] });
-      qc.invalidateQueries({ queryKey: ["mark-attendance"] });
-    }
   }
 
   return (

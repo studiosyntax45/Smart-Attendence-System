@@ -1,6 +1,6 @@
 ﻿
 import { useState, useTransition } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { notifyApiWrite } from "@/lib/api-client";
 import { CheckCircle2, LoaderCircle, ScanFace, ShieldCheck, XCircle } from "lucide-react";
 import { BiometricScanner, type ScanStatus } from "@/components/face/biometric-scanner";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,6 @@ export function FaceEnrollment({
   
   serverVerification?: boolean;
 }) {
-  const queryClient = useQueryClient();
   const [status, setStatus] = useState<ScanStatus | null>(null);
   const [result, setResult] = useState<Result>({ kind: "idle" });
   const [pending, startTransition] = useTransition();
@@ -41,10 +40,7 @@ export function FaceEnrollment({
       });
       if (res.ok) {
         setResult({ kind: "success" });
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ["enroll-face"] });
-          queryClient.invalidateQueries({ queryKey: ["mark-attendance"] });
-        }, 1600);
+        setTimeout(notifyApiWrite, 1600); // let the success state show first
       } else {
         setResult({ kind: "error", message: res.error ?? "Enrolment failed." });
       }

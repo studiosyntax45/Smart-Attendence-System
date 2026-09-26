@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   CheckCircle2,
@@ -45,7 +44,6 @@ export function BulkMarksUpload({
   courses: Array<{ code: string; name: string }>;
   existingMarks: ExistingMark[];
 }) {
-  const qc = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const [course, setCourse] = useState("");
   const [assessment, setAssessment] = useState("");
@@ -122,9 +120,6 @@ export function BulkMarksUpload({
     setCsvText(null);
     setFileName(null);
     if (fileInput.current) fileInput.current.value = "";
-    qc.invalidateQueries({ queryKey: ["faculty-marks"] });
-    qc.invalidateQueries({ queryKey: ["faculty-performance"] });
-    qc.invalidateQueries({ queryKey: ["student-dashboard"] });
   }
 
   const ready = course !== "" && assessment.trim() !== "";

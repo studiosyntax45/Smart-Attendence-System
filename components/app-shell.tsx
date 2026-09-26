@@ -25,6 +25,7 @@ import {
   CalendarX2,
 } from "lucide-react";
 import { AppNav, type NavItem } from "@/components/app-nav";
+import { DrillDownProvider } from "@/components/drilldown";
 import { PesLogo } from "@/components/pes-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -247,7 +248,7 @@ export function AppShell({
       
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pl-72 min-h-dvh pt-14 lg:pt-0">
         <main id="main" className="flex-1 w-full p-4 sm:p-6 lg:p-8">
-          {children}
+          <DrillDownProvider>{children}</DrillDownProvider>
         </main>
       </div>
     </div>

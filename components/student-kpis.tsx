@@ -4,6 +4,9 @@ import { api } from "@/lib/api-client";
 import { fetchStudentAttendance, isEligible, summarizeStudent, WARNING_THRESHOLD } from "@/lib/attendance";
 import { computeCgpa, computeCourseResults, type CourseMeta, type MarkRow } from "@/lib/results";
 import { KpiCard } from "@/components/kpi-card";
+import { useAuth } from "@/lib/auth";
+import type { DrillSpec } from "@/components/drilldown";
+import { pendingLeaveSpec, recordsSpec, type PendingAppeal, type PendingLeave, type RecordLite } from "@/components/drill-specs";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** Uses the server summary, so sessions a student never joined count as missed. */
@@ -14,11 +17,11 @@ export function useStudentOverview(studentId: string | undefined) {
     queryFn: async () => {
       const [summaryRows, attRes, marksRes, coursesRes, leaveApps, appeals] = await Promise.all([
         fetchStudentAttendance(studentId!),
-        api.get<{ attendance: Array<{ excused: boolean }> }>(`/attendance?studentId=${studentId}`),
+        api.get<{ attendance: Array<RecordLite & { excused: boolean }> }>(`/attendance?studentId=${studentId}`),
         api.get<{ marks: Array<{ course: string; assessment: string; score: number; maxScore: number }> }>(`/marks?studentId=${studentId}`),
         api.get<{ courses: CourseMeta[] }>("/courses"),
-        api.get<{ leaveApplications: Array<{ status: string; leaveType: string; fromDate: string; toDate: string }> }>("/leave-applications"),
-        api.get<{ leaveRequests: Array<{ status: string }> }>("/leave-requests?mine=true"),
+        api.get<{ leaveApplications: Array<PendingLeave & { status: string }> }>("/leave-applications"),
+        api.get<{ leaveRequests: Array<PendingAppeal & { status: string }> }>("/leave-requests?mine=true"),
       ]);
 
       const summary = summarizeStudent(summaryRows);
@@ -34,14 +37,19 @@ export function useStudentOverview(studentId: string | undefined) {
         max_score: m.maxScore,
       }));
 
+      const results = computeCourseResults(markRows, coursesRes.courses);
       return {
+        records: attRes.attendance,
+        results,
+        pendingApps: leaveApps.leaveApplications.filter((l) => l.status === "pending"),
+        pendingAppeals: appeals.leaveRequests.filter((l) => l.status === "pending"),
         overallPct: summary.overallOfficialPct,
         conducted,
         attended,
         missed: conducted - attended,
         late,
         excused: attRes.attendance.filter((a) => a.excused).length,
-        cgpa: computeCgpa(computeCourseResults(markRows, coursesRes.courses)),
+        cgpa: computeCgpa(results),
         lowSubjects: withData
           .filter((r) => !isEligible(r.official_pct))
           .sort((a, b) => (a.official_pct ?? 0) - (b.official_pct ?? 0))
@@ -57,6 +65,7 @@ export function useStudentOverview(studentId: string | undefined) {
 
 export function StudentKpis({ studentId, variant = "student" }: { studentId: string; variant?: "student" | "parent" }) {
   const { data, isLoading, isError } = useStudentOverview(studentId);
+  const { profile } = useAuth();
 
   if (isLoading) {
     return (
@@ -72,6 +81,9 @@ export function StudentKpis({ studentId, variant = "student" }: { studentId: str
   }
 
   const pct = data.overallPct === null ? null : Math.round(data.overallPct);
+  const student: DrillSpec = { kind: "student", studentId, name: profile?.fullName ?? "Attendance", usn: profile?.rollNo };
+  const records = (title: string, keep: (r: RecordLite & { excused: boolean }) => boolean) =>
+    recordsSpec(title, data.records.filter(keep), { columns: [{ key: "course", label: "Course" }, { key: "entry", label: "Entry" }, { key: "status", label: "Status" }] });
   const pctTone = pct === null ? "neutral" : pct >= 75 ? "present" : pct >= WARNING_THRESHOLD ? "late" : "absent";
 
   return (
@@ -84,6 +96,7 @@ export function StudentKpis({ studentId, variant = "student" }: { studentId: str
         sub={pct === null ? "No closed sessions yet" : pct >= 75 ? "Eligible (75%+)" : "Below the 75% rule"}
         icon={<Percent />}
         tone={pctTone}
+        drill={student}
       />
       <KpiCard
         label="Classes attended"
@@ -92,6 +105,7 @@ export function StudentKpis({ studentId, variant = "student" }: { studentId: str
         sub={`of ${data.conducted} held`}
         icon={<CalendarCheck2 />}
         tone="present"
+        drill={records("Classes attended", (r) => r.status !== "absent")}
       />
       <KpiCard
         label="Classes missed"
@@ -100,18 +114,38 @@ export function StudentKpis({ studentId, variant = "student" }: { studentId: str
         sub="Excused sessions not counted"
         icon={<CalendarX2 />}
         tone={data.missed > 0 ? "absent" : "neutral"}
+        drill={student}
       />
       <KpiCard
         label="Current CGPA"
         value={data.cgpa === null ? "—" : data.cgpa.toFixed(2)}
         sub={data.cgpa === null ? "No graded courses yet" : "Credit-weighted"}
         icon={<Award />}
-        href={variant === "student" ? "/student/results" : undefined}
+        drill={{
+          kind: "list",
+          title: "Results by course",
+          columns: [
+            { key: "code", label: "Course" },
+            { key: "name", label: "Name" },
+            { key: "credits", label: "Credits", numeric: true },
+            { key: "score", label: "Score", numeric: true },
+            { key: "grade", label: "Grade" },
+          ],
+          rows: data.results.map((c) => ({
+            code: c.code,
+            name: c.name,
+            credits: String(c.credits),
+            score: c.totalPct === null ? "—" : `${Math.round(c.totalPct)}%`,
+            grade: c.grade ?? "—",
+          })),
+          empty: "No marks yet.",
+          link: variant === "student" ? { to: "/student/results", label: "Open Results" } : undefined,
+        }}
       />
       {variant === "student" ? (
         <>
-          <KpiCard label="Late" value={String(data.late)} countTo={data.late} sub="Entries after the late cut-off" icon={<Clock />} tone={data.late > 0 ? "late" : "neutral"} />
-          <KpiCard label="Excused" value={String(data.excused)} countTo={data.excused} sub="Approved leave or appeals" icon={<ShieldCheck />} />
+          <KpiCard label="Late" value={String(data.late)} countTo={data.late} sub="Entries after the late cut-off" icon={<Clock />} tone={data.late > 0 ? "late" : "neutral"} drill={records("Late entries", (r) => r.status === "late" && !r.excused)} />
+          <KpiCard label="Excused" value={String(data.excused)} countTo={data.excused} sub="Approved leave or appeals" icon={<ShieldCheck />} drill={records("Excused sessions", (r) => r.excused)} />
         </>
       ) : (
         <KpiCard
@@ -121,6 +155,7 @@ export function StudentKpis({ studentId, variant = "student" }: { studentId: str
           sub={data.lowSubjects.length ? data.lowSubjects.map((s) => `${s.code} ${Math.round(s.pct)}%`).join(", ") : "All subjects at 75%+"}
           icon={<AlertTriangle />}
           tone={data.lowSubjects.length ? "absent" : "present"}
+          drill={student}
         />
       )}
       <KpiCard
@@ -134,7 +169,7 @@ export function StudentKpis({ studentId, variant = "student" }: { studentId: str
         }
         icon={<FileClock />}
         tone={data.pendingLeave > 0 ? "late" : "neutral"}
-        href={variant === "student" ? "/student/leave" : undefined}
+        drill={pendingLeaveSpec(data.pendingApps, data.pendingAppeals, variant === "student" ? { to: "/student/leave", label: "Open Leave" } : undefined)}
       />
       {variant === "student" && data.lowSubjects.length > 0 && (
         <KpiCard
@@ -144,7 +179,7 @@ export function StudentKpis({ studentId, variant = "student" }: { studentId: str
           sub={data.lowSubjects.map((s) => s.code).join(", ")}
           icon={<AlertTriangle />}
           tone="absent"
-          href="/student/attendance"
+          drill={student}
         />
       )}
     </div>

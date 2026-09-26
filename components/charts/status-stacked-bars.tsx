@@ -19,7 +19,7 @@ export interface DayStatusDatum {
 }
 
 
-export function StatusStackedBars({ data }: { data: DayStatusDatum[] }) {
+export function StatusStackedBars({ data, onDayClick }: { data: DayStatusDatum[]; onDayClick?: (index: number) => void }) {
   const total = data.reduce((s, d) => s + d.present + d.late + d.partial, 0);
 
   return (
@@ -46,7 +46,7 @@ export function StatusStackedBars({ data }: { data: DayStatusDatum[] }) {
         aria-label={`Attendance marks per day for the last 7 days, ${total} total, split by present, late and left-early.`}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 4, left: -22, bottom: 0 }} barCategoryGap="30%">
+          <BarChart data={data} margin={{ top: 8, right: 4, left: -22, bottom: 0 }} barCategoryGap="30%" onClick={(e: { activeTooltipIndex?: number | string | null } | null) => { if (e?.activeTooltipIndex != null) onDayClick?.(Number(e.activeTooltipIndex)); }} style={onDayClick ? { cursor: "pointer" } : undefined}>
             <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
             <XAxis
               dataKey="label"

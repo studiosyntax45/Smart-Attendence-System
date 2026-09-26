@@ -15,6 +15,18 @@ export function getAccessToken(): string | null {
   return accessToken;
 }
 
+let afterWrite: (() => void) | null = null;
+
+/** Called after every successful POST/PUT/PATCH/DELETE (auth calls excluded). */
+export function onApiWrite(fn: () => void): void {
+  afterWrite = fn;
+}
+
+/** For writes sent with `deferRefresh`: refresh cached data once the caller is ready. */
+export function notifyApiWrite(): void {
+  afterWrite?.();
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string, public body?: unknown) {
     super(message);
@@ -26,6 +38,8 @@ interface ApiOptions {
   skipAuth?: boolean;
   
   form?: boolean;
+  /** Skip the automatic cache refresh; the caller calls notifyApiWrite() later (e.g. after a success animation). */
+  deferRefresh?: boolean;
 }
 
 let refreshInflight: Promise<string | null> | null = null;
@@ -106,6 +120,7 @@ async function request<T>(
         : null) ?? `HTTP ${res.status}`;
     throw new ApiError(res.status, message, data);
   }
+  if (method !== "GET" && !path.startsWith("/auth/") && !options.deferRefresh) afterWrite?.();
   return data as T;
 }
 
