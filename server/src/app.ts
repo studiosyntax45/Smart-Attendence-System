@@ -27,6 +27,7 @@ import { auditLogRouter } from "./routes/audit-logs";
 import { notificationRouter } from "./routes/notifications";
 import { attendanceHealthRouter } from "./routes/attendance-health";
 import { leaveApplicationRouter } from "./routes/leave-applications";
+import { checkDatabaseSchema } from "./services/schema-check";
 
 export function createApp(): express.Express {
   const app = express();
@@ -46,8 +47,9 @@ export function createApp(): express.Express {
   app.use(express.json({ limit: "5mb" }));
   app.use(cookieParser());
   app.use(passport.initialize());
-  app.get("/health", (_req, res) => {
-    res.json({ status: "ok", time: new Date().toISOString() });
+  app.get("/health", async (_req, res) => {
+    const db = await checkDatabaseSchema();
+    res.json({ status: db.ok ? "ok" : "degraded", time: new Date().toISOString(), db });
   });
   app.use("/auth", authRouter);
   app.use("/profiles", profileRouter);
