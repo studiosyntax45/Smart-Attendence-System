@@ -1,5 +1,4 @@
-﻿
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   LogOut,
@@ -23,6 +22,7 @@ import {
   FileClock,
   History,
   CalendarX2,
+  Contact,
 } from "lucide-react";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { DrillDownProvider } from "@/components/drilldown";
@@ -50,6 +50,7 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/faculty/marks", label: "Marks", icon: GraduationCap },
     { href: "/faculty/attendance-health", label: "Attendance Health", icon: HeartPulse },
     { href: "/faculty/leave", label: "Leave & Appeals", icon: FileClock },
+    { href: "/faculty/students", label: "Students", icon: Contact },
     { href: "/faculty/imports", label: "Bulk Import", icon: Upload },
     { href: "/faculty/performance", label: "Performance", icon: BarChart3 },
   ],
@@ -62,6 +63,7 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/faculty/marks", label: "Marks", icon: GraduationCap },
     { href: "/faculty/attendance-health", label: "Attendance Health", icon: HeartPulse },
     { href: "/faculty/leave", label: "Leave & Appeals", icon: FileClock },
+    { href: "/faculty/students", label: "Students", icon: Contact },
     { href: "/faculty/imports", label: "Bulk Import", icon: Upload },
     { href: "/admin/schedule", label: "Timetable", icon: Clock },
     { href: "/admin/settings", label: "GPS Settings", icon: MapPin },
@@ -78,7 +80,6 @@ const ROLE_BADGES: Record<Role, { label: string; variant: "default" | "secondary
   student: { label: "Student Portal", variant: "outline" },
   parent: { label: "Parent Portal", variant: "secondary" },
 };
-
 
 export function AppShell({
   role,
@@ -109,9 +110,8 @@ export function AppShell({
         Skip to content
       </a>
 
-      
       <aside className="hidden lg:flex w-64 xl:w-72 flex-col fixed inset-y-0 left-0 z-40 bg-card border-r border-border shadow-sm">
-        
+
         <div className="flex h-16 shrink-0 items-center justify-between px-5 border-b border-border">
           <Link
             to={`/${role}/dashboard`}
@@ -130,7 +130,6 @@ export function AppShell({
           </Link>
         </div>
 
-        
         <div className="px-5 py-3 border-b border-border/60 bg-muted/30 flex items-center justify-between">
           <span className="text-xs text-muted-foreground font-medium">Current Role</span>
           <Badge variant={roleBadge.variant} className="text-xs capitalize font-semibold px-2.5 py-0.5">
@@ -138,12 +137,10 @@ export function AppShell({
           </Badge>
         </div>
 
-        
         <div className="flex-1 overflow-y-auto py-3">
           <AppNav items={NAV[role]} />
         </div>
 
-        
         <div className="shrink-0 border-t border-border p-4 bg-muted/20">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -176,7 +173,6 @@ export function AppShell({
         </div>
       </aside>
 
-      
       <div className="lg:hidden fixed top-0 inset-x-0 z-40 h-14 bg-card/95 border-b border-border backdrop-blur flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
           <Button
@@ -212,7 +208,6 @@ export function AppShell({
         </div>
       </div>
 
-      
       {compactNavOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div
@@ -245,7 +240,6 @@ export function AppShell({
         </div>
       )}
 
-      
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pl-72 min-h-dvh pt-14 lg:pt-0">
         <main id="main" className="flex-1 w-full p-4 sm:p-6 lg:p-8">
           <DrillDownProvider>{children}</DrillDownProvider>

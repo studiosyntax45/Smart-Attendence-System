@@ -41,6 +41,7 @@ export const router = createBrowserRouter([
       { path: "/faculty/attendance-health", lazy: page(() => import("@/app/faculty/attendance-health/page")) },
       { path: "/faculty/leave", lazy: page(() => import("@/app/faculty/leave/page")) },
       { path: "/faculty/imports", lazy: page(() => import("@/app/faculty/imports/page")) },
+      { path: "/faculty/students", lazy: page(() => import("@/app/faculty/students/page")) },
     ],
   },
 
