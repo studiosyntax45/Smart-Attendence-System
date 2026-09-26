@@ -30,15 +30,15 @@ export default function ForgotPasswordPage() {
             <section className="space-y-1">
               <h2 className="font-medium">Students</h2>
               <p className="text-muted-foreground">
-                You don&apos;t need a password. Go back and use{" "}
+                If your college has Google sign-in turned on, go back and use{" "}
                 <span className="font-medium text-foreground">
                   Sign in with college Google account
                 </span>{" "}
-                with your @pesu.pes.edu email.
+                with your @pesu.pes.edu email. Otherwise ask the admin to reset your password, as below.
               </p>
             </section>
             <section className="space-y-1 border-t pt-4">
-              <h2 className="font-medium">Faculty and admins</h2>
+              <h2 className="font-medium">Faculty, admins and students without Google</h2>
               <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
                 <li>Contact the Smart Attendance admin for your department.</li>
                 <li>

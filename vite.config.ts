@@ -25,6 +25,10 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, ".") },
   },
+  // The only chunk over 500 kB is @vladmandic/face-api (~1.33 MB, TensorFlow pre-bundled, cannot be split).
+  // It is imported on demand by lib/face-client.ts, so it never slows the first page load.
+  // Pages are split per route in src/router.tsx; everything else stays under 400 kB.
+  build: { chunkSizeWarningLimit: 1400 },
   server: { port: 3000 },
   preview: { port: 3000 },
 });
