@@ -26,6 +26,7 @@ export const router = createBrowserRouter([
       { path: "/student/enroll-face", lazy: page(() => import("@/app/student/enroll-face/page")) },
       { path: "/student/profile", lazy: page(() => import("@/app/student/profile/page")) },
       { path: "/student/leave", lazy: page(() => import("@/app/student/leave/page")) },
+      { path: "/student/insights", lazy: page(() => import("@/app/student/insights/page")) },
     ],
   },
 
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: "/faculty/leave", lazy: page(() => import("@/app/faculty/leave/page")) },
       { path: "/faculty/imports", lazy: page(() => import("@/app/faculty/imports/page")) },
       { path: "/faculty/students", lazy: page(() => import("@/app/faculty/students/page")) },
+      { path: "/faculty/insights", lazy: page(() => import("@/app/faculty/insights/page")) },
     ],
   },
 

@@ -14,10 +14,21 @@ sessionRouter.get(
   asyncHandler(async (req, res) => {
     const open = req.query.open === "true";
     const facultyId = typeof req.query.facultyId === "string" ? req.query.facultyId : undefined;
+    // Students only see sessions of courses they are enrolled in.
+    const enrolledCourses =
+      req.user!.role === "student"
+        ? (
+            await prisma.enrollment.findMany({
+              where: { studentId: req.user!.id, active: true },
+              select: { courseCode: true },
+            })
+          ).map((e) => e.courseCode)
+        : null;
     const sessions = await prisma.session.findMany({
       where: {
         ...(open ? { closedAt: null } : {}),
         ...(facultyId ? { facultyId } : {}),
+        ...(enrolledCourses ? { course: { in: enrolledCourses } } : {}),
       },
       orderBy: { openedAt: "desc" },
       include: { geofence: true, faculty: { select: { id: true, fullName: true } } },

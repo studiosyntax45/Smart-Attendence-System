@@ -1,10 +1,9 @@
 import { Router } from "express";
 import { prisma } from "../config/db";
-import { asyncHandler } from "../middleware/error-handler";
+import { asyncHandler, forbidden, notFound } from "../middleware/error-handler";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { computeAttendanceHealth, HEALTH_THRESHOLDS } from "../services/attendance-health";
-import { fetchAttendanceSummary } from "../services/attendance-summary";
-import { getPerformanceFeedback } from "../services/performance-feedback";
+import { classInsight, studentInsight } from "../services/insights";
 import { courseScope } from "../services/scope";
 
 export const performanceRouter = Router();
@@ -15,38 +14,52 @@ type MarkRow = { studentId?: string; course: string; score: unknown; maxScore: u
 const pctOf = (m: MarkRow) => (100 * Number(m.score)) / Number(m.maxScore);
 
 performanceRouter.get(
-  "/me",
+  "/insights/me",
   requireRole("student"),
   asyncHandler(async (req, res) => {
-    const [summary, marks] = await Promise.all([
-      fetchAttendanceSummary({ studentId: req.user!.id }),
-      prisma.marks.findMany({
-        where: { studentId: req.user!.id },
-        select: { course: true, score: true, maxScore: true },
-      }),
-    ]);
+    res.json({ insight: await studentInsight(req.user!.id) });
+  })
+);
 
-    const sessionsHeld = summary.reduce((n, r) => n + r.conducted, 0);
-    const attended = summary.reduce((n, r) => n + r.present_cnt + r.late_cnt + r.partial_cnt, 0);
-    const attendancePct = sessionsHeld > 0 ? Math.round((100 * attended) / sessionsHeld) : null;
-    const marksPct =
-      marks.length > 0 ? Math.round(marks.reduce((total, row) => total + pctOf(row), 0) / marks.length) : null;
-    const byCourse = new Map<string, { total: number; count: number }>();
-    for (const row of marks) {
-      const current = byCourse.get(row.course) ?? { total: 0, count: 0 };
-      current.total += pctOf(row);
-      current.count += 1;
-      byCourse.set(row.course, current);
-    }
-    const subjects = [...byCourse.entries()]
-      .map(([course, value]) => ({ course, marksPct: Math.round(value.total / value.count) }))
-      .sort((a, b) => a.marksPct - b.marksPct);
-    const feedback = await getPerformanceFeedback({ attendancePct, marksPct, subjects });
-
-    res.json({
-      metrics: { attendancePct, marksPct, sessionsHeld, attended, subjects },
-      feedback,
+performanceRouter.get(
+  "/insights/courses",
+  requireRole("faculty", "admin"),
+  asyncHandler(async (req, res) => {
+    const scope = await courseScope(req.user!);
+    const courses = await prisma.course.findMany({
+      where: scope ? { code: { in: scope } } : undefined,
+      orderBy: [{ semester: "desc" }, { code: "asc" }],
+      select: { code: true, name: true, semester: true, _count: { select: { enrollments: { where: { active: true } } } } },
     });
+    res.json({
+      courses: courses.map((c) => ({ code: c.code, name: c.name, semester: c.semester, students: c._count.enrollments })),
+    });
+  })
+);
+
+performanceRouter.get(
+  "/insights/course/:code",
+  requireRole("faculty", "admin"),
+  asyncHandler(async (req, res) => {
+    const scope = await courseScope(req.user!);
+    if (scope && !scope.includes(req.params.code)) throw forbidden("You can only view insights for courses you teach.");
+    res.json(await classInsight(req.params.code));
+  })
+);
+
+/** Faculty see only the subjects they teach; admins see every subject. */
+performanceRouter.get(
+  "/insights/student/:id",
+  requireRole("faculty", "admin"),
+  asyncHandler(async (req, res) => {
+    const scope = await courseScope(req.user!);
+    const student = await prisma.profile.findUnique({ where: { id: req.params.id }, select: { role: true, fullName: true, rollNo: true } });
+    if (!student || student.role !== "student") throw notFound("Student not found.");
+    if (scope) {
+      const shared = await prisma.enrollment.count({ where: { studentId: req.params.id, courseCode: { in: scope } } });
+      if (shared === 0) throw forbidden("This student is not in any of your courses.");
+    }
+    res.json({ student: { id: req.params.id, name: student.fullName, usn: student.rollNo }, insight: await studentInsight(req.params.id, scope ?? undefined) });
   })
 );
 
