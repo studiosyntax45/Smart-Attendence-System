@@ -23,6 +23,7 @@ import {
   History,
   CalendarX2,
   Contact,
+  Sparkles,
 } from "lucide-react";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { DrillDownProvider } from "@/components/drilldown";
@@ -38,6 +39,7 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/student/attendance", label: "My Attendance", icon: CalendarCheck },
     { href: "/student/results", label: "Results", icon: Award },
+    { href: "/student/insights", label: "AI Insights", icon: Sparkles },
     { href: "/student/leave", label: "Leave & Appeals", icon: CalendarX2 },
     { href: "/student/mark-attendance", label: "Mark Attendance", icon: CheckSquare },
     { href: "/student/enroll-face", label: "Enrol Face", icon: ScanFace },
@@ -53,6 +55,7 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/faculty/students", label: "Students", icon: Contact },
     { href: "/faculty/imports", label: "Bulk Import", icon: Upload },
     { href: "/faculty/performance", label: "Performance", icon: BarChart3 },
+    { href: "/faculty/insights", label: "AI Insights", icon: Sparkles },
   ],
   admin: [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -64,6 +67,7 @@ const NAV: Record<Role, NavItem[]> = {
     { href: "/faculty/attendance-health", label: "Attendance Health", icon: HeartPulse },
     { href: "/faculty/leave", label: "Leave & Appeals", icon: FileClock },
     { href: "/faculty/students", label: "Students", icon: Contact },
+    { href: "/faculty/insights", label: "AI Insights", icon: Sparkles },
     { href: "/faculty/imports", label: "Bulk Import", icon: Upload },
     { href: "/admin/schedule", label: "Timetable", icon: Clock },
     { href: "/admin/settings", label: "GPS Settings", icon: MapPin },

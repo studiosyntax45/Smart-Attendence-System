@@ -1,6 +1,6 @@
 ﻿import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { BookOpenCheck, ScanFace } from "lucide-react";
+import { BookOpenCheck, ChevronRight, ScanFace, Sparkles } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -10,7 +10,6 @@ import { StatusPill } from "@/components/status-pill";
 import { GsapReveal } from "@/components/gsap-reveal";
 import { AttendanceRing } from "@/components/charts/attendance-ring";
 import { DurationBars, type DurationDatum } from "@/components/charts/duration-bars";
-import { PerformanceInsight } from "@/components/performance-insight";
 import { StudentKpis, useStudentOverview } from "@/components/student-kpis";
 import { NotificationList } from "@/components/notification-list";
 import { Button } from "@/components/ui/button";
@@ -79,23 +78,6 @@ export default function StudentDashboard() {
 
       return { rows, sessionsHeld, myMarks };
     },
-  });
-
-  const { data: performanceData, isLoading: isPerformanceLoading } = useQuery({
-    queryKey: ["student-performance-insight", profile?.id],
-    enabled: !!profile,
-    queryFn: () =>
-      api.get<{
-        metrics: { attendancePct: number | null; marksPct: number | null };
-        feedback: {
-          source: "qwen" | "fallback";
-          priority: string;
-          summary: string;
-          strengths: string[];
-          concerns: string[];
-          actions: string[];
-        };
-      }>("/performance/me"),
   });
 
   if (!profile || isLoading) return <PageSkeleton />;
@@ -191,12 +173,19 @@ export default function StudentDashboard() {
         </div>
       </section>
 
-      <PerformanceInsight
-        attendancePct={performanceData?.metrics.attendancePct ?? pct}
-        marksPct={performanceData?.metrics.marksPct ?? avgMarksPct}
-        aiFeedback={performanceData?.feedback}
-        isAiLoading={isPerformanceLoading}
-      />
+      <Link
+        to="/student/insights"
+        className="group flex items-center gap-3 rounded-lg border bg-card p-4 transition hover:border-primary/40 hover:shadow-pop focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <span className="rounded-lg bg-primary/10 p-2 text-primary">
+          <Sparkles className="size-4" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium">AI Insights</span>
+          <span className="block text-sm text-muted-foreground">See where you stand in each subject and what to do next.</span>
+        </span>
+        <ChevronRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5" aria-hidden="true" />
+      </Link>
 
       {chartData.length >= 2 && (
         <Card>

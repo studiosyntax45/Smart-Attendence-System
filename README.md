@@ -259,7 +259,7 @@ The first time the face service starts (step 10), it downloads its recognition m
 
 ## 9. Set up Ollama (AI advice, optional)
 
-The student dashboard shows study advice. With Ollama running, a local AI model writes it; without Ollama, the app shows simpler rule-based advice. **Everything else works either way.**
+The **AI Insights** pages explain, subject by subject, where a student stands and what to do next (students see their own; faculty and admins see each class and each student). With Ollama running, a local AI model writes the explanations; without Ollama, the app shows simpler rule-based ones. **Everything else works either way.**
 
 ### 9.1 Install and download a model
 
@@ -301,7 +301,7 @@ OLLAMA_TIMEOUT_MS=8000
 
 ### 9.3 How to tell it is working
 
-On a student dashboard, the advice card ends with one of these lines:
+On an **AI Insights** page, the guidance ends with one of these lines:
 
 - *"AI-generated guidance — verify with your faculty."*: Ollama is working.
 - *"Rule-based guidance shown because the local AI model is unavailable."*: Ollama is not running, the model is not downloaded, or it took longer than `OLLAMA_TIMEOUT_MS`.
@@ -369,9 +369,18 @@ The seed also creates a CSE Sem-5 cohort of 24 students (`PES1UG23CS001`–`024`
 1. **Admin:** Dashboard → *Classroom geofences* → open **Room B-204** → stand where you are and click **Use my current location**. (The seeded room has fixed coordinates, so attendance fails from anywhere else. See [Location errors](#location-and-camera).)
 2. **Student:** open **Enrol Face**, allow the camera, and follow the steps.
 3. **Faculty:** on the dashboard, use **Open session** for one of your courses in that room.
-4. **Student:** open **Mark Attendance**, allow location and camera. The faculty's live roster updates.
+4. **Student:** open **Mark Attendance**, allow location and camera, and scan their face. The faculty's live roster updates.
+
+The face is enrolled **once**. After that, the student scans their face again **for every session** a faculty member or admin opens; the scan is compared with the enrolled face. Students only see sessions for courses they are enrolled in, and can only mark each session once, while it is open.
 
 The browser only allows camera and location on `localhost` (or HTTPS), so always use `http://localhost:3000`, not your PC's IP address.
+
+### AI Insights
+
+- **Students:** open **AI Insights** in the menu. The top card sums up attendance and marks overall; below it there is a card for each subject showing attendance and marks against the targets (75% attendance, 70% marks), the weakest assessments, what is going wrong, and one concrete next step (for example, how many classes in a row to attend to get back to 75%).
+- **Faculty and admins:** open **AI Insights**, pick a course, and see where that class is behind: average attendance and marks, how many students are below target, each assessment's class average (weakest first), and suggested next steps. Students who are behind are listed first; click **View** to see that student's insight. Faculty see only the courses they teach, and only those subjects for each student; admins see everything.
+
+Insights are cached and refreshed automatically as soon as a student's attendance or marks change.
 
 ### Add or edit a student's details
 
@@ -588,7 +597,8 @@ Smart-Attendence-System/
    - Attendance health: students grouped as 75% and above, 65–74%, and below 65%, plus low-attendance alerts
    - Drill-downs: click a number, chart or row to see the records behind it
    - Attendance record search with filters; CSV/PDF export of the filtered rows
-   - Marks and results (CGPA), with performance analytics and AI study advice
+   - Marks and results (CGPA), with performance analytics
+   - AI Insights: per-subject guidance for each student, and per-class insight for faculty and admins
    - Leave requests (date range) and per-session appeals, with faculty review and comments
    - Audit log of who changed what
    - Student details: faculty and admins add or edit each student's profile (DOB, parents, address, SSLC/PUC, Aadhaar last 4); students see them read-only
