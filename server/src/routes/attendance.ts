@@ -109,6 +109,11 @@ attendanceRouter.post(
 
     if (!session) throw notFound("Session not found.");
     if (session.closedAt) throw badRequest("This session has already been closed.");
+    const enrolled = await prisma.enrollment.findFirst({
+      where: { studentId: me.id, courseCode: session.course, active: true },
+      select: { id: true },
+    });
+    if (!enrolled) throw forbidden(`You are not enrolled in ${session.course}, so you cannot mark attendance for this session.`);
 
     if (!isValidDescriptor(meProfile?.faceEmbedding ?? null)) {
       throw badRequest(
