@@ -282,6 +282,22 @@ export function BiometricScanner({
   return <ScannerView status={status} mode={mode} videoRef={videoRef} onRetry={() => setAttempt((n) => n + 1)} />;
 }
 
+const NO_FACE_HINT_MS = 4000;
+
+/** True once the camera has been running this long without finding a face. */
+function useNoFaceHint(phase: ScanPhase): boolean {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (phase !== "searching") {
+      setShow(false);
+      return;
+    }
+    const t = setTimeout(() => setShow(true), NO_FACE_HINT_MS);
+    return () => clearTimeout(t);
+  }, [phase]);
+  return show;
+}
+
 function ScannerView({
   status,
   mode,
@@ -294,6 +310,7 @@ function ScannerView({
   onRetry: () => void;
 }) {
   const pct = Math.round(status.score * 100);
+  const noFaceHint = useNoFaceHint(status.phase);
   const borderTone =
     status.phase === "ready"
       ? "border-status-present"
@@ -304,10 +321,11 @@ function ScannerView({
           : "border-border";
 
   return (
-    <div className="space-y-3">
+    <div className="mx-auto w-full max-w-xl space-y-3">
+      {/* 4:3 matches laptop webcams, so the whole frame shows instead of a zoomed-in crop. */}
       <div
         className={cn(
-          "relative aspect-square w-full overflow-hidden rounded-lg border-4 bg-muted transition-colors duration-300",
+          "relative aspect-[4/3] w-full overflow-hidden rounded-lg border-4 bg-muted transition-colors duration-300",
           borderTone
         )}
       >
@@ -365,9 +383,18 @@ function ScannerView({
           status.phase !== "engine-error" && (
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-[12%] rounded-[50%] border-2 border-dashed border-white/50"
+              className="pointer-events-none absolute inset-x-[27%] inset-y-[8%] rounded-[50%] border-2 border-dashed border-white/50"
             />
           )}
+
+        {noFaceHint && (
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 flex justify-center">
+            <p className="max-w-md rounded-lg bg-black/75 px-3 py-2 text-center text-sm text-white">
+              <span className="font-medium">No face found.</span> Sit facing the screen and tilt it so the camera at the top
+              sees your face. Make sure your face is well lit and not backlit by a window.
+            </p>
+          </div>
+        )}
 
         {status.phase === "blink" && !status.liveness && (
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
