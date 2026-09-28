@@ -8,6 +8,7 @@ import { courseScope } from "../services/scope";
 import { haversineWithin, effectiveGraceM } from "../services/geofence";
 import { euclideanDistance, isFaceMatch, isValidDescriptor } from "../services/face";
 import { getIO } from "../sockets/index";
+import { writeAudit } from "../services/audit";
 
 export const attendanceRouter = Router();
 
@@ -109,11 +110,29 @@ attendanceRouter.post(
 
     if (!session) throw notFound("Session not found.");
     if (session.closedAt) throw badRequest("This session has already been closed.");
+    // A refused scan is logged and shown live to the faculty; the student stays absent.
+    const reject = async (reason: string, err: Error, details: Record<string, unknown> = {}): Promise<never> => {
+      const who = meProfile ? `${meProfile.fullName}${meProfile.rollNo ? ` (${meProfile.rollNo})` : ""}` : "A student";
+      const attempt = { sessionId: session.id, studentId: me.id, name: meProfile?.fullName ?? null, usn: meProfile?.rollNo ?? null, reason, at: new Date().toISOString() };
+      await writeAudit({ id: me.id, role: me.role }, "attendance_rejected", "attendance", {
+        entityId: session.id,
+        summary: `${who}: ${reason}`,
+        after: { ...attempt, ...details },
+      });
+      getIO()?.to(`session:${session.id}`).emit("attendance:rejected", { attempt });
+      throw err;
+    };
+
     const enrolled = await prisma.enrollment.findFirst({
       where: { studentId: me.id, courseCode: session.course, active: true },
       select: { id: true },
     });
-    if (!enrolled) throw forbidden(`You are not enrolled in ${session.course}, so you cannot mark attendance for this session.`);
+    if (!enrolled) {
+      await reject(
+        "not enrolled in this course",
+        forbidden(`You are not enrolled in ${session.course}, so you cannot mark attendance for this session.`)
+      );
+    }
 
     if (!isValidDescriptor(meProfile?.faceEmbedding ?? null)) {
       throw badRequest(
@@ -122,7 +141,9 @@ attendanceRouter.post(
     }
     const faceDistance = euclideanDistance(input.descriptor, meProfile!.faceEmbedding as number[]);
     if (!isFaceMatch(faceDistance)) {
-      throw badRequest("Face does not match your enrolment - please try again.");
+      await reject("face did not match the enrolled face", badRequest("Face does not match your enrolment - please try again."), {
+        faceDistance: Math.round(faceDistance * 1000) / 1000,
+      });
     }
     const graceM = effectiveGraceM(input.accuracy, gps?.accuracyGraceM ?? 25);
     const geo = haversineWithin(
@@ -132,8 +153,12 @@ attendanceRouter.post(
       graceM
     );
     if (!geo.within) {
-      throw badRequest(
-        `You appear to be ${Math.round(geo.distanceM)} m from the classroom (limit ${Math.round(geo.allowedM)} m). Move inside the geofence and retry.`
+      await reject(
+        `outside the classroom radius (${Math.round(geo.distanceM)} m away, limit ${Math.round(geo.allowedM)} m)`,
+        badRequest(
+          `You appear to be ${Math.round(geo.distanceM)} m from the classroom (limit ${Math.round(geo.allowedM)} m). Move inside the geofence and retry.`
+        ),
+        { distanceM: Math.round(geo.distanceM), allowedM: Math.round(geo.allowedM) }
       );
     }
 
@@ -160,6 +185,25 @@ attendanceRouter.post(
     }
     getIO()?.to(`session:${input.sessionId}`).emit("attendance:new", { attendance: row });
     res.status(201).json({ attendance: row, status, lateAfterMin });
+  })
+);
+attendanceRouter.get(
+  "/rejected",
+  requireRole("faculty", "admin"),
+  asyncHandler(async (req, res) => {
+    const sessionId = z.string().uuid().parse(req.query.sessionId);
+    const rows = await prisma.auditLog.findMany({
+      where: { action: "attendance_rejected", entity: "attendance", entityId: sessionId },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      select: { id: true, after: true, createdAt: true },
+    });
+    res.json({
+      attempts: rows.map((r) => {
+        const a = (r.after ?? {}) as { name?: string; usn?: string; reason?: string };
+        return { id: r.id, name: a.name ?? null, usn: a.usn ?? null, reason: a.reason ?? "rejected", at: r.createdAt };
+      }),
+    });
   })
 );
 attendanceRouter.post(

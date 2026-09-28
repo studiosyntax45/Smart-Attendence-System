@@ -19,6 +19,16 @@ profileRouter.get(
     res.json({ profile: serializeProfile(profile) });
   })
 );
+// Only the student's own descriptor, so Mark Attendance can pre-check the live face; the server re-verifies.
+profileRouter.get(
+  "/me/face",
+  requireRole("student"),
+  asyncHandler(async (req, res) => {
+    const p = await prisma.profile.findUnique({ where: { id: req.user!.id }, select: { faceEnrolled: true, faceEmbedding: true } });
+    const descriptor = Array.isArray(p?.faceEmbedding) ? (p!.faceEmbedding as number[]) : null;
+    res.json({ enrolled: !!p?.faceEnrolled && descriptor !== null, descriptor });
+  })
+);
 profileRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {

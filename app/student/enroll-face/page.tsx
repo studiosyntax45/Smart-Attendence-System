@@ -2,7 +2,6 @@
 import { ShieldCheck } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
-import { isValidDescriptor } from "@/lib/face";
 import { FACE_VERIFICATION_ENABLED } from "@/app/student/enroll-face/actions";
 import { FaceEnrollment } from "@/components/face/face-enrollment";
 import { PageSkeleton } from "@/components/page-skeleton";
@@ -25,8 +24,9 @@ export default function EnrollFacePage() {
     queryKey: ["enroll-face", profile?.id],
     enabled: !!profile,
     queryFn: async () => {
-      const res = await api.get<{ profile: { faceEnrolled: boolean; faceEmbedding?: number[] | null } }>(`/profiles/${profile!.id}`);
-      return { enrolled: res.profile?.faceEnrolled || isValidDescriptor(res.profile?.faceEmbedding) };
+      // Same check as Mark Attendance, so the two pages always agree.
+      const res = await api.get<{ enrolled: boolean }>("/profiles/me/face");
+      return { enrolled: res.enrolled };
     },
   });
 
