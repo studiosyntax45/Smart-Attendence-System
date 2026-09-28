@@ -27,7 +27,7 @@ import {
   type FaceReading,
 } from "@/lib/face-client";
 
-const BLINKS_REQUIRED = 0;
+const BLINKS_REQUIRED = 1;
 
 const BLINK_INTERVAL_MS = 120;
 
@@ -373,7 +373,7 @@ function ScannerView({
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
             <span className="flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-sm font-medium text-white">
               <Eye className="size-4" aria-hidden="true" />
-              Blink once to confirm you&apos;re live
+              Close your eyes for a second, then open them
             </span>
           </div>
         )}
@@ -415,7 +415,7 @@ function StatusLine({
       Icon = Eye;
       text = status.liveness
         ? `Hold still… quality ${pct}% (need ${Math.round(FACE_CONFIDENCE_MIN * 100)}%+)`
-        : "Waiting for a blink…";
+        : "Close your eyes for a second, then open them";
       break;
     case "no-match":
       Icon = ShieldAlert;
