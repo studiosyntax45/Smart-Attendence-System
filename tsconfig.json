@@ -17,7 +17,6 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "types": ["node", "vite/client"],
-    "baseUrl": ".",
     "paths": { "@/*": ["./*"] }
   },
   "include": ["src", "app", "components", "lib", "hooks", "stores", "vite.config.ts"],
