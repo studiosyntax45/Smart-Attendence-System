@@ -40,6 +40,8 @@ export function RealtimeRoster({
     const onNew = () => refresh();
     const onUpdated = () => refresh();
     const onClosed = () => refresh();
+    const onRejected = () =>
+      queryClientRef.current.invalidateQueries({ queryKey: ["rejected-attempts", sessionId] });
     const onDisconnect = () => startFallback();
     const onError = (err: { message?: string }) => {
       if (err?.message === "not-your-session") {
@@ -58,6 +60,7 @@ export function RealtimeRoster({
     socket.on("attendance:new", onNew);
     socket.on("attendance:updated", onUpdated);
     socket.on("session:closed", onClosed);
+    socket.on("attendance:rejected", onRejected);
     socket.on("error", onError);
 
     return () => {
@@ -69,6 +72,7 @@ export function RealtimeRoster({
       socket.off("attendance:new", onNew);
       socket.off("attendance:updated", onUpdated);
       socket.off("session:closed", onClosed);
+      socket.off("attendance:rejected", onRejected);
       socket.off("error", onError);
       disconnectSocket();
     };

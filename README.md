@@ -369,9 +369,11 @@ The seed also creates a CSE Sem-5 cohort of 24 students (`PES1UG23CS001`–`024`
 1. **Admin:** Dashboard → *Classroom geofences* → open **Room B-204** → stand where you are and click **Use my current location**. (The seeded room has fixed coordinates, so attendance fails from anywhere else. See [Location errors](#location-and-camera).)
 2. **Student:** open **Enrol Face**, allow the camera, and follow the steps.
 3. **Faculty:** on the dashboard, use **Open session** for one of your courses in that room.
-4. **Student:** open **Mark Attendance**, allow location and camera, and scan their face. The faculty's live roster updates.
+4. **Student:** open **Mark Attendance**, allow location and camera, look at the camera, then **close their eyes for a second and open them** (this proves it is a live person, not a photo). Once the scanner says *Identity verified*, click **Mark Entry**. The faculty's live roster updates.
 
 The face is enrolled **once**. After that, the student scans their face again **for every session** a faculty member or admin opens; the scan is compared with the enrolled face. Students only see sessions for courses they are enrolled in, and can only mark each session once, while it is open.
+
+A scan is **refused** if the face does not match the enrolled face (for example, someone scanning for a friend), if the student is outside the classroom radius, or if they are not enrolled in the course. Refused scans are never counted: the student stays **absent** unless they mark again successfully. The faculty dashboard lists them live under the roster as **Rejected attempts**, with the reason, and every one is also recorded in the admin's **Audit Logs**.
 
 The browser only allows camera and location on `localhost` (or HTTPS), so always use `http://localhost:3000`, not your PC's IP address.
 
@@ -475,7 +477,11 @@ After the code is updated or the frontend restarts, an already open tab reloads 
 |---|---|
 | *"You appear to be … m from the classroom"* | The room's saved location is elsewhere. As admin, open Dashboard → Classroom geofences, stand in the real room and click **Use my current location**. |
 | Camera or location never asks for permission | Use `http://localhost:3000`. Browsers block camera and GPS on plain `http://` addresses other than `localhost`. Check the site permissions (padlock icon in the address bar). |
-| Face enrolment or marking fails | Run `npm run download-models` (step 4). With `VITE_FACE_VERIFICATION=true` the face service (window 1) must also be running. Use good lighting and look straight at the camera. |
+| Scanner says *Face models missing* | Run `npm run download-models` (step 4), then reload the page. |
+| Scanner keeps saying *Close your eyes for a second, then open them* | Close your eyes fully for about a second, then open them. A quick blink can be missed on slower laptops. Make sure your face is well lit. |
+| Scanner says *The face scanner could not start* | Use Chrome or Edge. In the browser settings turn on *Use graphics acceleration when available*, restart the browser, and click **Try again**. The scanner still works without graphics acceleration, just more slowly. |
+| *Face does not match your enrolment* | Use good lighting and look straight at the camera. If the enrolment photo was poor, an admin can reset the face (Dashboard → users → Reset) and the student enrols again. |
+| Face enrolment fails | With `VITE_FACE_VERIFICATION=true` the face service (window 1) must also be running. |
 | Face service is slow to start | The first start downloads the model (8.2). Wait for `Application startup complete`. |
 
 ### Ollama

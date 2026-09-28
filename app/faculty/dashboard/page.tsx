@@ -24,6 +24,7 @@ import { GsapReveal } from "@/components/gsap-reveal";
 import { OpenSessionForm } from "@/components/faculty/open-session-form";
 import { CloseSessionButton } from "@/components/faculty/close-session-button";
 import { RealtimeRoster } from "@/components/faculty/realtime-roster";
+import { RejectedAttempts } from "@/components/faculty/rejected-attempts";
 import { TodaysClasses } from "@/components/faculty/todays-classes";
 import { PendingAppeals } from "@/components/faculty/pending-appeals";
 import {
@@ -387,6 +388,7 @@ export default function FacultyDashboard() {
                 </table>
               </div>
             )}
+            <RejectedAttempts sessionId={openSession.id} />
           </CardContent>
         </Card>
       ) : (

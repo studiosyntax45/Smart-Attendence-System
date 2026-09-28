@@ -24,7 +24,7 @@ export default function MarkAttendancePage() {
     queryFn: async () => {
       const [sessionsRes, meRes, gps] = await Promise.all([
         api.get<{ sessions: Array<{ id: string; course: string; openedAt: string; closedAt: string | null; radiusM?: number | null; geofence?: { roomName: string; lat: number; lng: number; radiusM: number } }> }>("/sessions"),
-        api.get<{ profile: { faceEnrolled: boolean; faceEmbedding?: number[] | null } }>(`/profiles/${profile!.id}`),
+        api.get<{ enrolled: boolean; descriptor: number[] | null }>("/profiles/me/face"),
         fetchGpsSettings(),
       ]);
 
@@ -47,11 +47,8 @@ export default function MarkAttendancePage() {
 
       const fence = session.geofences;
 
-      const enrolledDescriptor: FaceDescriptor | null = isValidDescriptor(
-        meRes.profile?.faceEmbedding
-      )
-        ? (meRes.profile!.faceEmbedding as number[])
-        : null;
+      const enrolledDescriptor: FaceDescriptor | null =
+        meRes.enrolled && isValidDescriptor(meRes.descriptor) ? (meRes.descriptor as number[]) : null;
 
       const attRes = await api.get<{ attendance: Array<{ id: string; sessionId: string; exitTime: string | null }> }>(`/attendance?sessionId=${session.id}&studentId=${profile!.id}`);
       const existingRaw = (attRes.attendance ?? [])[0] ?? null;

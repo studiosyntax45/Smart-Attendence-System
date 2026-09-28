@@ -22,11 +22,12 @@ import {
 import {
   detectFace,
   detectFaceLandmarks,
+  FaceModelsMissingError,
   loadFaceModels,
   type FaceReading,
 } from "@/lib/face-client";
 
-const BLINKS_REQUIRED = 0;
+const BLINKS_REQUIRED = 1;
 
 const BLINK_INTERVAL_MS = 120;
 
@@ -35,6 +36,7 @@ const DETECT_INTERVAL_MS = 200;
 export type ScanPhase =
   | "loading"
   | "no-models"
+  | "engine-error"
   | "denied"
   | "searching"
   | "blink"
@@ -55,6 +57,8 @@ export interface ScanStatus {
   descriptor: number[] | null;
 
   imageDataUrl: string | null;
+  /** Why the face engine could not start ("engine-error" only). */
+  error?: string;
 }
 
 const IDLE: ScanStatus = {
@@ -83,6 +87,7 @@ export function BiometricScanner({
   const videoRef = useRef<HTMLVideoElement>(null);
   const blink = useRef<BlinkState>(initBlinkState());
   const [status, setStatus] = useState<ScanStatus>(IDLE);
+  const [attempt, setAttempt] = useState(0);
   const onStatusRef = useRef(onStatus);
   onStatusRef.current = onStatus;
   const targetRef = useRef(targetDescriptor);
@@ -124,8 +129,13 @@ export function BiometricScanner({
       let faceapi;
       try {
         faceapi = await loadFaceModels();
-      } catch {
-        publish({ ...IDLE, phase: "no-models" });
+      } catch (err) {
+        console.error("Face engine failed to start:", err);
+        publish(
+          err instanceof FaceModelsMissingError
+            ? { ...IDLE, phase: "no-models" }
+            : { ...IDLE, phase: "engine-error", error: err instanceof Error ? err.message : String(err) }
+        );
         return;
       }
       if (cancelled) return;
@@ -267,19 +277,21 @@ export function BiometricScanner({
       stream?.getTracks().forEach((t) => t.stop());
       if (videoRef.current) videoRef.current.srcObject = null;
     };
-  }, [mode]);
+  }, [mode, attempt]);
 
-  return <ScannerView status={status} mode={mode} videoRef={videoRef} />;
+  return <ScannerView status={status} mode={mode} videoRef={videoRef} onRetry={() => setAttempt((n) => n + 1)} />;
 }
 
 function ScannerView({
   status,
   mode,
   videoRef,
+  onRetry,
 }: {
   status: ScanStatus;
   mode: "enroll" | "verify";
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  onRetry: () => void;
 }) {
   const pct = Math.round(status.score * 100);
   const borderTone =
@@ -320,6 +332,23 @@ function ScannerView({
             <p className="text-xs">Allow camera access, then reload.</p>
           </Overlay>
         )}
+        {status.phase === "engine-error" && (
+          <Overlay>
+            <ShieldAlert className="size-8" aria-hidden="true" />
+            <p className="text-sm font-medium">The face scanner could not start</p>
+            <p className="max-w-xs text-xs">
+              Use Chrome or Edge, and turn on &ldquo;Use graphics acceleration when available&rdquo; in the browser settings.
+              {status.error && <span className="mt-1 block font-mono opacity-80">{status.error}</span>}
+            </p>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="pointer-events-auto mt-1 rounded-md bg-white/15 px-3 py-1.5 text-xs font-medium hover:bg-white/25"
+            >
+              Try again
+            </button>
+          </Overlay>
+        )}
         {status.phase === "no-models" && (
           <Overlay>
             <ScanFace className="size-8" aria-hidden="true" />
@@ -332,7 +361,8 @@ function ScannerView({
 
         {status.phase !== "loading" &&
           status.phase !== "denied" &&
-          status.phase !== "no-models" && (
+          status.phase !== "no-models" &&
+          status.phase !== "engine-error" && (
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-[12%] rounded-[50%] border-2 border-dashed border-white/50"
@@ -343,7 +373,7 @@ function ScannerView({
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
             <span className="flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-sm font-medium text-white">
               <Eye className="size-4" aria-hidden="true" />
-              Blink once to confirm you&apos;re live
+              Close your eyes for a second, then open them
             </span>
           </div>
         )}
@@ -373,6 +403,11 @@ function StatusLine({
     case "no-models":
       text = "Preparing camera…";
       break;
+    case "engine-error":
+      Icon = ShieldAlert;
+      tone = "text-status-absent";
+      text = "Face scanner unavailable";
+      break;
     case "searching":
       text = "Position your face inside the oval";
       break;
@@ -380,7 +415,7 @@ function StatusLine({
       Icon = Eye;
       text = status.liveness
         ? `Hold still… quality ${pct}% (need ${Math.round(FACE_CONFIDENCE_MIN * 100)}%+)`
-        : "Waiting for a blink…";
+        : "Close your eyes for a second, then open them";
       break;
     case "no-match":
       Icon = ShieldAlert;
