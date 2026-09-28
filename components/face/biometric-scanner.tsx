@@ -426,9 +426,17 @@ function StatusLine({
 
   switch (status.phase) {
     case "loading":
-    case "denied":
-    case "no-models":
       text = "Preparing camera…";
+      break;
+    case "denied":
+      Icon = CameraOff;
+      tone = "text-status-absent";
+      text = "Camera access is blocked: allow it in the browser, then reload";
+      break;
+    case "no-models":
+      Icon = ShieldAlert;
+      tone = "text-status-absent";
+      text = "Face models missing";
       break;
     case "engine-error":
       Icon = ShieldAlert;
